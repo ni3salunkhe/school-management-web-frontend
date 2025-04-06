@@ -133,3 +133,14 @@
   --toastify-color-error: #dc3545;
   --toastify-font-family: 'Arial', sans-serif;
 }
+
+@media (max-width: 768px) {
+  
+}
+
+@media (max-width: 300px) {
+  .subscription{
+    margin-top: 4px;
+    background-color: #282c34;
+  }
+}

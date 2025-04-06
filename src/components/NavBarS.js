@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react'
 import { Container, Row, Col, Nav, Navbar, Card, Table, Button, Badge, Form, Dropdown, Offcanvas } from 'react-bootstrap';
 import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiPlusCircle, FiFilter, FiSearch, FiEdit, FiEye, FiTrash2, FiBell, FiBarChart2, FiMenu } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function NavBarS({ role }) {
   const handleShowSidebar = () => setShowSidebar(true);
@@ -37,12 +37,11 @@ function NavBarS({ role }) {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto align-items-center">
               <div className="d-flex align-items-center">
-                  <Nav className="ms-auto align-items-center">
-                    <Nav.Link href="#home">Home</Nav.Link>
-                    <Nav.Link href="#features">Features</Nav.Link>
-                    <Nav.Link href="#pricing">Pricing</Nav.Link>
-                    <Nav.Link href="#about">About</Nav.Link>
-                  </Nav>
+                <Nav className="ms-auto align-items-center">
+                  <Nav.Link as={Link} to={"/new-school"}>शाळा नोंदणी करा</Nav.Link>
+                  <Nav.Link as={Link} to={"/subscription"}>सदस्यता</Nav.Link>
+                  <Nav.Link as={Link} to={"/view-school"}>शाळांची माहिती पहा</Nav.Link>
+                </Nav>
                 {/* <Form className="me-2 d-none d-lg-block position-relative">
                   <Form.Control
                     type="search"

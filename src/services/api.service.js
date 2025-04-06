@@ -5,7 +5,7 @@ const apiService={
     url:"http://localhost:8080/",
 
     createHm(endpoint,data,config){
-        return axios.post(`${this.url}${endpoint}`,data,config)
+        return axios.post(`${this.url}${endpoint}`,data)
     },
      getdata(endpoint)
     {
