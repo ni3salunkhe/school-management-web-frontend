@@ -10,11 +10,15 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-  const handleSubmit=(e)=>{}
-  const handleChange=(e)=>{}
+  const handleSubmit=(e)=>{
+    e.preventDefault();
+    if(credentials.username === "admin" && credentials.password === "admin"){
+        navigate('/view-school')
+    }
+  }
 
-//   const navigate = useNavigate();
 
 //   const getTargetPath = (role) => {
 //     switch (role?.toLowerCase()) {
@@ -29,14 +33,14 @@ const Login = () => {
 //     }
 //   };
 
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setCredentials(prev => ({
-//       ...prev,
-//       [name]: value
-//     }));
-//     if (error) setError('');
-//   };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (error) setError('');
+  };
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();

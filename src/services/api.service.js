@@ -4,7 +4,7 @@ import axios from "axios";
 const apiService={
     url:"http://localhost:8080/",
 
-    createHm(endpoint,data,config){
+    post(endpoint,data,config){
         return axios.post(`${this.url}${endpoint}`,data)
     },
      getdata(endpoint)

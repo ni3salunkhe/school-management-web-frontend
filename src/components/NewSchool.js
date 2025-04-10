@@ -381,7 +381,7 @@ const NewSchool = () => {
                 // Send the request
                 try {
                     console.log(userData); // Check data before sending
-                    await apiService.createHm('school/', userData);
+                    await apiService.post('school/', userData);
                     setSubmitStatus({
                         type: 'success',
                         message: 'User account created successfully!'
