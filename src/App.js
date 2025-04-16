@@ -1,10 +1,14 @@
 import logo from './logo.svg';
 import './App.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Login from './pages/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewSchool from './components/NewSchool';
 import NavBarS from './components/NavBarS';
+import ViewSchools from './components/ViewSchools';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import Subscription from './components/Subscription';
+import Attendance from './components/Attendance';
 import AddSchoolInfo from './components/AddSchoolInfo';
 import AddStaffMember from './components/AddStaffMember';
 import AddClass from './components/AddClass';
@@ -20,8 +24,26 @@ import UpdateStudentAllAcademic from './components/UpdateStudentAllAcademic';
 import LColdForm from './components/LColdForm';
 
 function App() {
+  const location = useLocation();
+  const isLoginPage = location.pathname === '/';
+  sessionStorage.setItem("udiseNo",1)
+  
   return (
     <>
+      {!isLoginPage && (
+        <>
+          <NavBarS />
+          <div style={{ "minHeight": "45px" }}></div>
+        </>
+      )}
+      
+      <Routes>
+        <Route path='/' element={<Login />} />
+        <Route path='/view-school/*' element={<ViewSchools />} />
+        <Route path='/new-school/*' element={<NewSchool />} />
+        <Route path='/subscription/*' element={<Subscription />} />
+        <Route path='/attendance/*' element={<Attendance />} />
+      </Routes> 
       {/* <NavBarS /> */}
       <div style={{ "min-height": "45px" }}></div>
       {/* <NewSchool /> */}
@@ -53,3 +75,4 @@ function App() {
 }
 
 export default App;
+
