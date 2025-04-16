@@ -1,0 +1,11 @@
+
+.heading-font {
+    font-family: 'Tiro Devanagari Marathi', serif;
+    font-weight: 600;
+  }
+  
+  .label-font {
+    font-family: 'Baloo 2', cursive;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
