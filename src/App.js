@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Login from './pages/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewSchool from './components/NewSchool';
@@ -13,7 +13,8 @@ import Attendance from './components/Attendance';
 function App() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/';
-
+  sessionStorage.setItem("udiseNo",1)
+  
   return (
     <>
       {!isLoginPage && (
@@ -22,6 +23,7 @@ function App() {
           <div style={{ "minHeight": "45px" }}></div>
         </>
       )}
+      
       <Routes>
         <Route path='/' element={<Login />} />
         <Route path='/view-school/*' element={<ViewSchools />} />

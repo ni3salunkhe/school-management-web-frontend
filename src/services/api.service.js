@@ -36,13 +36,9 @@ const apiService={
       })
     },
 
-    putViewdByUserData(endpoint)
+    putData(endpoint, data)
     {
-      return axios.put(this.url +endpoint,{},{
-        headers:{
-          "Authorization": `Bearer ${sessionStorage.getItem('token')}`
-       }
-      })
+      return axios.put(this.url +endpoint,data)
     }
    
 };

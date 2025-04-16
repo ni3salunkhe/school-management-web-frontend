@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
+import apiService from '../services/api.service';
 // import { authService } from '../services/auth.service';
 
 const Login = () => {
+
+  const [isExpired, setIsExpired] = useState(false);
+
+  const fetchSubscription = async (udiseNo) => {
+    try {
+      const response = await apiService.getdata(`api/subscription/check/${udiseNo}`);
+      
+      setIsExpired(response.data)
+      alert(isExpired)
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+    }
+  };
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
@@ -16,6 +30,22 @@ const Login = () => {
     e.preventDefault();
     if(credentials.username === "admin" && credentials.password === "admin"){
         navigate('/view-school')
+    }
+    else if(credentials.username === "user" && credentials.password === "user"){
+      
+        fetchSubscription(1);
+          if(isExpired)
+            {
+              
+              alert("Subscription Expired")
+              navigate('/')
+            }
+            else{
+              navigate('/attendance')
+              alert(isExpired)
+            }
+       
+        
     }
   }
 
