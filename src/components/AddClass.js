@@ -12,7 +12,7 @@ function AddClass() {
     const [classSaved, setClassSaved] = useState(false);
     const [allDivision, setAllDivision] = useState([]);
     const [errors, setErrors] = useState({});
-    const udiseNo = 12345678912;
+    const udiseNo = 1;
 
     useEffect(() => {
         // apiService.getdata("Division/")
@@ -73,7 +73,7 @@ function AddClass() {
     }
 
     // Submit division data with validation
-    function handleAddDivision() {
+    function handleAddDivision () {
         const trimmedName = divisionName.division.trim();
 
         if (!trimmedName) {

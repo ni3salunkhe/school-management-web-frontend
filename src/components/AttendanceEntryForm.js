@@ -19,6 +19,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
     const fetchStudents = async () => {
         try {
             const response = await apiService.getdata(`api/student/school/${udiseNo}`)
+            console.log(await apiService.getdata(`api/student/byclass/search/1`))
             if (Array.isArray(response.data)) {
                 // Filter students by selected class
                 // const filtered = response.data.filter(

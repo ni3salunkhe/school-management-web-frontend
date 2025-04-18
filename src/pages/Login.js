@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiService from '../services/api.service';
-// import { authService } from '../services/auth.service';
 
 const Login = () => {
 
@@ -11,7 +10,7 @@ const Login = () => {
   const fetchSubscription = async (udiseNo) => {
     try {
       const response = await apiService.getdata(`api/subscription/check/${udiseNo}`);
-      
+
       setIsExpired(response.data)
       alert(isExpired)
     } catch (error) {
@@ -24,44 +23,47 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const handleSubmit=(e)=>{
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if(credentials.username === "admin" && credentials.password === "admin"){
-        navigate('/view-school')
+    if (credentials.username === "admin" && credentials.password === "admin") {
+      navigate('/headmaster')
+      sessionStorage.setItem("role", "HEADMASTER");
+      sessionStorage.setItem("token", "JSON.stringify(token)");
     }
-    else if(credentials.username === "user" && credentials.password === "user"){
-      
-        fetchSubscription(1);
-          if(isExpired)
-            {
-              
-              alert("Subscription Expired")
-              navigate('/')
-            }
-            else{
-              navigate('/attendance')
-              alert(isExpired)
-            }
-       
-        
+    else if (credentials.username === "user" && credentials.password === "user") {
+      fetchSubscription(1);
+      if (isExpired) {
+        alert("Subscription Expired")
+        navigate('/')
+      }
+      else {
+        navigate('/clerk')
+        sessionStorage.setItem("role", "CLERK");
+        sessionStorage.setItem("token", "JSON.stringify(token)");
+      }
+    }
+    else if (credentials.username === "TEACHER" && credentials.password === "TEACHER") {
+      navigate('/teacher')
+      sessionStorage.setItem("role", "TEACHER");
+      sessionStorage.setItem("token", "JSON.stringify(token)");
     }
   }
 
 
-//   const getTargetPath = (role) => {
-//     switch (role?.toLowerCase()) {
-//       case 'admin':
-//         return '/admin/dashboard';
-//       case 'user':
-//         return '/user/notification';
-//       case 'clerk':
-//         return '/clerk/dashboard';
-//       default:
-//         return '/';
-//     }
-//   };
+  //   const getTargetPath = (role) => {
+  //     switch (role?.toLowerCase()) {
+  //       case 'admin':
+  //         return '/admin/dashboard';
+  //       case 'user':
+  //         return '/user/notification';
+  //       case 'clerk':
+  //         return '/clerk/dashboard';
+  //       default:
+  //         return '/';
+  //     }
+  //   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,36 +74,36 @@ const Login = () => {
     if (error) setError('');
   };
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setError('');
-//     setLoading(true);
+  //   const handleSubmit = async (e) => {
+  //     e.preventDefault();
+  //     setError('');
+  //     setLoading(true);
 
-//     try {
-//       console.log('Submitting login form...');
-   
-//       const response = await authService.login(credentials);
+  //     try {
+  //       console.log('Submitting login form...');
 
-//       console.log('Login successful, role:', response.role);
-//       console.log(" the response is ", response.role);
-      
-      
+  //       const response = await authService.login(credentials);
 
-//       if (!response.role) {
-//         throw new Error('No role received from server');
-//       }
+  //       console.log('Login successful, role:', response.role);
+  //       console.log(" the response is ", response.role);
 
-//       const targetPath = getTargetPath(response.role);
-//       console.log('Navigating to:', targetPath);
-//       navigate(targetPath, { replace: true });
-//     } catch (err) {
-//       console.error('Login failed:', err);
-//       setError(err.message || 'Failed to login. Please try again.');
-//       setCredentials({ username: '', password: '' });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+
+
+  //       if (!response.role) {
+  //         throw new Error('No role received from server');
+  //       }
+
+  //       const targetPath = getTargetPath(response.role);
+  //       console.log('Navigating to:', targetPath);
+  //       navigate(targetPath, { replace: true });
+  //     } catch (err) {
+  //       console.error('Login failed:', err);
+  //       setError(err.message || 'Failed to login. Please try again.');
+  //       setCredentials({ username: '', password: '' });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
   return (
     <Container fluid className="bg-light min-vh-100 d-flex align-items-center justify-content-center">
@@ -117,7 +119,7 @@ const Login = () => {
                   {error}
                 </Alert>
               )}
-              
+
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                   <Form.Label>वापरकर्तानाव</Form.Label>
