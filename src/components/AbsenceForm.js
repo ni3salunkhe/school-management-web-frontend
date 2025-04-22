@@ -21,9 +21,7 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
   const fetchStudents = async () => {
     try {
       const response = await apiService.getdata(`api/attendance/by-udise-std-monthnyear/${udiseNo}/${selectedClass}/${monthnyear}`)
-
       if (Array.isArray(response.data)) {
-        // Filter students by selected class
         const filtered = response.data.filter(
             student => String(student.std).includes(String(selectedClass))
         )

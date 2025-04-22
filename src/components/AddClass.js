@@ -73,7 +73,7 @@ function AddClass() {
     }
 
     // Submit division data with validation
-    function handleAddDivision() {
+    function handleAddDivision () {
         const trimmedName = divisionName.division.trim();
 
         if (!trimmedName) {
