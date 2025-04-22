@@ -28,8 +28,8 @@ function UpdateStudentAllAcademic() {
     const { selectedStudents } = location.state || { selectedStudents: [] };
     console.log(selectedStudents);
 
-    const schoolUdiseNo = 12345678093;
-
+    const schoolUdiseNo = 42534565235;
+    const studentId=selectedStudents[0];
 
     useEffect(() => {
         apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {
@@ -45,19 +45,19 @@ function UpdateStudentAllAcademic() {
             // console.log(response.data);
             setClassTeacherData(response.data);
         });
-        // axios.get("http://localhost:8080/academic/student-school", {
-        //     params: {
-        //         studentId: studentId,
-        //         schoolUdiseNo: schoolUdiseNo
-        //     }
-        // }).then((response) => {
-        //     console.log(response.data);
-        //     setAcademicData(response.data);
-        // })
+        axios.get("http://localhost:8080/academic/student-school", {
+            params: {
+                studentId: studentId,
+                schoolUdiseNo: schoolUdiseNo
+            }
+        }).then((response) => {
+            console.log(response.data);
+            setAcademicData(response.data);
+        })
     }, []);
 
     console.log(teachers);
-    console.log(classTeacherData);
+    // console.log(classTeacherData);
 
     useEffect(() => {
         if (formData.division && formData.standardId) {
@@ -73,35 +73,48 @@ function UpdateStudentAllAcademic() {
 
     function handleChange(event) {
         const { name, value } = event.target;
+        const newValue = name === "status" ? value.toLowerCase() : value;
         setFormData({
             ...formData,
-            [name]: value
+            [name]: newValue
         });
     }
 
     function handleSubmit(event) {
         event.preventDefault();
-        const payload = {
-            ...formData,
-            studentIds: selectedStudents,
-            schoolUdiseNo,
-            classTeacher: singleTeacher?.id
-        };
-        setFormData({
-            division: '',
-            standardId: '',
-            academicYear: ''
-        })
-        console.log(payload);
+        if(formData.status==="pass")
+        {     
+            if (formData.standardId == academicdata?.standard?.id) {
+                alert("इयत्ता बदला (Please change the standard)");
+                return;
+            }
+            else{
+                const payload = {
+                    ...formData,
+                    studentIds: selectedStudents,
+                    schoolUdiseNo,
+                    classTeacher: singleTeacher?.id
+                };
+                setFormData({
+                    division: '',
+                    standardId: '',
+                    academicYear: ''
+                })
+
+                axios.put("http://localhost:8080/academic/update-student/bulk", payload).then((response) => {
+                    alert("Data Added Successfully");
+                })
+                navigate(`/updateacademicyearlist`);
+            }
+        }
+        
+        // console.log(payload);
 
         // apiService.putdata('academic/update-status/', payload, academicdata.id).then((response) => {
         //     alert("Data Added Succesfully");
         // });
 
-        axios.put("http://localhost:8080/academic/update-student/bulk", payload).then((response) => {
-            alert("Data Added Successfully");
-        })
-        // navigate(`/updateacademicyearform`);
+       
     }
     return (
         <div className="container py-3">
@@ -170,6 +183,16 @@ function UpdateStudentAllAcademic() {
                                     />
                                 </div>
 
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">status</label>
+                                    <input
+                                        className='form-control'
+                                        name='status'
+                                        value={formData.status || ""}
+                                        placeholder='pass'
+                                        onChange={handleChange}
+                                    />
+                                </div>
                                 <div className="text-center mt-4">
                                     <button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
                                         जतन करा

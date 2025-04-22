@@ -22,12 +22,12 @@ function UpdateStudentAcademicYearForm() {
   const [teachers, setTeachers] = useState([]);
   const [singleTeacher, setSingleTeacher] = useState();
   const [classTeacherData, setClassTeacherData] = useState([]);
-  const [academicdata,setAcademicData]=useState('');
-  const location=useLocation();
-  const {selectedStudents}=location.state || {selectedStudents :[]}
+  const [academicdata, setAcademicData] = useState('');
+  const location = useLocation();
+  const { selectedStudents } = location.state || { selectedStudents: [] }
   console.log(selectedStudents);
-  
-  const schoolUdiseNo = 12345678093;
+
+  const schoolUdiseNo = 42534565235;
   const studentId = id;
 
   useEffect(() => {
@@ -72,32 +72,40 @@ function UpdateStudentAcademicYearForm() {
 
   function handleChange(event) {
     const { name, value } = event.target;
+    const newValue = name === "status" ? value.toLowerCase() : value;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: newValue
     });
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    const payload = {
-      ...formData,
-      studentId: id,
-      schoolUdiseNo,
-      classTeacher: singleTeacher?.id
-    };
-    setFormData({
-      division: '',
-      standardId: '',
-      academicYear: ''
-    })
-    console.log(payload);
 
-    apiService.putdata('academic/update-status/', payload,academicdata.id).then((response) => {
-      alert("Data Added Succesfully");
-    });
-
-    navigate(`/updateacademicyearform`);
+    if (formData.standardId == academicdata?.standard?.id) {
+      alert("इयत्ता बदला (Please change the standard)");
+      return;
+    }
+    else{
+      const payload = {
+        ...formData,
+        studentId: id,
+        schoolUdiseNo,
+        classTeacher: singleTeacher?.id
+      };
+      setFormData({
+        division: '',
+        standardId: '',
+        academicYear: ''
+      })
+      console.log(payload);
+  
+      apiService.putdata('academic/update-status/', payload, academicdata.id).then((response) => {
+        alert("Data Added Succesfully");
+      });
+  
+      navigate(`/updateacademicyearlist`);
+    }
   }
   return (
     <div className="container py-3">

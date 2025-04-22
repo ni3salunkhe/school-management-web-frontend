@@ -16,7 +16,7 @@ function AddStudent() {
     const [students, setStudents] = useState([]);
     const [warningMessage, setWarningMessage] = useState('');
 
-    const school = 12345678093;
+    const school = 42534565235;
     // const registerNumber=78272827287;
 
     const [formData, setFormData] = useState({
@@ -81,10 +81,10 @@ function AddStudent() {
         // apiService.getbyid(`student/byudise/${school}/byregister/`,registerNumber).then((response)=>{
         //     console.log(response.data);
         // });
-       apiService.getbyid('student/byudise/',school).then((response)=>{
-        console.log(response.data);
-        setStudents(response.data);
-       })
+        apiService.getbyid('student/byudise/', school).then((response) => {
+            console.log(response.data);
+            setStudents(response.data);
+        })
     }, [])
 
     console.log(students);
@@ -124,7 +124,48 @@ function AddStudent() {
         apiService.postdata("student/", payload).then((response) => {
             alert("Data Added Successfully");
             console.log(response);
+            setFormData({
+                // Registration Information
+                registerNumber: '',
+                apparId: '',
+                studentId: '',
 
+                // Personal Information
+                gender: '',
+                surName: '',
+                studentName: '',
+                fatherName: '',
+                motherName: '',
+                nationality: '',
+                motherTongue: '',
+                religion: '',
+                caste: '',
+                subCast: '',
+                dateOfBirth: '',
+                dateOfBirthInWord: '',
+
+                // Contact Information
+                residentialAddress: '',
+                mobileNo: '',
+
+                // Birth Place Information
+                birthPlace: '',
+                villageOfBirth: '',
+                tehasilOfBirth: '',
+                districtOfBirth: '',
+                stateOfBirth: '',
+
+                // Academic Information
+                lastSchoolUdiseNo: '',
+                admissionDate: '',
+                whichStandardAdmitted: '',
+
+                // Additional Information
+                adhaarNumber: '',
+                ebcInformation: '',
+                minorityInformation: '',
+                casteCategory: ''
+            })
         })
         console.log('Form submitted:', payload);
     }
@@ -133,7 +174,7 @@ function AddStudent() {
         const { id, value } = e.target;
         if (id === 'registerNumber') {
             const isavailable = students.some(
-                (item) => item.registerNumber.toString() === value && item.school.udiseNo===school
+                (item) => item.registerNumber.toString() === value && item.school.udiseNo === school
             )
             if (isavailable) {
                 setWarningMessage("कृपया नोंद: प्रत्येक विद्यार्थ्यासाठी नोंदणी क्रमांक अद्वितीय असणे आवश्यक आहे. हा क्रमांक आधीच वापरात आहे.");
@@ -143,7 +184,7 @@ function AddStudent() {
         }
         setFormData(prev => ({
             ...prev,
-            [id]: value.trim()
+            [id]: value
         }));
     }
 
@@ -226,18 +267,6 @@ function AddStudent() {
                                         </h5>
                                         <div className="row g-3">
                                             <div className="col-md-3 mb-2">
-                                                <label htmlFor="surName" className="form-label fw-semibold small">आडनाव *</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-sm"
-                                                    id="surName"
-                                                    value={formData.surName}
-                                                    onChange={handleChange}
-                                                    required
-                                                    placeholder="आडनाव"
-                                                />
-                                            </div>
-                                            <div className="col-md-3 mb-2">
                                                 <label htmlFor="studentName" className="form-label fw-semibold small">विद्यार्थ्याचे नाव *</label>
                                                 <input
                                                     type="text"
@@ -246,7 +275,7 @@ function AddStudent() {
                                                     value={formData.studentName}
                                                     onChange={handleChange}
                                                     required
-                                                    placeholder="पूर्ण नाव"
+                                                    placeholder="विद्यार्थ्याचे नाव"
                                                 />
                                             </div>
                                             <div className="col-md-3 mb-2">
@@ -259,6 +288,18 @@ function AddStudent() {
                                                     onChange={handleChange}
                                                     required
                                                     placeholder="वडिलांचे नाव"
+                                                />
+                                            </div>
+                                            <div className="col-md-3 mb-2">
+                                                <label htmlFor="surName" className="form-label fw-semibold small">आडनाव *</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control form-control-sm"
+                                                    id="surName"
+                                                    value={formData.surName}
+                                                    onChange={handleChange}
+                                                    required
+                                                    placeholder="आडनाव"
                                                 />
                                             </div>
                                             <div className="col-md-3 mb-2">

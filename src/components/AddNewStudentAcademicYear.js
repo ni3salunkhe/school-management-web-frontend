@@ -11,7 +11,7 @@ function AddNewStudentAcademicYear() {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const udise = 12345678093;
+    const udise = 42534565235;
 
     const navigate=useNavigate();
 
@@ -81,14 +81,7 @@ function AddNewStudentAcademicYear() {
                             <h5 className="card-title mb-3 text-dark">विद्यार्थी शोधा</h5>
                             <div className="d-flex align-items-center">
                                 <div className="flex-grow-1 d-flex flex-wrap">
-                                    <div className="me-2 mb-2" style={{ width: '23%' }}>
-                                        <input
-                                            value={surName}
-                                            onChange={e => setSurName(e.target.value)}
-                                            className="form-control form-control-sm"
-                                            placeholder="आडनाव"
-                                        />
-                                    </div>
+                                    
                                     <div className="me-2 mb-2" style={{ width: '23%' }}>
                                         <input
                                             value={studentName}
@@ -103,6 +96,14 @@ function AddNewStudentAcademicYear() {
                                             onChange={e => setFatherName(e.target.value)}
                                             className="form-control form-control-sm"
                                             placeholder="वडिलांचे नाव"
+                                        />
+                                    </div>
+                                    <div className="me-2 mb-2" style={{ width: '23%' }}>
+                                        <input
+                                            value={surName}
+                                            onChange={e => setSurName(e.target.value)}
+                                            className="form-control form-control-sm"
+                                            placeholder="आडनाव"
                                         />
                                     </div>
                                     <div className="me-2 mb-2" style={{ width: '23%' }}>
