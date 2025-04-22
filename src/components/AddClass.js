@@ -12,7 +12,7 @@ function AddClass() {
     const [classSaved, setClassSaved] = useState(false);
     const [allDivision, setAllDivision] = useState([]);
     const [errors, setErrors] = useState({});
-    const udiseNo = 12345678912;
+    const udiseNo = 42534565235;
 
     useEffect(() => {
         // apiService.getdata("Division/")

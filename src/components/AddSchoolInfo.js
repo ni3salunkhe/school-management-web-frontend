@@ -7,7 +7,7 @@ import '../styling/formstyle.css'
 
 
 function AddSchoolInfo() {
-  const udiseNo = 12873498485;
+  const udiseNo = 42534565235;
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [tehsils, setTehsils] = useState([]);
@@ -111,6 +111,24 @@ function AddSchoolInfo() {
       .catch((err) => {
         console.error('Error submitting form:', err);
       });
+
+      setFormData({
+        schoolName: '',
+        schoolSlogan: '',
+        sansthaName: '',
+        state: '',
+        district: '',
+        tehsil: '',
+        village: '',
+        pincode: '',
+        medium: '',
+        headMasterMobileNo: '',
+        board: '',
+        boardDivision: '',
+        boardIndexNo: '',
+        schoolApprovalNo: '',
+        logo: null,
+      })
   }
   
 

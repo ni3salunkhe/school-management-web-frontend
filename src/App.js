@@ -16,21 +16,25 @@ import AddClassTeacher from './components/AddClassTeacher';
 import Pdfgenerator from './components/Pdfgenerator';
 import AddStudent from './components/AddStudent';
 import AddNewStudentAcademicYear from './components/AddNewStudentAcademicYear';
-import { Route, Routes } from 'react-router-dom';
+
 import AddNewStudentAcademicYearForm from './components/AddNewStudentAcademicYearForm';
 import UpdateStudentAcademicYearForm from './components/UpdateStudentAcademicYearForm';
 import UpdateStudentAcademicYear from './components/UpdateStudentAcademicYear';
 import UpdateStudentAllAcademic from './components/UpdateStudentAllAcademic';
 import LColdForm from './components/LColdForm';
+import StudentList from './components/StudentList';
+import ReportsShows from './components/ReportsShows';
+import LCdownload from './components/LCdownload';
+import LCnewdownload from './components/LCnewdownload';
 
 function App() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/';
-  sessionStorage.setItem("udiseNo",1)
-  
+  // sessionStorage.setItem("udiseNo",1)
+
   return (
     <>
-      {!isLoginPage && (
+      {/* {!isLoginPage && (
         <>
           <NavBarS />
           <div style={{ "minHeight": "45px" }}></div>
@@ -43,7 +47,7 @@ function App() {
         <Route path='/new-school/*' element={<NewSchool />} />
         <Route path='/subscription/*' element={<Subscription />} />
         <Route path='/attendance/*' element={<Attendance />} />
-      </Routes> 
+      </Routes>  */}
       {/* <NavBarS /> */}
       <div style={{ "min-height": "45px" }}></div>
       {/* <NewSchool /> */}
@@ -62,11 +66,23 @@ function App() {
 
       {/* <Routes>
         <Route path='' element={<UpdateStudentAcademicYear />}></Route>
+        <Route path='updateacademicyearlist' element={<UpdateStudentAcademicYear/>}></Route>
         <Route path='updateacademicyearform' element={<UpdateStudentAcademicYearForm />}></Route>
         <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm />}></Route>
         <Route path='updateacademicyearall' element={<UpdateStudentAllAcademic/>}></Route>
       </Routes> */}
-      <LColdForm/>
+      {/* <LColdForm/> */}
+      {/* <StudentList /> */}
+      <Routes>
+        <Route path='' element={<StudentList/>}></Route>
+        <Route path='studentlist' element={<StudentList/>} ></Route>
+        <Route path='reports/:id' element={<ReportsShows/>}></Route>
+        <Route path='reports/lc-old/:id' element={<LColdForm/>}></Route>
+        <Route path='reports/download/:id' element={<LCdownload/>}></Route>
+        <Route path='reports/lc-new/:id' element={<LColdForm/>}></Route>
+        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload/>}></Route>
+      </Routes>
+
       {/* <UpdateStudentAcademicYear /> */}
       {/* <UpdateStudentAcademicYearForm/> */}
       {/* <Login /> */}

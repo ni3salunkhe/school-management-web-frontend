@@ -6,6 +6,7 @@ import apiService from '../services/api.service';
 function AddStaffMember() {
     const [formData, setFormData] = useState({
         fname: '',
+        fathername:'',
         lname: '',
         username: '',
         email: '',
@@ -16,11 +17,11 @@ function AddStaffMember() {
         level: '',
     });
 
-    const school = 12345678093;
+    const school = 42534565235;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({ ...formData, [name]: value.trim() });
     };
 
     const handleSubmit = (e) => {
@@ -34,6 +35,7 @@ function AddStaffMember() {
         })
         setFormData({
             fname: '',
+            fathername:'',
             lname: '',
             username: '',
             email: '',
@@ -67,19 +69,23 @@ function AddStaffMember() {
                                     <div className="row g-3">
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold ">प्रथम नाव</label>
-                                            <input type="text" name="fname" className="form-control" value={formData.fname} onChange={handleChange} />
+                                            <input type="text" name="fname" className="form-control" value={formData.fname} onChange={handleChange} placeholder='प्रथम नाव' />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-semibold ">वडीलांचे नाव</label>
+                                            <input type="text" name="fathername" className="form-control" value={formData.fathername} onChange={handleChange}  placeholder='वडीलांचे नाव'/>
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold">आडनाव</label>
-                                            <input type="text" name="lname" className="form-control" value={formData.lname} onChange={handleChange} />
+                                            <input type="text" name="lname" className="form-control" value={formData.lname} onChange={handleChange} placeholder='आडनाव'/>
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold">मोबाईल नंबर</label>
-                                            <input type="text" name="mobile" className="form-control" value={formData.mobile} onChange={handleChange} maxLength={10} />
+                                            <input type="text" name="mobile" className="form-control" value={formData.mobile} onChange={handleChange} maxLength={10} placeholder='मोबाईल नंबर' />
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold">ई-मेल</label>
-                                            <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} />
+                                            <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} placeholder='ई-मेल'/>
                                         </div>
                                     </div>
                                 </div>
@@ -92,12 +98,12 @@ function AddStaffMember() {
                                     </h5>
                                     <div className="row g-3">
                                         <div className="col-md-6">
-                                            <label className="form-label fw-semibold">वापरकर्तानाव</label>
-                                            <input type="text" name="username" className="form-control" value={formData.username} onChange={handleChange} />
+                                            <label className="form-label fw-semibold">वापरकर्तानाव / username</label>
+                                            <input type="text" name="username" className="form-control" value={formData.username} onChange={handleChange} placeholder='username' />
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label fw-semibold">पासवर्ड</label>
-                                            <input type="password" name="password" className="form-control" value={formData.password} onChange={handleChange} />
+                                            <label className="form-label fw-semibold">पासवर्ड / password</label>
+                                            <input type="password" name="password" className="form-control" value={formData.password} onChange={handleChange} placeholder='password'/>
                                         </div>
                                     </div>
                                 </div>
@@ -137,6 +143,7 @@ function AddStaffMember() {
                                                 <option value="">-- निवडा --</option>
                                                 <option value="PRIMARY">प्राथमिक</option>
                                                 <option value="SECONDARY">माध्यमिक</option>
+                                                <option value="HigherSecondary">उच्च माध्यमिक</option>
                                             </select>
                                         </div>
                                     </div>

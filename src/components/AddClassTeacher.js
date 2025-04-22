@@ -14,7 +14,7 @@ function AddClassTeacher() {
     const [teachers, setTeachers] = useState([]);
     const [classteacherdata, setClassTeacherData] = useState([]);
     const [warningMessage, setWarningMessage] = useState('');
-    const schoolUdiseNo = 12345678093;
+    const schoolUdiseNo = 42534565235;
 
     useEffect(() => {
 

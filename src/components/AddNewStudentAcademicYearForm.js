@@ -19,7 +19,7 @@ function AddNewStudentAcademicYearForm() {
     const [teachers, setTeachers] = useState([]);
     const [singleTeacher, setSingleTeacher] = useState();
     const [classTeacherData, setClassTeacherData] = useState([]);
-    const schoolUdiseNo = 12345678093;
+    const schoolUdiseNo = 42534565235;
 
     useEffect(() => {
         apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {

@@ -14,8 +14,8 @@ function UpdateStudentAcademicYear() {
   const [loading, setLoading] = useState(false);
   const [listOfStudents, setListOfStudents] = useState([]);
 
-  const udise = 12345678093;
-  const teacherId = 1;
+  const udise = 42534565235;
+  const teacherId = 10;
   const navigate = useNavigate();
 
   const fetchStudents = (searchParams = {}) => {
@@ -57,7 +57,14 @@ function UpdateStudentAcademicYear() {
 
   function alldataset()
   {
-    navigate('/updateacademicyearall',{ state: { selectedStudents: listOfStudents } })
+    if(listOfStudents.length>0)
+    {
+      navigate('/updateacademicyearall',{ state: { selectedStudents: listOfStudents } })
+    }
+    else{
+      alert("कृपया विद्यार्थी निवडा तुम्ही विद्यार्थी निवडलेले नाहीत ");
+    }
+   
   }
 
   useEffect(() => {
@@ -88,9 +95,23 @@ function UpdateStudentAcademicYear() {
       }
     }, 500);
 
+   
     return () => clearTimeout(timeout);
+
+   
   }, [surName, studentName, fatherName, motherName]);
 
+
+  useEffect(()=>{
+    // apiService.getbyid("student/byclass/",teacherId).then((response)=>{
+    //   console.log(response.data);
+    // })
+
+    axios.get(`http://localhost:8080/student/byclass/${teacherId}`).then((results)=>{
+      console.log(results.data);
+      
+    })
+  },[])
   return (
     <div className="container py-4">
       <div className="row justify-content-center">
