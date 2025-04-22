@@ -37,11 +37,11 @@ function NavBarS({ role }) {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto align-items-center">
               <div className="d-flex align-items-center">
-                <Nav className="ms-auto align-items-center">
-                  <Nav.Link as={Link} to={"/new-school"}>शाळा नोंदणी करा</Nav.Link>
-                  <Nav.Link as={Link} to={"/subscription"}>सदस्यता</Nav.Link>
-                  <Nav.Link as={Link} to={"/view-school"}>शाळांची माहिती पहा</Nav.Link>
-                </Nav>
+                {role == "DEVELOPER" && <Nav className="ms-auto align-items-center">
+                  <Nav.Link as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
+                  <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
+                  <Nav.Link as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
+                </Nav>}
                 {/* <Form className="me-2 d-none d-lg-block position-relative">
                   <Form.Control
                     type="search"

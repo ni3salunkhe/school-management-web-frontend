@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Table, Form, Button } from 'react-bootstrap'
 import apiService from '../services/api.service'
+import { jwtDecode } from 'jwt-decode';
 
 const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
+    const id = jwtDecode(sessionStorage.getItem('token'))?.id;
     const [students, setStudents] = useState([])
     const [selectedStudents, setSelectedStudents] = useState([])
     const [errors, setErrors] = useState({})
+    const [existingAttendance, setExistingAttendance] = useState([])
+    
     const now = new Date()
     const day = now.toISOString().split('T')[0]
     const monthnyear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -18,13 +22,10 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
 
     const fetchStudents = async () => {
         try {
-            const response = await apiService.getdata(`api/student/school/${udiseNo}`)
-            console.log(await apiService.getdata(`api/student/byclass/search/1`))
+            const response = await apiService.getdata(`api/student/byclass/${selectedClass}`)
+            
             if (Array.isArray(response.data)) {
-                // Filter students by selected class
-                // const filtered = response.data.filter(
-                //     student => String(student.className).includes(String(selectedClass))
-                // )
+                
                 setStudents(response.data)
             }
         } catch (error) {
@@ -38,6 +39,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
                 ? prev.filter(id => id !== registerNumber)
                 : [...prev, registerNumber]
         )
+        
     }
 
     const handleSelectAll = () => {
@@ -65,7 +67,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
             const attendanceData = {
                 udiseNo,
                 studentRegisterId: selectedStudents,
-                staffId: 1,
+                staffId: id,
                 teacherQualification: "B.Ed",
                 division: "A",
                 medium: "English",

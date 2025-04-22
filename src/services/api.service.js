@@ -4,36 +4,38 @@ import axios from "axios";
 const apiService = {
   url: "http://localhost:8080/",
 
-    post(endpoint,data,config){
-        return axios.post(`${this.url}${endpoint}`,data)
-    },
-     getdata(endpoint)
-    {
-        return axios.get(`${this.url}${endpoint}`
-        //     {
-        //     headers: {
-        //       "Authorization": `Bearer ${sessionStorage.getItem('token')}`
-        //     }
-        //   }
-        );
-    },
-    
-    getbyid(endpoint,id)
-    {
-      return axios.get(`${this.url}${endpoint}${id}`)
-      }  ,
+  post(endpoint, data) {
+    return axios.post(`${this.url}${endpoint}`, data,{
+      headers: {
+        "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+      }
+    })
+  },
+  getdata(endpoint) {
+    return axios.get(`${this.url}${endpoint}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+        }
+      }
+    );
+  },
+
+  getbyid(endpoint, id) {
+    return axios.get(`${this.url}${endpoint}${id}`)
+  },
   postdata(endpoint, data) {
     return axios.post(`${this.url}${endpoint}`, data)
   },
-  getdata(endpoint) {
-    return axios.get(`${this.url}${endpoint}`
-      //     {
-      //     headers: {
-      //       "Authorization": `Bearer ${sessionStorage.getItem('token')}`
-      //     }
-      //   }
-    );
-  },
+  // getdata(endpoint) {
+  //   return axios.get(`${this.url}${endpoint}`
+  //     //     {
+  //     //     headers: {
+  //     //       "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+  //     //     }
+  //     //   }
+  //   );
+  // },
 
   putdata(endpoint, data, id) {
     return axios.put(`${this.url}${endpoint}${id}`, data)
@@ -55,12 +57,15 @@ const apiService = {
     })
   },
 
-    putData(endpoint, data)
-    {
-      return axios.put(this.url +endpoint,data)
-    }
-   
-  
+  putData(endpoint, data) {
+    return axios.put(this.url + endpoint, data,{
+      headers: {
+        "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+      }
+    })
+  }
+
+
 
 };
 export default apiService;

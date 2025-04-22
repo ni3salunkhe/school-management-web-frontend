@@ -2,10 +2,14 @@ import React, { useState } from 'react'
 import { Col, Container, Form, Row, Button, Card } from 'react-bootstrap'
 import AttendanceEntryForm from './AttendanceEntryForm'
 import AbsenceForm from './AbsenceForm'
+import { jwtDecode } from 'jwt-decode'
+import apiService from '../services/api.service'
 
 const Attendance = () => {
+    const udiseno=jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+    const [udiseNo] = useState(udiseno)
+    const id=jwtDecode(sessionStorage.getItem('token'))?.id;
     const [activeTab, setActiveTab] = useState("create")
-    const [udiseNo] = useState(sessionStorage.getItem("udiseNo"))
     const [selectedClass, setSelectedClass] = useState('')
     const [errors, setErrors] = useState({})
 
@@ -13,8 +17,14 @@ const Attendance = () => {
         setSelectedClass(e.target.value)
     }
 
+    const classTeacher=async()=>{
+       const response = await apiService.getdata(`classteacher/getbyid/${id}`)
+       const std=response.data.standardMaster.standard
+       setSelectedClass(std)
+    }
+    classTeacher();
     return (
-        <Container fluid className="d-flex justify-content-center align-items-center">
+        <Container fluid className="d-flex justify-content-center align-items-center py-3">
             <Card className="shadow-lg" style={{ width: '100%', maxWidth: '800px' }}>
                 <Card.Header as="h3" className="text-center p-3 bg-primary text-white">
                     विद्यार्थी उपस्थिती नोंदणी
@@ -34,19 +44,16 @@ const Attendance = () => {
                     <Row className="mb-4">
                         <Col>
                             <Form.Group>
-                                <Form.Label>वर्ग निवडा (Standard)</Form.Label>
-                                <Form.Select
+                                <Form.Label>चयनित शिक्षक</Form.Label>
+                                <Form.Control
                                     value={selectedClass}
                                     onChange={handleClassChange}
                                     isInvalid={!!errors.class}
+                                    readOnly
                                 >
-                                    <option value="">वर्ग निवडा</option>
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((std) => (
-                                        <option key={std} value={std}>{std}</option>
-                                    ))}
-                                </Form.Select>
+                                </Form.Control>
                                 <Form.Control.Feedback type="invalid">
-                                    {errors.class}
+                                    {/* {errors.class} */}
                                 </Form.Control.Feedback>
                             </Form.Group>
                         </Col>

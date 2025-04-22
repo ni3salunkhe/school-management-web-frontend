@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Attendance from './components/Attendance';
 import Layout from './components/Layout';
+import Developer from './pages/Developer';
 
 function App() {
   const location = useLocation();
@@ -36,6 +37,17 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route
+          path="/developer/*"
+          element={
+            <ProtectedRoute allowedRoles={['DEVELOPER']}>
+              <Layout role="DEVELOPER" sidebarItems={sidebarItemsHm} >
+                <Developer/>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        
         <Route
           path="/headmaster/*"
           element={
