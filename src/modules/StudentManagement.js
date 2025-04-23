@@ -11,6 +11,10 @@ import ReportsShows from '../components/ReportsShows';
 import LColdForm from '../components/LColdForm';
 import LCdownload from '../components/LCdownload';
 import LCnewdownload from '../components/LCnewdownload';
+import BonafideCertificate from '../components/BonafideCertificate';
+import PresentyCertificate from '../components/PresentyCertificate';
+import SingleStudentInfo from '../components/SingleStudentInfo';
+
 
 
 function StudentManagement({ role }) {
@@ -34,6 +38,9 @@ function StudentManagement({ role }) {
             <Route path='reports/download/:id' element={<LCdownload />}></Route>
             <Route path='reports/lc-new/:id' element={<LColdForm />}></Route>
             <Route path='reports/lcnewdownload/:id' element={<LCnewdownload />}></Route>
+            <Route path='reports/bonfide/:id' element={<BonafideCertificate />}></Route>
+            <Route path='reports/prsenty/:id' element={<PresentyCertificate />}></Route>
+            <Route path='singlestudentinfo/:id' element={<SingleStudentInfo />}></Route>
           </Routes>
         );
       case 'TEACHER':

@@ -50,15 +50,14 @@ function App() {
       mainMenu: ['Attendance'],
     },
   ];
-  // sessionStorage.setItem("udiseNo",1)
 
   return (
     <div>
 
-      {/* <div style={{ "minHeight": "45px" }}></div> */}
+      <div style={{ "minHeight": "45px" }}></div>
 
       
-      <Routes>
+      
       {/* {!isLoginPage && (
         <>
           <NavBarS />
@@ -66,7 +65,7 @@ function App() {
         </>
       )} */}
 
-      {/* <Routes>
+       <Routes>
         <Route path="/" element={<Login />} />
         <Route
           path="/developer/*"
@@ -111,7 +110,7 @@ function App() {
           }
         />
       </Routes> 
-    </>
+    {/*
       <Routes>
         <Route path='' element={<StudentList />}></Route>
         <Route path='studentlist' element={<StudentList />} ></Route>

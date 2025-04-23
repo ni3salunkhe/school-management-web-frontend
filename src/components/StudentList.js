@@ -4,6 +4,8 @@ import { FaChalkboardTeacher, FaUserGraduate } from 'react-icons/fa';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import apiService from '../services/api.service';
+
 
 function StudentList() {
     const [surName, setSurName] = useState('');
@@ -14,6 +16,10 @@ function StudentList() {
     const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+    const [teacherId, setTeacherId] = useState('');
+    const [teachers, setTeachers] = useState([]);
+    const [showSearchForm, setShowSearchForm] = useState(false);
+
     const navigate = useNavigate();
 
     const fetchStudents = (searchParams = {}) => {
@@ -93,7 +99,7 @@ function StudentList() {
     };
 
     const viewInfo = (id) => {
-        navigate(`/singlestudentinfo/${id}`);
+        navigate(`/clerk/singlestudentinfo/${id}`);
     };
 
     const toggleSearchForm = () => {
