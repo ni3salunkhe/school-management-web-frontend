@@ -7,7 +7,7 @@ function ReportsShows() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const udise = 42534565235;
+    const udise = 12345678093;
     const [result, setResult] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -37,7 +37,7 @@ function ReportsShows() {
                 schoolUdiseNo: udise
             }
         }).then((response) => {
-            console.log(response.data);
+             console.log(response.data);
             setAcademicData(response.data);
         })
 
@@ -73,6 +73,20 @@ function ReportsShows() {
                 console.error("Error while checking data presence:", error);
                 navigate(`/reports/${reportType}/${id}`); // fallback
             });
+        }else if(reportType==="bonafide")
+        {
+            navigate(`/reports/bonfide/${id}`);
+        }
+        else if(reportType==="attendance")
+        {
+           if(academicData.standard.standard>1)
+           {
+            navigate(`/reports/prsenty/${id}`);
+           }
+           else{
+            alert("तुमचा 75% हाजेरीचा दाखला निघू शकत नाही ");
+           }
+
         }
         else {
             navigate(`/reports/${reportType}/${id}`);

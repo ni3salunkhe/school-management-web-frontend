@@ -11,7 +11,7 @@ function LCnewdownload() {
     const [leavingInfo, setLeavingInfo] = useState(null);
     const [error, setError] = useState(null);
     const [isduplicate, setIsDuplicate] = useState(false); // Initialize with false
-    const udise = 42534565235;
+    const udise = 12345678093;
 
     const A4_WIDTH_PX = 794;
     const A4_HEIGHT_PX = 900;

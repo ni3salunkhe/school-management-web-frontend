@@ -26,6 +26,9 @@ import StudentList from './components/StudentList';
 import ReportsShows from './components/ReportsShows';
 import LCdownload from './components/LCdownload';
 import LCnewdownload from './components/LCnewdownload';
+import BonafideCertificate from './components/BonafideCertificate';
+import PresentyCertificate from './components/PresentyCertificate';
+import SingleStudentInfo from './components/SingleStudentInfo';
 
 function App() {
   const location = useLocation();
@@ -38,7 +41,7 @@ function App() {
   ];
   const sidebarItemsClerk = [
     {
-      mainMenu: ['Student','Class'],
+      mainMenu: ['Student', 'Class'],
     },
   ];
   const sidebarItemsTeacher = [
@@ -49,18 +52,18 @@ function App() {
   // sessionStorage.setItem("udiseNo",1)
 
   return (
-    <>
+    <div>
 
-      <div style={{ "minHeight": "45px" }}></div>
+      {/* <div style={{ "minHeight": "45px" }}></div> */}
 
       {/* {!isLoginPage && (
         <>
           <NavBarS />
           <div style={{ "minHeight": "45px" }}></div>
         </>
-      )}
-      
-      <Routes>
+      )} */}
+
+      {/* <Routes>
         <Route path="/" element={<Login />} />
         <Route
           path="/headmaster/*"
@@ -96,7 +99,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+      </Routes> */}
 
+
+      {/*
       </Routes>
         <Route path='/' element={<Login />} />
         <Route path='/view-school/*' element={<ViewSchools />} />
@@ -130,19 +136,22 @@ function App() {
       {/* <LColdForm/> */}
       {/* <StudentList /> */}
       <Routes>
-        <Route path='' element={<StudentList/>}></Route>
-        <Route path='studentlist' element={<StudentList/>} ></Route>
-        <Route path='reports/:id' element={<ReportsShows/>}></Route>
-        <Route path='reports/lc-old/:id' element={<LColdForm/>}></Route>
-        <Route path='reports/download/:id' element={<LCdownload/>}></Route>
-        <Route path='reports/lc-new/:id' element={<LColdForm/>}></Route>
-        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload/>}></Route>
+        <Route path='' element={<StudentList />}></Route>
+        <Route path='studentlist' element={<StudentList />} ></Route>
+        <Route path='reports/:id' element={<ReportsShows />}></Route>
+        <Route path='reports/lc-old/:id' element={<LColdForm />}></Route>
+        <Route path='reports/download/:id' element={<LCdownload />}></Route>
+        <Route path='reports/lc-new/:id' element={<LColdForm />}></Route>
+        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload />}></Route>
+        <Route path='reports/bonfide/:id'element={<BonafideCertificate/>}></Route>
+        <Route path='reports/prsenty/:id' element={<PresentyCertificate/>}></Route>
+        <Route path='singlestudentinfo/:id' element={<SingleStudentInfo/>}></Route>
       </Routes>
 
       {/* <UpdateStudentAcademicYear /> */}
       {/* <UpdateStudentAcademicYearForm/> */}
       {/* <Login /> */}
-    </>
+    </div>
   );
 }
 

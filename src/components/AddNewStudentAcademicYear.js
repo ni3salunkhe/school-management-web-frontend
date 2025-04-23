@@ -11,7 +11,7 @@ function AddNewStudentAcademicYear() {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const udise = 42534565235;
+    const udise = 12345678093;
 
     const navigate=useNavigate();
 
