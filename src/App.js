@@ -58,7 +58,7 @@ function App() {
       {/* <div style={{ "minHeight": "45px" }}></div> */}
 
       
-      <Routes>
+      {/* <Routes> */}
       {/* {!isLoginPage && (
         <>
           <NavBarS />
@@ -162,7 +162,7 @@ function App() {
         <Route path='reports/lc-new/:id' element={<LColdForm/>}></Route>
         <Route path='reports/lcnewdownload/:id' element={<LCnewdownload/>}></Route>
       </Routes> */}
-    </>
+    {/* </> */}
       <Routes>
         <Route path='' element={<StudentList />}></Route>
         <Route path='studentlist' element={<StudentList />} ></Route>
