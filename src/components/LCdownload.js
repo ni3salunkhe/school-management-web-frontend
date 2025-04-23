@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import apiService from '../services/api.service';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function LCdownload() {
     const { id } = useParams();
@@ -10,7 +11,7 @@ function LCdownload() {
     const [leavingInfo, setLeavingInfo] = useState(null);
     const [error, setError] = useState(null);
     const [isduplicate, setIsDuplicate] = useState(false); // Initialize with false
-    const udise = 42534565235;
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     // A4 dimensions in pixels at 96 DPI
     const A4_WIDTH_PX = 794;

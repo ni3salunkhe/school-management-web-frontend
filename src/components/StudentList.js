@@ -3,6 +3,7 @@ import { BiSearch } from 'react-icons/bi';
 import { useEffect,useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function StudentList() {
     const [surName, setSurName] = useState('');
@@ -12,14 +13,18 @@ function StudentList() {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
-    const udise = 42534565235;
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const navigate = useNavigate();
 
     const fetchStudents = (searchParams = {}) => {
         setLoading(true);
         const params = { udise, ...searchParams };
         
-        axios.get('http://localhost:8080/student/byudise/search', { params })
+        axios.get(`http://localhost:8080/student/byudise/${udise}`,{
+            headers: {
+              "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+            }
+          })
             .then(response => {
                 setResults(response.data);
                 setLoading(false);
@@ -74,7 +79,7 @@ function StudentList() {
     }, [studentName, surName, fatherName, motherName, results]);
 
     const handleClick = (id) => {
-        navigate(`/reports/${id}`);
+        navigate(`/clerk/reports/${id}`);
     };
   return (
     <div className="container py-4">

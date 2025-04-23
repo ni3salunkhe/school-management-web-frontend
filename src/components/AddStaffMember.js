@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BiUser, BiIdCard, BiEnvelope, BiPhone, BiLockAlt, BiBook, BiBriefcase } from 'react-icons/bi';
 import '../styling/formstyle.css'
 import apiService from '../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 
 function AddStaffMember() {
     const [formData, setFormData] = useState({
@@ -17,7 +18,7 @@ function AddStaffMember() {
         level: '',
     });
 
-    const school = 42534565235;
+    const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -31,7 +32,7 @@ function AddStaffMember() {
         const payload = { ...formData, school };
         console.log("Form submitted:", payload);
         apiService.postdata("staff/", payload).then((response) => {
-            alert("Data Added Successfully");
+            alert("माहिती यशस्वीपणे प्रणालीमध्ये समाविष्ट करण्यात आली आहे.");
         })
         setFormData({
             fname: '',
@@ -116,7 +117,7 @@ function AddStaffMember() {
                                     </h5>
                                     <div className="row g-3">
                                         <div className="col-md-6">
-                                            <label className="form-label fw-semibold">इयत्ता</label>
+                                            <label className="form-label fw-semibold">शिक्षण</label>
                                             <input type="text" name="standard" className="form-control" value={formData.standard} onChange={handleChange} />
                                         </div>
                                     </div>

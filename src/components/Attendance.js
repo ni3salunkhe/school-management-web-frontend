@@ -6,21 +6,20 @@ import { jwtDecode } from 'jwt-decode'
 import apiService from '../services/api.service'
 
 const Attendance = () => {
+    
     const udiseno=jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [udiseNo] = useState(udiseno)
-    const id=jwtDecode(sessionStorage.getItem('token'))?.id;
+    const id=jwtDecode(sessionStorage.getItem('token')).id;
     const [activeTab, setActiveTab] = useState("create")
     const [selectedClass, setSelectedClass] = useState('')
     const [errors, setErrors] = useState({})
-
-    const handleClassChange = (e) => {
-        setSelectedClass(e.target.value)
-    }
+    const [teacherName, setTeacherName] = useState('')
+    
 
     const classTeacher=async()=>{
-       const response = await apiService.getdata(`classteacher/getbyid/${id}`)
-       const std=response.data.standardMaster.standard
-       setSelectedClass(std)
+       const response = await apiService.getdata(`classteacher/getbyid/${id}`)     
+       setTeacherName(response.data.staff.fname+" "+response.data.staff.fathername+" "+response.data.staff.lname);
+       setSelectedClass(id)
     }
     classTeacher();
     return (
@@ -44,10 +43,9 @@ const Attendance = () => {
                     <Row className="mb-4">
                         <Col>
                             <Form.Group>
-                                <Form.Label>चयनित शिक्षक</Form.Label>
+                                <Form.Label>वर्ग शिक्षक</Form.Label>
                                 <Form.Control
-                                    value={selectedClass}
-                                    onChange={handleClassChange}
+                                    value={teacherName}
                                     isInvalid={!!errors.class}
                                     readOnly
                                 >

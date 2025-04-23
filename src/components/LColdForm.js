@@ -3,13 +3,14 @@ import apiService from '../services/api.service';
 import { BiSearch } from 'react-icons/bi';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function LColdForm() {
 
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const udise = 42534565235;
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [error, setError] = useState('');
     const [studentData, setStudentData] = useState('');
     const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ function LColdForm() {
             lcDate: '',
             otherRemark: '',
         })
-        navigate(`/reports/download/${id}`);
+        navigate(`/clerk/reports/download/${id}`);
 
     }
 

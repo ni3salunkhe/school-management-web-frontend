@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 
 
 function AddClass() {
@@ -12,17 +13,9 @@ function AddClass() {
     const [classSaved, setClassSaved] = useState(false);
     const [allDivision, setAllDivision] = useState([]);
     const [errors, setErrors] = useState({});
-    const udiseNo = 42534565235;
+    const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
-        // apiService.getdata("Division/")
-        //     .then((response) => {
-        //         console.log("Division fetched:", response.data);
-        //         setAllDivision(response.data);
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error fetching divisions:", error);
-        //     });
         apiService.getbyid("Division/getbyudise/",udiseNo).then((response)=>{
             setAllDivision(response.data);
             console.log(response.data);
@@ -61,7 +54,6 @@ function AddClass() {
 
         setErrors({});
         const payload = { ...formData, udiseNo };
-
         apiService.postdata("standardmaster/", payload).then((response) => {
             console.log("Form Submitted");
             setClassSaved(true);

@@ -19,28 +19,6 @@ const NewSchool = () => {
         const fetchHm = async () => {
             try {
                 const response = await apiService.getdata("school/");
-
-                // if (response.data && Array.isArray(response.data)) {
-                //     // Loop through each school object and extract the logo
-                //     response.data.forEach(school => {
-                //         if (school.logo) {
-                //             // If the school has a logo, create an image element
-                //             const imgElement = document.createElement('img');
-                //             imgElement.src = `data:image/jpeg;base64,${school.logo}`; // Assuming it's a JPEG image
-                //             document.body.appendChild(imgElement); // Append image to the body
-                //             console.log("Blob URL:", school.logo);
-                //         } else {
-                //             console.log(`No logo for UDISE No ${school.udiseNo}`);
-                //         }
-                //     });
-                // }
-                // response.data.forEach(school => {
-                //     if (school.headMasterName) {
-                //         console.log("U N:", school.headMasterName);
-                //     } else {
-                //         console.log(`No logo for UDISE No ${school.headMasterName}`);
-                //     }
-                // });
                 if (Array.isArray(response.data)) {
                     response.data.forEach(school => {
                         // Look for headMasterName or any nested structure that might hold it
@@ -79,59 +57,6 @@ const NewSchool = () => {
         };
 
         fetchHm();
-
-        // const fetchDepartments = async () => {
-        //   try {
-        //     const response = await DepartmentService.getDepartments();
-        //     const department = response.data || []; // Ensure it's an array if data is null or undefined
-
-        //     if (department.length === 0) {
-        //       console.warn('No department found, setting fallback value.');
-        //       setAllDepartments([{ id: 0, name: 'No department available' }]); // Placeholder category
-        //     } else {
-        //       setAllDepartments(department);
-        //     }
-        //   } catch (error) {
-        //     console.error('Failed to fetch departments:', error);
-        //   }
-        // };
-        // const fetchRoles = async () => {
-        //   try {
-        //     const response = await RoleService.getRole();
-        //     // const response = ["await RoleService.getRole();"]
-        //     const roles = response.data || []; // Ensure it's an array if data is null or undefined
-        //     console.log(response)
-        //     if (roles.length === 0) {
-        //       console.warn('No roles found, setting fallback value.');
-        //       setAllRoles([{ id: 0, name: 'No roles available' }]); // Placeholder category
-        //     } else {
-        //       setAllRoles(roles);
-        //       console.log(allRoles)
-        //     }
-        //   } catch (error) {
-        //     console.error('Failed to fetch roles:', error);
-        //   }
-        // };
-
-        // const fetchBranches = async () => {
-        //   try {
-        //     const response = await BranchService.getBranches();
-        //     const branches = response.data || []; // Ensure it's an array if data is null or undefined
-
-        //     if (branches.length === 0) {
-        //       console.warn('No branches found, setting fallback value.');
-        //       setAllBranches([{ id: 0, name: 'No branches available' }]); // Placeholder category
-        //     } else {
-        //       setAllBranches(branches);
-        //     }
-        //   } catch (error) {
-        //     console.error('Failed to fetch branches:', error);
-        //   }
-        // };
-
-        // fetchBranches()
-        // fetchRoles()
-        // fetchDepartments()
     }, []);
 
     const [formData, setFormData] = useState({
@@ -296,79 +221,16 @@ const NewSchool = () => {
 
         if (validateForm()) {
             try {
-                // Simulated API call - replace with actual backend integration
-
-                // const userData = {
-                //     udiseNo: formData.schoolUdise,
-                //     schoolName: formData.schoolName,
-                //     sansthaName: formData.orgName,
-                //     headMasterName: formData.username,
-                //     schoolEmailId: formData.email,
-                //     headMasterMobileNo: formData.phone,
-                //     headMasterPassword: formData.password,
-                //     schoolPlace: "hsdf",
-                //     board: "sdfs",
-                //     boardDivision: "sd",
-                //     boardIndexNo: 89,
-                //     schoolApprovalNo: 1,
-                //     createdAt: 20 - 12 - 20,
-                //     state:1,
-
-                //     district:1,
-
-                //     tehsil:1,
-
-                //     village:1,
-
-                //     pinCode:1,
-                //     medium:"efdsfsd",
-                //     logo:formData.logo
-                //     // roleId: formData.role,
-                // }
-
-                // try {
-                //     const config = {
-                //         headers: {
-                //             'Content-Type': 'multipart/form-data'  // This ensures the server knows the body is JSON
-                //         }
-                //     };
-                //     console.log(userData)
-                //     await apiService.createHm('school/', userData,config);
-                //     setSubmitStatus({
-                //         type: 'success',
-                //         message: 'User account created successfully!'
-                //     });
-
-                //     toast.success('User created successfully!', {
-                //         position: "top-right",
-                //         autoClose: 3000,
-                //         hideProgressBar: false,
-                //         closeOnClick: true,
-                //         pauseOnHover: true,
-                //         draggable: true,
-                //     });
-                // }
-                // catch (error) {
-                //     const errorMessage = error.response?.data?.message || 'Failed to create User';
-                //     toast.error(errorMessage, {
-                //         position: "top-right",
-                //         autoClose: 5000,
-                //         hideProgressBar: false,
-                //         closeOnClick: true,
-                //         pauseOnHover: true,
-                //         draggable: true,
-                //     });
-                // }
                 const userData = new FormData();
                 userData.append('schoolDto', JSON.stringify({
                     udiseNo: formData.schoolUdise,
                     schoolName: formData.schoolName,
                     sansthaName: formData.orgName,
-                    headMasterName: formData.username,
+                    headMasterUserName: formData.username,
                     schoolEmailId: formData.email,
                     headMasterMobileNo: formData.phone,
                     headMasterPassword: formData.password,
-
+                    role: formData.role
                 }));
 
                 // Add the logo file if it exists
@@ -606,7 +468,7 @@ const NewSchool = () => {
                                                         onChange={handleChange}
                                                         isInvalid={!!errors.role}
                                                     >
-                                                        <option value={"Head Master"}>Head Master</option>
+                                                        <option value={"HEADMASTER"}>Head Master</option>
                                                         {/* {Array.isArray(allRoles) && allRoles.map(role => (
                                                     <option key={role.id} value={role.id}>
                                                         {role.roleName}

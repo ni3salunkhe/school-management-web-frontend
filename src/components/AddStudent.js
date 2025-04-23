@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { BiMap, BiInfoCircle, BiUserCircle, BiBook, BiHome } from 'react-icons/bi';
 import apiService from '../services/api.service';
 import CombinedDropdownInput from './CombinedDropdownInput';
+import { jwtDecode } from 'jwt-decode';
 
 
 function AddStudent() {
@@ -16,7 +17,7 @@ function AddStudent() {
     const [students, setStudents] = useState([]);
     const [warningMessage, setWarningMessage] = useState('');
 
-    const school = 42534565235;
+    const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     // const registerNumber=78272827287;
 
     const [formData, setFormData] = useState({
@@ -378,14 +379,6 @@ function AddStudent() {
                                                 required={true}
                                                 options={["हिंदू", "मुस्लिम", "ख्रिश्चन", "बौद्ध", "जैन"]}
                                             />
-                                            <CombinedDropdownInput
-                                                id="caste"
-                                                label="जात"
-                                                value={formData.caste}
-                                                onChange={(id, value) => setFormData(prev => ({ ...prev, [id]: value }))}
-                                                required={true}
-                                                options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]}
-                                            />
                                             <div className="col-md-3 mb-2">
                                                 <label htmlFor="subCast" className="form-label fw-semibold small">उपजात</label>
                                                 <input
@@ -394,9 +387,18 @@ function AddStudent() {
                                                     id="subCast"
                                                     value={formData.subCast}
                                                     onChange={handleChange}
-                                                    placeholder="उपजात"
+                                                    placeholder="जात"
                                                 />
                                             </div>
+                                            <CombinedDropdownInput
+                                                id="caste"
+                                                label="प्रवर्ग"
+                                                value={formData.caste}
+                                                onChange={(id, value) => setFormData(prev => ({ ...prev, [id]: value }))}
+                                                required={true}
+                                                options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]}
+                                            />
+                                            
                                         </div>
                                     </div>
                                 </div>

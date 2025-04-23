@@ -1,28 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api.service';
 import { authService } from '../services/authService';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
-
-  const [isExpired, setIsExpired] = useState(false);
-
-  const fetchSubscription = async (udiseNo) => {
-    try {
-      const response = await apiService.getdata(`api/subscription/check/${udiseNo}`);
-
-      setIsExpired(response.data)
-      alert(isExpired)
-    } catch (error) {
-      console.error('Error fetching subscription:', error);
-    }
-  };
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
-    userType:"STAFF"
+    userType: ""
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,25 +30,56 @@ const Login = () => {
     }
   };
 
+  const checkSubscription = async (udiseNo) => {
+    try {
+      const response = await apiService.getdata(`api/subscription/check/${udiseNo}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      throw new Error('Subscription check failed');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+
     try {
+      // First authenticate the user
       await authService.login('public/authenticate', credentials);
-      const token=sessionStorage.getItem('token');
-      if(token){
-        const decoded=jwtDecode(token);
-        const targetPath = getTargetPath(decoded.role);
-        navigate(targetPath, { replace: true });
+      const token = sessionStorage.getItem('token');
+      
+      if (token) {
+        const decoded = jwtDecode(token);
+        
+        // If user is developer, allow login without subscription check
+        if (decoded.role?.toLowerCase() === 'developer') {
+          navigate(getTargetPath(decoded.role), { replace: true });
+          return;
+        }
+
+        // Check subscription for non-developer users
+        alert(decoded.udiseNo)
+        const isSubscriptionValid = await checkSubscription(decoded.udiseNo);
+      
+        if (!isSubscriptionValid) {
+          // Subscription is valid, proceed with login
+          navigate(getTargetPath(decoded.role), { replace: true });
+        } else {
+
+          setError('सॉफ्टवेअर लायसन्स वैध नाही. कृपया डेवलपरशी संपर्क साधा.');
+          setCredentials({ username: '', password: '', userType: '' });
+        }
       }
     } catch (err) {
       console.error('Login failed:', err);
-      setError(err.message || 'Failed to login. Please try again.');
-      setCredentials({ username: '', password: '' });
+      setError('कृपया आपल्या लॉगिन माहितीची (वापरकर्तानाव, संकेतशब्द, भूमिका) पुन्हा एकदा खात्री करा.');
+      setCredentials({ username: '', password: '', userType: '' });
     } finally {
       setLoading(false);
     }
-    
-  }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -95,7 +113,7 @@ const Login = () => {
                     name="username"
                     value={credentials.username}
                     onChange={handleChange}
-                    placeholder="वापरकर्तानाव प्रविष्ट करा"
+                    placeholder="-- वापरकर्तानाव प्रविष्ट करा --"
                     disabled={loading}
                     required
                   />
@@ -108,19 +126,33 @@ const Login = () => {
                     name="password"
                     value={credentials.password}
                     onChange={handleChange}
-                    placeholder="पासवर्ड प्रविष्ट करा"
+                    placeholder="-- पासवर्ड प्रविष्ट करा --"
                     disabled={loading}
                     required
                   />
                 </Form.Group>
-
+                <Form.Group className="mb-4" controlId="userRole">
+                  <Form.Label>✅ वापरकर्त्याची भूमिका निवडा</Form.Label>
+                  <Form.Select 
+                    name="userType" 
+                    value={credentials.userType} 
+                    onChange={handleChange} 
+                    required 
+                    disabled={loading}
+                  >
+                    <option value="">-- भूमिका निवडा --</option>
+                    <option value="HEADMASTER">मुख्याध्यापक</option>
+                    <option value="STAFF">शिक्षक / लिपिक</option>
+                    <option value="DEVELOPER">डेवलपर</option>
+                  </Form.Select>
+                </Form.Group>
                 <Button
                   type="submit"
                   variant="primary"
                   className="w-100"
                   disabled={loading}
                 >
-                  {loading ? 'Logging in...' : 'Login'}
+                  {loading ? 'लॉगिन होत आहे...' : 'लॉगिन करा'}
                 </Button>
               </Form>
             </Card.Body>

@@ -17,12 +17,12 @@ function App() {
   const componentMap = ['StudentManagement']
   const sidebarItemsHm = [
     {
-      mainMenu: ['School', 'Staff'],
+      mainMenu: ['School','Class', 'Staff'],
     },
   ];
   const sidebarItemsClerk = [
     {
-      mainMenu: ['Student','Class'],
+      mainMenu: ['Student','StudentList'],
     },
   ];
   const sidebarItemsTeacher = [
@@ -49,8 +49,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-        />
-        
+        /> 
         <Route
           path="/headmaster/*"
           element={
@@ -61,7 +60,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/clerk/*"
           element={
@@ -72,12 +70,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/teacher/*"
           element={
             <ProtectedRoute allowedRoles={['TEACHER']}>
-              <Layout role="TEACHER" sidebarItems={sidebarItemsTeacher}>
+              <Layout role="teacher" sidebarItems={sidebarItemsTeacher}>
 
                 <TeacherDashboard componentMap={componentMap} role="TEACHER" />
 
@@ -85,20 +82,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-      
       </Routes> 
-      
-      {/* <StudentList /> */}
-      {/* <Routes>
-        <Route path='' element={<StudentList/>}></Route>
-        <Route path='studentlist' element={<StudentList/>} ></Route>
-        <Route path='reports/:id' element={<ReportsShows/>}></Route>
-        <Route path='reports/lc-old/:id' element={<LColdForm/>}></Route>
-        <Route path='reports/download/:id' element={<LCdownload/>}></Route>
-        <Route path='reports/lc-new/:id' element={<LColdForm/>}></Route>
-        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload/>}></Route>
-      </Routes> */}
     </>
   );
 }

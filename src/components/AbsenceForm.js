@@ -69,12 +69,12 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
         day
       }
       await apiService.putData(`api/attendance/mark-absent`, attendanceData)
-      alert('Absence of Students noted successfully!')
+      alert('👉 विद्यार्थ्यांची गैरहजेरी यशस्वीरित्या नोंदवली गेली!')
       setSelectedStudents([])
       fetchStudents()
     } catch (error) {
       console.error("Error submitting attendance:", error)
-      setErrors({ submit: 'Failed to register students' })
+      setErrors({ submit: '🔄 विद्यार्थ्यांची नोंदणी अपूर्ण राहिली आहे. कृपया तपासून पुन्हा प्रयत्न करा.' })
     }
   }
 

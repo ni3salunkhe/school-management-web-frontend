@@ -22,8 +22,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
 
     const fetchStudents = async () => {
         try {
-            const response = await apiService.getdata(`api/student/byclass/${selectedClass}`)
-            
+            const response = await apiService.getdata(`student/byclass/${selectedClass}`)
             if (Array.isArray(response.data)) {
                 
                 setStudents(response.data)
@@ -77,12 +76,12 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
             }
 
             await apiService.post(`api/attendance/bulk`, attendanceData)
-            alert('Students registered successfully!')
+            alert('👉 विद्यार्थ्यांची नोंदणी यशस्वीरित्या पूर्ण झाली आहे!')
             setSelectedStudents([])
             fetchStudents()
         } catch (error) {
             console.error("Error submitting attendance:", error)
-            setErrors({ submit: 'Failed to register students' })
+            setErrors({ submit: '🔄 विद्यार्थ्यांची नोंदणी करण्यात अपयश आले' })
         }
     }
 
