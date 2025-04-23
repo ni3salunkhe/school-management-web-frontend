@@ -10,6 +10,26 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Attendance from './components/Attendance';
 import Layout from './components/Layout';
 import Developer from './pages/Developer';
+import AddSchoolInfo from './components/AddSchoolInfo';
+import AddStaffMember from './components/AddStaffMember';
+import AddClass from './components/AddClass';
+import AddClassTeacher from './components/AddClassTeacher';
+import Pdfgenerator from './components/Pdfgenerator';
+import AddStudent from './components/AddStudent';
+import AddNewStudentAcademicYear from './components/AddNewStudentAcademicYear';
+
+import AddNewStudentAcademicYearForm from './components/AddNewStudentAcademicYearForm';
+import UpdateStudentAcademicYearForm from './components/UpdateStudentAcademicYearForm';
+import UpdateStudentAcademicYear from './components/UpdateStudentAcademicYear';
+import UpdateStudentAllAcademic from './components/UpdateStudentAllAcademic';
+import LColdForm from './components/LColdForm';
+import StudentList from './components/StudentList';
+import ReportsShows from './components/ReportsShows';
+import LCdownload from './components/LCdownload';
+import LCnewdownload from './components/LCnewdownload';
+import BonafideCertificate from './components/BonafideCertificate';
+import PresentyCertificate from './components/PresentyCertificate';
+import SingleStudentInfo from './components/SingleStudentInfo';
 
 function App() {
   const location = useLocation();
@@ -33,12 +53,20 @@ function App() {
   // sessionStorage.setItem("udiseNo",1)
 
   return (
-    <>
+    <div>
 
-      <div style={{ "minHeight": "45px" }}></div>
+      {/* <div style={{ "minHeight": "45px" }}></div> */}
 
       
       <Routes>
+      {/* {!isLoginPage && (
+        <>
+          <NavBarS />
+          <div style={{ "minHeight": "45px" }}></div>
+        </>
+      )} */}
+
+      {/* <Routes>
         <Route path="/" element={<Login />} />
         <Route
           path="/developer/*"
@@ -84,6 +112,23 @@ function App() {
         />
       </Routes> 
     </>
+      <Routes>
+        <Route path='' element={<StudentList />}></Route>
+        <Route path='studentlist' element={<StudentList />} ></Route>
+        <Route path='reports/:id' element={<ReportsShows />}></Route>
+        <Route path='reports/lc-old/:id' element={<LColdForm />}></Route>
+        <Route path='reports/download/:id' element={<LCdownload />}></Route>
+        <Route path='reports/lc-new/:id' element={<LColdForm />}></Route>
+        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload />}></Route>
+        <Route path='reports/bonfide/:id'element={<BonafideCertificate/>}></Route>
+        <Route path='reports/prsenty/:id' element={<PresentyCertificate/>}></Route>
+        <Route path='singlestudentinfo/:id' element={<SingleStudentInfo/>}></Route>
+      </Routes>
+
+      {/* <UpdateStudentAcademicYear /> */}
+      {/* <UpdateStudentAcademicYearForm/> */}
+      {/* <Login /> */}
+    </div>
   );
 }
 

@@ -27,7 +27,7 @@ function UpdateStudentAcademicYearForm() {
   const { selectedStudents } = location.state || { selectedStudents: [] }
   console.log(selectedStudents);
 
-  const schoolUdiseNo = 42534565235;
+  const schoolUdiseNo = 12345678093;
   const studentId = id;
 
   useEffect(() => {
@@ -104,7 +104,7 @@ function UpdateStudentAcademicYearForm() {
         alert("Data Added Succesfully");
       });
   
-      navigate(`/updateacademicyearlist`);
+       navigate(`/updateacademicyearlist`);
     }
   }
   return (

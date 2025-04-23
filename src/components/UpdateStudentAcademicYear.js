@@ -14,8 +14,8 @@ function UpdateStudentAcademicYear() {
   const [loading, setLoading] = useState(false);
   const [listOfStudents, setListOfStudents] = useState([]);
 
-  const udise = 42534565235;
-  const teacherId = 10;
+  const udise = 12345678093;
+  const teacherId = 1;
   const navigate = useNavigate();
 
   const fetchStudents = (searchParams = {}) => {
