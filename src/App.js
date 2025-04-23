@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Attendance from './components/Attendance';
 import Layout from './components/Layout';
+import Developer from './pages/Developer';
 import AddSchoolInfo from './components/AddSchoolInfo';
 import AddStaffMember from './components/AddStaffMember';
 import AddClass from './components/AddClass';
@@ -56,6 +57,8 @@ function App() {
 
       {/* <div style={{ "minHeight": "45px" }}></div> */}
 
+      
+      <Routes>
       {/* {!isLoginPage && (
         <>
           <NavBarS />
@@ -65,6 +68,17 @@ function App() {
 
       {/* <Routes>
         <Route path="/" element={<Login />} />
+        <Route
+          path="/developer/*"
+          element={
+            <ProtectedRoute allowedRoles={['DEVELOPER']}>
+              <Layout role="DEVELOPER" sidebarItems={sidebarItemsHm} >
+                <Developer/>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        
         <Route
           path="/headmaster/*"
           element={
@@ -99,6 +113,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+      
+      </Routes> 
+      
       </Routes> */}
 
 
@@ -135,6 +153,16 @@ function App() {
       </Routes> */}
       {/* <LColdForm/> */}
       {/* <StudentList /> */}
+      {/* <Routes>
+        <Route path='' element={<StudentList/>}></Route>
+        <Route path='studentlist' element={<StudentList/>} ></Route>
+        <Route path='reports/:id' element={<ReportsShows/>}></Route>
+        <Route path='reports/lc-old/:id' element={<LColdForm/>}></Route>
+        <Route path='reports/download/:id' element={<LCdownload/>}></Route>
+        <Route path='reports/lc-new/:id' element={<LColdForm/>}></Route>
+        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload/>}></Route>
+      </Routes> */}
+    </>
       <Routes>
         <Route path='' element={<StudentList />}></Route>
         <Route path='studentlist' element={<StudentList />} ></Route>
