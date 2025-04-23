@@ -3,11 +3,12 @@ import apiService from '../services/api.service';
 import { AiOutlineMobile } from 'react-icons/ai';
 import { BiUpload,BiPhone ,BiInfoCircle,BiGlobeAlt, BiMap, BiListUl, BiMobile, BiImageAdd} from 'react-icons/bi';
 import '../styling/formstyle.css'
+import { jwtDecode } from 'jwt-decode';
 
 
 
 function AddSchoolInfo() {
-  const udiseNo = 42534565235;
+  const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [tehsils, setTehsils] = useState([]);
@@ -92,6 +93,7 @@ function AddSchoolInfo() {
       boardIndexNo: formData.boardIndexNo,
       schoolApprovalNo: formData.schoolApprovalNo,
       headMasterMobileNo: formData.headMasterMobileNo,
+      headMasterPassword: '123456',
     };
   
     // Append the JSON string of schoolDto

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 
 function AddClassTeacher() {
 
@@ -14,7 +15,7 @@ function AddClassTeacher() {
     const [teachers, setTeachers] = useState([]);
     const [classteacherdata, setClassTeacherData] = useState([]);
     const [warningMessage, setWarningMessage] = useState('');
-    const schoolUdiseNo = 42534565235;
+    const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
 
@@ -63,6 +64,7 @@ function AddClassTeacher() {
     // Handle form submission
     function handleSubmit(event) {
         event.preventDefault();
+
         const payload = { ...formData, schoolUdiseNo }
         console.log("Form Data Submitted:", payload);
         apiService.postdata("classteacher/", payload).then((response) => {

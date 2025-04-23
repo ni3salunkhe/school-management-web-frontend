@@ -1,10 +1,9 @@
 import apiService from './api.service';
 
-const BASE_URL = 'http://localhost:8080/';
 export const authService = {
     login: async (endpoint,credentials) => {
         try {
-            const response = await apiService.post(endpoint, credentials);
+            const response = await apiService.postlogin(endpoint, credentials);
             const { token} = response.data;
             sessionStorage.setItem('token', token);
             return { token};

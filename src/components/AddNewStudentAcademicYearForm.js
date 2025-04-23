@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import { useNavigate, useParams } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function AddNewStudentAcademicYearForm() {
     const { id } = useParams();
@@ -19,7 +20,7 @@ function AddNewStudentAcademicYearForm() {
     const [teachers, setTeachers] = useState([]);
     const [singleTeacher, setSingleTeacher] = useState();
     const [classTeacherData, setClassTeacherData] = useState([]);
-    const schoolUdiseNo = 12345678093;
+    const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
         apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {

@@ -2,17 +2,26 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../services/api.service';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function ReportsShows() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const udise = 12345678093;
-    const [result, setResult] = useState('');
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+    const [result, setResult] = useState({
+        studentName: '',
+        fatherName: '',
+        surName: '',
+        studentId: '',
+        registerNumber: ''
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [academicData, setAcademicData] = useState('');
-    const [duplicate, setDuplicate] = useState();
+    const [academicData, setAcademicData] = useState({
+        standard: { standard: '' },
+        division: { name: '' }
+    });
 
     useEffect(() => {
         const fetchStudentData = async () => {
@@ -20,10 +29,10 @@ function ReportsShows() {
                 setLoading(true);
                 await new Promise(resolve => setTimeout(resolve, 800));
 
-                apiService.getbyid("student/", id).then((response) => {
+                const response = await apiService.getbyid("student/", id);
+                if (response?.data) {
                     setResult(response.data);
-                })
-
+                }
                 setLoading(false);
             } catch (err) {
                 setError('विद्यार्थ्याची माहिती लोड करण्यात अडचण आली. कृपया पुन्हा प्रयत्न करा.');
@@ -31,65 +40,63 @@ function ReportsShows() {
             }
         };
 
-        axios.get("http://localhost:8080/academic/student-school", {
-            params: {
-                studentId: id,
-                schoolUdiseNo: udise
+        const fetchAcademicData = async () => {
+            try {
+                const response = await axios.get("http://localhost:8080/academic/student-school", {
+                    params: {
+                        studentId: id,
+                        schoolUdiseNo: udise
+                    },
+                    headers: {
+                        "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+                    }
+                });
+                if (response?.data) {
+                    setAcademicData(response.data);
+                    console.log(response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching academic data:", error);
             }
-        }).then((response) => {
-             console.log(response.data);
-            setAcademicData(response.data);
-        })
+        };
 
         fetchStudentData();
-    }, [id]);
+        fetchAcademicData();
+    }, [id, udise]);
 
     const handleReportClick = (reportType) => {
         if (reportType === "lc-old") {
             apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
                 .then((response) => {
+                    console.log(response.data);
+                    
                     if (response.data === true) {
-                        navigate(`/reports/download/${id}`);
+                        navigate(`/clerk/reports/download/${id}`);
                     } else {
-                        navigate(`/reports/${reportType}/${id}`);
+                        navigate(`/clerk/reports/${reportType}/${id}`);
                     }
                 })
                 .catch((error) => {
                     console.error("Error while checking data presence:", error);
-                    navigate(`/reports/${reportType}/${id}`); // fallback
+                    navigate(`/clerk/reports/${reportType}/${id}`);
                 });
         } 
-        else if(reportType ==="lc-new")
-        {
+        else if(reportType === "lc-new") {
             apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
-            .then((response) => {
-                if (response.data === true) {
-                    navigate(`/reports/lcnewdownload/${id}`);
-                } else {
-                    navigate(`/reports/${reportType}/${id}`);
-                }
-            })
-            .catch((error) => {
-                console.error("Error while checking data presence:", error);
-                navigate(`/reports/${reportType}/${id}`); // fallback
-            });
-        }else if(reportType==="bonafide")
-        {
-            navigate(`/reports/bonfide/${id}`);
-        }
-        else if(reportType==="attendance")
-        {
-           if(academicData.standard.standard>1)
-           {
-            navigate(`/reports/prsenty/${id}`);
-           }
-           else{
-            alert("तुमचा 75% हाजेरीचा दाखला निघू शकत नाही ");
-           }
-
+                .then((response) => {
+                    if (response.data === true) {
+                        navigate(`/clerk/reports/lcnewdownload/${id}`);
+                    } else {
+                        navigate(`/clerk/reports/${reportType}/${id}`);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error while checking data presence:", error);
+                    navigate(`/clerk/reports/${reportType}/${id}`);
+                });
         }
         else {
-            navigate(`/reports/${reportType}/${id}`);
+            navigate(`/clerk/reports/${reportType}/${id}`);
         }
     };
     
@@ -144,7 +151,10 @@ function ReportsShows() {
                             <div className="col-md-6">
                                 <div className="p-3 bg-light rounded">
                                     <span className="fw-bold text-primary d-inline-block w-25">वर्ग:</span>
-                                    <span>{academicData.standard.standard || 'माहिती नाही'} {academicData.division.name}</span>
+                                    <span>
+                                        {academicData?.standard?.standard || 'माहिती नाही'} 
+                                        {academicData?.division?.name ? ` ${academicData.division.name}` : ''}
+                                    </span>
                                 </div>
                             </div>
                             <div className="col-md-6">

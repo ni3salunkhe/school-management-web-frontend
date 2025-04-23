@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function UpdateStudentAllAcademic() {
     const { id } = useParams();
@@ -28,7 +29,7 @@ function UpdateStudentAllAcademic() {
     const { selectedStudents } = location.state || { selectedStudents: [] };
     console.log(selectedStudents);
 
-    const schoolUdiseNo = 12345678093;
+    const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const studentId=selectedStudents[0];
 
     useEffect(() => {

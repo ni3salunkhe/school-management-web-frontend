@@ -37,12 +37,12 @@ function App() {
   const componentMap = ['StudentManagement']
   const sidebarItemsHm = [
     {
-      mainMenu: ['School', 'Staff'],
+      mainMenu: ['School','Class', 'Staff'],
     },
   ];
   const sidebarItemsClerk = [
     {
-      mainMenu: ['Student', 'Class'],
+      mainMenu: ['Student','StudentList'],
     },
   ];
   const sidebarItemsTeacher = [
@@ -50,15 +50,14 @@ function App() {
       mainMenu: ['Attendance'],
     },
   ];
-  // sessionStorage.setItem("udiseNo",1)
 
   return (
     <div>
 
-      {/* <div style={{ "minHeight": "45px" }}></div> */}
+      <div style={{ "minHeight": "45px" }}></div>
 
       
-      {/* <Routes> */}
+      
       {/* {!isLoginPage && (
         <>
           <NavBarS />
@@ -66,7 +65,7 @@ function App() {
         </>
       )} */}
 
-      {/* <Routes>
+       <Routes>
         <Route path="/" element={<Login />} />
         <Route
           path="/developer/*"
@@ -77,8 +76,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-        />
-        
+        /> 
         <Route
           path="/headmaster/*"
           element={
@@ -89,7 +87,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/clerk/*"
           element={
@@ -100,12 +97,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/teacher/*"
           element={
             <ProtectedRoute allowedRoles={['TEACHER']}>
-              <Layout role="TEACHER" sidebarItems={sidebarItemsTeacher}>
+              <Layout role="teacher" sidebarItems={sidebarItemsTeacher}>
 
                 <TeacherDashboard componentMap={componentMap} role="TEACHER" />
 
@@ -113,56 +109,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-      
       </Routes> 
-      
-      </Routes> */}
-
-
-      {/*
-      </Routes>
-        <Route path='/' element={<Login />} />
-        <Route path='/view-school/*' element={<ViewSchools />} />
-        <Route path='/new-school/*' element={<NewSchool />} />
-        <Route path='/subscription/*' element={<Subscription />} />
-        <Route path='/attendance/*' element={<Attendance />} />
-      </Routes>  */}
-      {/* <NavBarS /> */}
-      <div style={{ "min-height": "45px" }}></div>
-      {/* <NewSchool /> */}
-      {/* <AddSchoolInfo/> */}
-      {/* <AddStaffMember/> */}
-      {/* <AddClass/> */}
-      {/* <AddClassTeacher/> */}
-      {/* <Pdfgenerator/> */}
-      {/* <AddStudent/> */}
-      {/* <AddNewStudentAcademicYear/> */}
-      {/* <Routes>
-          <Route path='' element={<AddNewStudentAcademicYear/>}></Route>
-          <Route path='academicyearform' element={<AddNewStudentAcademicYear/>}></Route>
-          <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm/>}></Route>
-        </Routes> */}
-
-      {/* <Routes>
-        <Route path='' element={<UpdateStudentAcademicYear />}></Route>
-        <Route path='updateacademicyearlist' element={<UpdateStudentAcademicYear/>}></Route>
-        <Route path='updateacademicyearform' element={<UpdateStudentAcademicYearForm />}></Route>
-        <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm />}></Route>
-        <Route path='updateacademicyearall' element={<UpdateStudentAllAcademic/>}></Route>
-      </Routes> */}
-      {/* <LColdForm/> */}
-      {/* <StudentList /> */}
-      {/* <Routes>
-        <Route path='' element={<StudentList/>}></Route>
-        <Route path='studentlist' element={<StudentList/>} ></Route>
-        <Route path='reports/:id' element={<ReportsShows/>}></Route>
-        <Route path='reports/lc-old/:id' element={<LColdForm/>}></Route>
-        <Route path='reports/download/:id' element={<LCdownload/>}></Route>
-        <Route path='reports/lc-new/:id' element={<LColdForm/>}></Route>
-        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload/>}></Route>
-      </Routes> */}
-    {/* </> */}
+    {/*
       <Routes>
         <Route path='' element={<StudentList />}></Route>
         <Route path='studentlist' element={<StudentList />} ></Route>

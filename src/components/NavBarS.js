@@ -4,6 +4,7 @@ import { Container, Row, Col, Nav, Navbar, Card, Table, Button, Badge, Form, Dro
 import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiPlusCircle, FiFilter, FiSearch, FiEdit, FiEye, FiTrash2, FiBell, FiBarChart2, FiMenu } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 
 function NavBarS({ role }) {
   const handleShowSidebar = () => setShowSidebar(true);
@@ -11,11 +12,9 @@ function NavBarS({ role }) {
   const handleCloseSidebar = () => setShowSidebar(false);
   // const navigate = useNavigate();
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem('authToken');
-  //   localStorage.removeItem('role');
-  //   navigate('/');
-  // };
+  const handleLogout = () => {
+    authService.logout()
+  };
   // const { colors } = useContext(ColorContext);
 
   return (
@@ -93,7 +92,7 @@ function NavBarS({ role }) {
                     <Dropdown.Item href="#profile"><FiUsers className="me-2" /> Profile</Dropdown.Item>
                     <Dropdown.Item href="#settings"><FiSettings className="me-2" /> Settings</Dropdown.Item>
                     <Dropdown.Divider />
-                    <Dropdown.Item ><FiLogOut className="me-2" /> Logout</Dropdown.Item>
+                    <Dropdown.Item onClick={handleLogout} ><FiLogOut  className="me-2" /> Logout</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </div>

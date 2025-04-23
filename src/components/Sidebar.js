@@ -3,6 +3,7 @@ import { Nav, Button, Form, Offcanvas } from 'react-bootstrap';
 import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2 ,FiBell ,FiFilePlus, FiUserPlus} from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useContext, useEffect } from "react";
+import { authService } from "../services/authService";
 
 const Sidebar = ({sidebarItems, role}) => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -35,9 +36,7 @@ const Sidebar = ({sidebarItems, role}) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userRole');
-    navigate('/');
+    authService.logout()
   };
 
   // Nav link style function

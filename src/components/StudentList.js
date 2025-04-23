@@ -3,7 +3,9 @@ import { BiSearch, BiUserCheck } from 'react-icons/bi';
 import { FaChalkboardTeacher, FaUserGraduate } from 'react-icons/fa';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import apiService from '../services/api.service';
+
 
 function StudentList() {
     const [surName, setSurName] = useState('');
@@ -13,10 +15,11 @@ function StudentList() {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
-    const [teachers, setTeachers] = useState([]);
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [teacherId, setTeacherId] = useState('');
+    const [teachers, setTeachers] = useState([]);
     const [showSearchForm, setShowSearchForm] = useState(false);
-    const udise = 12345678093;
+
     const navigate = useNavigate();
 
     const fetchStudents = (searchParams = {}) => {
@@ -26,10 +29,13 @@ function StudentList() {
 
         setLoading(true);
         const params = { udise, ...searchParams };
-
-        axios
-            .get(`http://localhost:8080/student/byclass/search/${teacherId}`, { params })
-            .then((response) => {
+        
+        axios.get(`http://localhost:8080/student/byudise/${udise}`,{
+            headers: {
+              "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+            }
+          })
+            .then(response => {
                 setResults(response.data);
                 setLoading(false);
             })
@@ -89,11 +95,11 @@ function StudentList() {
     }, [studentName, surName, fatherName, motherName, results]);
 
     const handleClick = (id) => {
-        navigate(`/reports/${id}`);
+        navigate(`/clerk/reports/${id}`);
     };
 
     const viewInfo = (id) => {
-        navigate(`/singlestudentinfo/${id}`);
+        navigate(`/clerk/singlestudentinfo/${id}`);
     };
 
     const toggleSearchForm = () => {

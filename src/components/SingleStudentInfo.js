@@ -4,6 +4,7 @@ import apiService from '../services/api.service';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaUser, FaUsers, FaMapMarkerAlt, FaSchool, FaIdCard, FaSpinner } from 'react-icons/fa';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function SingleStudentInfo() {
     const { id } = useParams();
@@ -12,7 +13,7 @@ function SingleStudentInfo() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('personal');
-    const udise = 12345678093;
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
         setLoading(true);
@@ -30,6 +31,9 @@ function SingleStudentInfo() {
             params: {
                 studentId: id,
                 schoolUdiseNo: udise
+            },
+            headers: {
+                "Authorization": `Bearer ${sessionStorage.getItem('token')}`
             }
         }).then((response) => {
             console.log('Academic Data:', response.data);
