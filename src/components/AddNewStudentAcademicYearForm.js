@@ -5,10 +5,8 @@ import { jwtDecode } from 'jwt-decode';
 
 function AddNewStudentAcademicYearForm() {
     const { id } = useParams();
-
-    console.log(id);
-
-    const navigate=useNavigate();
+    const navigate = useNavigate();
+    
     const [formData, setFormData] = useState({
         division: '',
         standardId: '',
@@ -17,9 +15,12 @@ function AddNewStudentAcademicYearForm() {
 
     const [divisions, setDivisions] = useState([]);
     const [standards, setStandards] = useState([]);
-    const [teachers, setTeachers] = useState([]);
     const [singleTeacher, setSingleTeacher] = useState();
     const [classTeacherData, setClassTeacherData] = useState([]);
+    const [warning,setWarning]=useState(false);
+    const [errors, setErrors] = useState({});
+    const [submitted, setSubmitted] = useState(false);
+    
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
@@ -29,25 +30,19 @@ function AddNewStudentAcademicYearForm() {
         apiService.getbyid("standardmaster/getbyudise/", schoolUdiseNo).then((response) => {
             setStandards(response.data);
         });
-        apiService.getbyid("staff/getbyudise/", schoolUdiseNo).then((response) => {
-            setTeachers(response.data);
-        });
         apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo).then((response) => {
-            console.log(response.data);
             setClassTeacherData(response.data);
         });
     }, []);
 
-    console.log(teachers);
-    console.log(classTeacherData);
-
     useEffect(() => {
         if (formData.division && formData.standardId) {
             const filter = classTeacherData.find(ct =>
-                ct.division.id === parseInt(formData.division) &&
-                ct.standardMaster.id === parseInt(formData.standardId)
+                ct?.division?.id === parseInt(formData.division) &&
+                ct?.standardMaster?.id === parseInt(formData.standardId)
             );
             setSingleTeacher(filter);
+            setWarning(!filter);
         } else {
             setSingleTeacher(null);
         }
@@ -59,28 +54,61 @@ function AddNewStudentAcademicYearForm() {
             ...formData,
             [name]: value
         });
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    }
+
+    function validateForm() {
+        const newErrors = {};
+        
+        if (!formData.division) {
+            newErrors.division = "कृपया तुकडी निवडा";
+        }
+        if (!formData.standardId) {
+            newErrors.standardId = "कृपया इयत्ता निवडा";
+        }
+        if (!formData.academicYear) {
+            newErrors.academicYear = "कृपया शैक्षणिक वर्ष प्रविष्ट करा";
+        } else if (!/^\d{4}-\d{2}$/.test(formData.academicYear)) {
+            newErrors.academicYear = "कृपया योग्य स्वरूपात शैक्षणिक वर्ष प्रविष्ट करा (उदा. 2024-25)";
+        }
+        return newErrors;
     }
 
     function handleSubmit(event) {
         event.preventDefault();
+        
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
         const payload = {
             ...formData,
             studentId: id,
             schoolUdiseNo,
             classTeacher: singleTeacher?.id
         };
-        setFormData({
-            division: '',
-            standardId: '',
-            academicYear: ''
-        })
-        console.log(payload);
 
         apiService.postdata('academic/', payload).then((response) => {
-            alert("Data Added Succesfully");
-        });
+            setSubmitted(true);
+            setFormData({
+                division: '',
+                standardId: '',
+                academicYear: ''
+            });
 
-        navigate(`/academicyearform`);
+            setTimeout(() => {
+                navigate(`/clerk/newstudentacademicyear`);
+                setSubmitted(false);
+            }, 2000);
+        }).catch(error => {
+            console.error("Error saving data:", error);
+            setErrors({ submit: "डेटा जतन करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा." });
+        });
     }
 
     return (
@@ -89,16 +117,20 @@ function AddNewStudentAcademicYearForm() {
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
-                            <h3 className="mb-0 fw-bold fs-4 heading-font">वर्गशिक्षक नियुक्ती</h3>
+                            <h3 className="mb-0 fw-bold fs-4 heading-font">विद्यार्थि शैक्षणिक माहिती अपडेट करा</h3>
                         </div>
 
                         <div className="card-body p-4">
+                            {errors.submit && (
+                                <div className="alert alert-danger mb-3">{errors.submit}</div>
+                            )}
+                            
                             <form onSubmit={handleSubmit} className="fs-6">
                                 {/* Division Select */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">तुकडी</label>
                                     <select
-                                        className="form-select form-select-sm"
+                                        className={`form-select form-select-sm ${errors.division ? 'is-invalid' : ''}`}
                                         name="division"
                                         value={formData.division}
                                         onChange={handleChange}
@@ -110,21 +142,16 @@ function AddNewStudentAcademicYearForm() {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
-
-                                {/* Staff Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">शिक्षक</label>
-                                    <div className="form-control form-control-sm">
-                                        {singleTeacher ? `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 'शिक्षक निवडले नाहीत'}
-                                    </div>
+                                    {errors.division && (
+                                        <div className="invalid-feedback">{errors.division}</div>
+                                    )}
                                 </div>
 
                                 {/* Standard Select */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">इयत्ता</label>
                                     <select
-                                        className="form-select form-select-sm"
+                                        className={`form-select form-select-sm ${errors.standardId ? 'is-invalid' : ''}`}
                                         name="standardId"
                                         value={formData.standardId}
                                         onChange={handleChange}
@@ -136,18 +163,43 @@ function AddNewStudentAcademicYearForm() {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.standardId && (
+                                        <div className="invalid-feedback">{errors.standardId}</div>
+                                    )}
+                                </div>
+
+                                {/* Teacher Display */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">शिक्षक</label>
+                                    <div className={`form-control form-control-sm ${errors.teacher ? 'is-invalid' : ''}`}>
+                                        {singleTeacher ? 
+                                            `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 
+                                            'शिक्षक निवडले नाहीत'}
+                                    </div>
+                                    {/* {errors.teacher && (
+                                        <div className="invalid-feedback">{errors.teacher}</div>
+                                    )} */}
+
+                                    {warning &&(
+                                        <div className='text-danger'>
+                                         <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                         या वर्गासाठी कोणताही शिक्षक नियुक्त केला नाही</div>
+                                    )}
                                 </div>
 
                                 {/* Academic Year Input */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">शैक्षणिक वर्ष</label>
                                     <input
-                                        className='form-control'
+                                        className={`form-control ${errors.academicYear ? 'is-invalid' : ''}`}
                                         name='academicYear'
                                         value={formData.academicYear}
                                         placeholder='उदा. 2024-25'
                                         onChange={handleChange}
                                     />
+                                    {errors.academicYear && (
+                                        <div className="invalid-feedback">{errors.academicYear}</div>
+                                    )}
                                 </div>
 
                                 <div className="text-center mt-4">
@@ -155,6 +207,10 @@ function AddNewStudentAcademicYearForm() {
                                         जतन करा
                                     </button>
                                 </div>
+                                
+                                {submitted && (
+                                    <div className="mt-3 text-success">विद्यार्थ्याची शैक्षणिक माहिती यशस्वीरित्या जतन झाली!</div>
+                                )}
                             </form>
                         </div>
                     </div>

@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import apiService from '../services/api.service';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function BonafideCertificate() {
     const printContentRef = useRef(null);
     const [studentData, setStudentData] = useState();
     const { id } = useParams();
-    const udise = 42534565235;
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [academicData, setAcademicData] = useState();
 
     useEffect(() => {
@@ -15,7 +16,7 @@ function BonafideCertificate() {
             setStudentData(response.data);
         });
 
-        axios.get("http://localhost:8080/academic/student-school", {
+        apiService.api.get("http://localhost:8080/academic/student-school", {
             params: {
                 studentId: id,
                 schoolUdiseNo: udise
@@ -26,7 +27,7 @@ function BonafideCertificate() {
     }, [id]);
 
     const A4_WIDTH_PX = 794;
-    const A4_HEIGHT_PX = 1123; // Standard A4 height in pixels at 96dpi
+    const A4_HEIGHT_PX = 1000; // Standard A4 height in pixels at 96dpi
 
     const handlePrint = () => {
         const printWindow = window.open('', '_blank');

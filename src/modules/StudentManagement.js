@@ -14,6 +14,12 @@ import LCnewdownload from '../components/LCnewdownload';
 import BonafideCertificate from '../components/BonafideCertificate';
 import PresentyCertificate from '../components/PresentyCertificate';
 import SingleStudentInfo from '../components/SingleStudentInfo';
+import AddClassTeacher from '../components/AddClassTeacher';
+import AddNewStudentAcademicYear from '../components/AddNewStudentAcademicYear';
+import AddNewStudentAcademicYearForm from '../components/AddNewStudentAcademicYearForm';
+import UpdateStudentAcademicYear from '../components/UpdateStudentAcademicYear';
+import UpdateStudentAcademicYearForm from '../components/UpdateStudentAcademicYearForm';
+import UpdateStudentAllAcademic from '../components/UpdateStudentAllAcademic';
 
 
 
@@ -41,12 +47,18 @@ function StudentManagement({ role }) {
             <Route path='reports/bonfide/:id' element={<BonafideCertificate />}></Route>
             <Route path='reports/prsenty/:id' element={<PresentyCertificate />}></Route>
             <Route path='singlestudentinfo/:id' element={<SingleStudentInfo />}></Route>
+            <Route path='classteacher/' element={<AddClassTeacher/>}></Route>
+            <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear/>}></Route>
+            <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm/>}/>
           </Routes>
         );
       case 'TEACHER':
         return (
           <Routes>
             <Route path='attendance' element={<Attendance />} />
+            <Route path='Updateyear' element={<UpdateStudentAcademicYear/>}/>
+            <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm/>}/>
+            <Route path='updateacademicyearall' element={<UpdateStudentAllAcademic />} />
           </Routes>
         );
       default:

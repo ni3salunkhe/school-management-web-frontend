@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BiSearch } from 'react-icons/bi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function AddNewStudentAcademicYear() {
     const [surName, setSurName] = useState('');
@@ -11,15 +12,23 @@ function AddNewStudentAcademicYear() {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const udise = 12345678093;
+    const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
-    const navigate=useNavigate();
+    
+    const navigate = useNavigate();
+
+    const api = axios.create({
+        baseURL: 'http://localhost:8080',
+        headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+        }
+    });
 
     const fetchStudents = (searchParams = {}) => {
         setLoading(true);
         const params = { udise, ...searchParams };
 
-        axios.get('http://localhost:8080/student/search', { params })
+        api.get('student/search', { params })
             .then(response => {
                 setResults(response.data);
                 setLoading(false);
@@ -34,9 +43,8 @@ function AddNewStudentAcademicYear() {
         fetchStudents();
     }, []);
 
-    function handleClick(id)
-    {
-        navigate(`/academicyearform/${id}`);
+    function handleClick(id) {
+        navigate(`/clerk/academicyearform/${id}`);
     }
 
     useEffect(() => {
@@ -81,7 +89,7 @@ function AddNewStudentAcademicYear() {
                             <h5 className="card-title mb-3 text-dark">विद्यार्थी शोधा</h5>
                             <div className="d-flex align-items-center">
                                 <div className="flex-grow-1 d-flex flex-wrap">
-                                    
+
                                     <div className="me-2 mb-2" style={{ width: '23%' }}>
                                         <input
                                             value={studentName}
@@ -145,7 +153,7 @@ function AddNewStudentAcademicYear() {
                         <div className="card border-0 rounded-0" style={{ boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
                             <div className="card-header bg-primary text-white p-2">
                                 <h3 className="mb-0 fw-bold fs-6 text-center">
-                                विद्यार्थ्यांची यादी
+                                    विद्यार्थ्यांची यादी
                                 </h3>
                             </div>
                             <div className="card-body p-0">
@@ -169,10 +177,10 @@ function AddNewStudentAcademicYear() {
                                                         <td>{student.fatherName}</td>
                                                         <td>{student.motherName}</td>
                                                         <td>
-                                                            <button 
+                                                            <button
                                                                 className="btn btn-sm btn-outline-primary"
                                                                 style={{ fontSize: '0.8rem' }}
-                                                                onClick={()=>handleClick(student.id)}
+                                                                onClick={() => handleClick(student.id)}
                                                             >
                                                                 माहिती नोंदवा
                                                             </button>

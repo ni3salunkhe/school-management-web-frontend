@@ -40,6 +40,19 @@ function NavBarS({ role }) {
                   <Nav.Link as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
                   <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
                   <Nav.Link as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
+                  <Dropdown as={Nav.Item} className="me-2">
+                    <Dropdown.Toggle as={Nav.Link} style={{ color: "white" }}>
+                      स्थान माहिती प्रविष्ट करणे
+                      
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item as={Link} to={"/developer/state"}>राज्य प्रविष्ट करणे</Dropdown.Item>
+                      <Dropdown.Item as={Link} to={"/developer/district"}>जिल्हा  प्रविष्ट करणे</Dropdown.Item>
+                      <Dropdown.Item as={Link} to={"/developer/tehsil"}>तालुका  प्रविष्ट करणे</Dropdown.Item>
+                      <Dropdown.Item as={Link} to={"/developer/village"}>गाव किंवा शहर प्रविष्ट करणे</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+
                 </Nav>}
                 {/* <Form className="me-2 d-none d-lg-block position-relative">
                   <Form.Control
@@ -92,7 +105,7 @@ function NavBarS({ role }) {
                     <Dropdown.Item href="#profile"><FiUsers className="me-2" /> Profile</Dropdown.Item>
                     <Dropdown.Item href="#settings"><FiSettings className="me-2" /> Settings</Dropdown.Item>
                     <Dropdown.Divider />
-                    <Dropdown.Item onClick={handleLogout} ><FiLogOut  className="me-2" /> Logout</Dropdown.Item>
+                    <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> Logout</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </div>

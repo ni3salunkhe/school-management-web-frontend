@@ -30,7 +30,7 @@ function StudentList() {
         setLoading(true);
         const params = { udise, ...searchParams };
         
-        axios.get(`http://localhost:8080/student/byudise/${udise}`,{
+        axios.get(`http://localhost:8080/student/byclass/${teacherId}`,{
             headers: {
               "Authorization": `Bearer ${sessionStorage.getItem('token')}`
             }
@@ -38,6 +38,8 @@ function StudentList() {
             .then(response => {
                 setResults(response.data);
                 setLoading(false);
+                console.log(response.data);
+                
             })
             .catch((error) => {
                 console.error('Error fetching students', error);
@@ -53,9 +55,12 @@ function StudentList() {
 
     useEffect(() => {
         apiService.getbyid("staff/getbyudise/", udise).then((response) => {
-            setTeachers(response.data);
+            const allStaff = response.data;
+            const onlyTeachers = allStaff.filter((staff) => staff.role.toLowerCase() === "teacher");
+            setTeachers(onlyTeachers);
+            console.log(onlyTeachers);
         });
-    }, []);
+    }, [udise]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
