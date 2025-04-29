@@ -37,8 +37,7 @@ function App() {
 
   return (
     <div>
-
-      <div style={{ "minHeight": "45px" }}></div>
+      {!isLoginPage && <div style={{ minHeight: "45px" }}></div>}
        <Routes>
         <Route path="/" element={<Login />} />
         <Route

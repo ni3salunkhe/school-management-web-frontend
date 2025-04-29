@@ -9,7 +9,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
     const [selectedStudents, setSelectedStudents] = useState([])
     const [errors, setErrors] = useState({})
     const [existingAttendance, setExistingAttendance] = useState([])
-    
+
     const now = new Date()
     const day = now.toISOString().split('T')[0]
     const monthnyear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -24,9 +24,12 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
         try {
             const response = await apiService.getdata(`student/byclass/${selectedClass}`)
             if (Array.isArray(response.data)) {
-                
+
                 setStudents(response.data)
             }
+            const standard = await apiService.getdata(`classteacher/getbyid/${selectedClass}`)
+            console.log(standard);
+
         } catch (error) {
             console.error("Error fetching students:", error)
         }
@@ -38,7 +41,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
                 ? prev.filter(id => id !== registerNumber)
                 : [...prev, registerNumber]
         )
-        
+
     }
 
     const handleSelectAll = () => {
