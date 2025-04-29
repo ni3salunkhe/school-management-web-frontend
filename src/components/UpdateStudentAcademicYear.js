@@ -3,6 +3,7 @@ import apiService from '../services/api.service';
 import { BiSearch } from 'react-icons/bi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 
 function UpdateStudentAcademicYear() {
@@ -13,26 +14,72 @@ function UpdateStudentAcademicYear() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listOfStudents, setListOfStudents] = useState([]);
+  const [teacher, setTeacher] = useState({});
+  const [error, setError] = useState(null); // New state for error handling
 
-  const udise = 12345678093;
-  const teacherId = 1;
   const navigate = useNavigate();
+  
+  // Get token data
+  const token = sessionStorage.getItem('token');
+  let udise, username;
+  
+  try {
+    const decoded = jwtDecode(token);
+    udise = decoded?.udiseNo;
+    username = decoded?.username;
+  } catch (error) {
+    console.error("Token decoding error:", error);
+  }
 
+  // Create API instance
+  const api = axios.create({
+    baseURL: 'http://localhost:8080',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  // Fetch teacher data first
+  useEffect(() => {
+    if (udise && username) {
+      setLoading(true);
+      apiService.getdata(`staff/getbyudiseandusername/${udise}/${username}`)
+        .then((response) => {
+          setTeacher(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching teacher data:", error);
+          setError("Failed to load teacher data. Please try again.");
+          setLoading(false);
+        });
+    }
+  }, [udise, username]);
+
+  // Fetch students after teacher data is available
   const fetchStudents = (searchParams = {}) => {
+    if (!teacher.id) {
+      console.log("Teacher ID not available yet");
+      return;
+    }
+    
     setLoading(true);
     const params = { udise, ...searchParams };
 
-    axios
-      .get(`http://localhost:8080/student/byclass/search/${teacherId}`, { params })
+    // Use the baseURL from api instance - don't repeat the full URL
+    api.get(`/student/byclass/search/${teacher.id}`, { params })
       .then((response) => {
+        console.log("Student data received:", response.data);
         setResults(response.data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Error fetching students', error);
+        console.error('Error fetching students:', error);
+        setError("Failed to load student data. Please check your connection and try again.");
         setLoading(false);
       });
   };
+
 
   const toggleStudentSelection = (id) => {
     if (listOfStudents.includes(id)) {
@@ -55,24 +102,24 @@ function UpdateStudentAcademicYear() {
     setListOfStudents([]);
   }
 
-  function alldataset()
-  {
-    if(listOfStudents.length>0)
-    {
-      navigate('/updateacademicyearall',{ state: { selectedStudents: listOfStudents } })
+  function alldataset() {
+    if (listOfStudents.length > 0) {
+      navigate('/teacher/updateacademicyearall', { state: { selectedStudents: listOfStudents } })
     }
-    else{
+    else {
       alert("कृपया विद्यार्थी निवडा तुम्ही विद्यार्थी निवडलेले नाहीत ");
     }
-   
+
   }
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (teacher.id) {
+      fetchStudents();
+    }
+  }, [teacher.id]);
 
   function handleClick(id) {
-    navigate(`/updateacademicyearform/${id}`);
+    navigate(`/teacher/updateacademicyearform/${id}`);
   }
 
   useEffect(() => {
@@ -95,23 +142,11 @@ function UpdateStudentAcademicYear() {
       }
     }, 500);
 
-   
+
     return () => clearTimeout(timeout);
 
-   
+
   }, [surName, studentName, fatherName, motherName]);
-
-
-  useEffect(()=>{
-    // apiService.getbyid("student/byclass/",teacherId).then((response)=>{
-    //   console.log(response.data);
-    // })
-
-    axios.get(`http://localhost:8080/student/byclass/${teacherId}`).then((results)=>{
-      console.log(results.data);
-      
-    })
-  },[])
   return (
     <div className="container py-4">
       <div className="row justify-content-center">
@@ -196,15 +231,15 @@ function UpdateStudentAcademicYear() {
                 <div className="d-flex justify-content-between align-items-center">
                   <h3 className="mb-0 fw-bold fs-6">विद्यार्थ्यांची यादी</h3>
                   <div className="d-flex">
-                    <button 
-                      onClick={selectAllStudents} 
+                    <button
+                      onClick={selectAllStudents}
                       disabled={results.length === 0}
                       className="btn btn-sm btn-light me-2 d-flex align-items-center"
                       style={{ fontSize: '0.8rem', fontWeight: '500' }}
                     >
                       <i className="bi bi-check-all me-1"></i> सर्व निवडा
                     </button>
-                    <button 
+                    <button
                       onClick={clearAllSelections}
                       className="btn btn-sm btn-outline-light me-2 d-flex align-items-center"
                       style={{ fontSize: '0.8rem', fontWeight: '500' }}
@@ -212,11 +247,11 @@ function UpdateStudentAcademicYear() {
                       <i className="bi bi-x-circle me-1"></i> निवड रद्द करा
                     </button>
                     <button
-                    onClick={alldataset}
-                     className="btn btn-sm btn-outline-light  d-flex align-items-center"
-                     style={{ fontSize: '0.8rem', fontWeight: '500' }}
+                      onClick={alldataset}
+                      className="btn btn-sm btn-outline-light  d-flex align-items-center"
+                      style={{ fontSize: '0.8rem', fontWeight: '500' }}
                     >
-                      सर्वांची माहिती संपादित करा 
+                      सर्वांची माहिती संपादित करा
                     </button>
                   </div>
                 </div>

@@ -69,7 +69,7 @@ function ReportsShows() {
             apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
                 .then((response) => {
                     console.log(response.data);
-                    
+
                     if (response.data === true) {
                         navigate(`/clerk/reports/download/${id}`);
                     } else {
@@ -80,8 +80,8 @@ function ReportsShows() {
                     console.error("Error while checking data presence:", error);
                     navigate(`/clerk/reports/${reportType}/${id}`);
                 });
-        } 
-        else if(reportType === "lc-new") {
+        }
+        else if (reportType === "lc-new") {
             apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
                 .then((response) => {
                     if (response.data === true) {
@@ -95,11 +95,17 @@ function ReportsShows() {
                     navigate(`/clerk/reports/${reportType}/${id}`);
                 });
         }
+        else if (reportType === "bonafide") {
+            navigate(`/clerk/reports/bonfide/${id}`)
+        }
+        else if (reportType === "attendance") {
+            navigate(`/clerk/reports/prsenty/${id}`)
+        }
         else {
             navigate(`/clerk/reports/${reportType}/${id}`);
         }
     };
-    
+
 
     const reportOptions = [
         { name: 'lc-old', title: 'शाळा सोडल्याचा दाखला (जुना फॉरमॅट)', icon: '📄' },
@@ -152,7 +158,7 @@ function ReportsShows() {
                                 <div className="p-3 bg-light rounded">
                                     <span className="fw-bold text-primary d-inline-block w-25">वर्ग:</span>
                                     <span>
-                                        {academicData?.standard?.standard || 'माहिती नाही'} 
+                                        {academicData?.standard?.standard || 'माहिती नाही'}
                                         {academicData?.division?.name ? ` ${academicData.division.name}` : ''}
                                     </span>
                                 </div>

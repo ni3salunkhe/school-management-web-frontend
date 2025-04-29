@@ -296,9 +296,6 @@ function SingleStudentInfo() {
                     <div className="card-body p-4">
                         <div className="row mb-4 justify-content-center">
                             <div className="col-md-4 text-center mb-4">
-                                <div style={styles.profileCircle}>
-                                    <FaUser/>
-                                </div>
                                 <h2 className="mb-1 fw-bold text-primary">{student.studentName} {student.surName}</h2>
                                 <p className="text-muted mb-2">रोल नंबर: {student.registerNumber}</p>
                                 <p className="badge bg-primary px-3 py-2 fs-6">

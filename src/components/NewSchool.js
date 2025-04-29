@@ -13,6 +13,10 @@ const NewSchool = () => {
     const [existingEmail, setExistingEmail] = useState([]);
     const [existingPhone, setExistingPhone] = useState([]);
 
+    const isEnglish = (text) => {
+        return /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(text);
+    };
+
     useEffect(() => {
 
 
@@ -48,7 +52,7 @@ const NewSchool = () => {
                     console.warn("No data found");
                 } else {
                     setAllSchool(school);
-                    console.log(school);
+                    // console.log(school);
                 }
 
             } catch (error) {
@@ -86,11 +90,20 @@ const NewSchool = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
+
         setFormData(prevState => ({
             ...prevState,
             [name]: value
 
         }));
+
+        if (name == 'schoolUdise' && !/^[0-9]*$/.test(value)) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                schoolUdise: 'कृपया केवळ इंग्रजी अंक प्रविष्ट करा (Please use only English numbers)'
+            }));
+            return;
+        }
 
         if (name == 'username' && value) {
             if (existingUsers.includes(value)) {
@@ -153,7 +166,7 @@ const NewSchool = () => {
             if (existingPhone.includes(value)) {
                 setErrors({
                     ...errors,
-                    phone: 'हे फोन नंबर आधीच अस्तित्वात आहे'
+                    phone: 'हा फोन नंबर आधीच अस्तित्वात आहे'
                 });
             } else {
                 // Clear error if fixed
@@ -163,8 +176,37 @@ const NewSchool = () => {
             }
         }
 
+        if(name=='phone' && !/^[0-9]*$/.test(value))
+            {
+                setErrors({
+                    ...errors,
+                    phone:'कृपया फोन नंबर इंग्रजी नंबर प्रविष्ट करा'
+                })
+            }
+
+        if (['username', 'email', 'password', 'confirmPassword'].includes(name)) {
+            if (value && !isEnglish(value)) {
+                setErrors(prevErrors => ({
+                    ...prevErrors,
+                    [name]: 'कृपया केवळ इंग्रजी अक्षरे वापरा (Please use only English characters)'
+                }));
+            } else {
+                // Clear error if fixed
+                const updatedErrors = { ...errors };
+                delete updatedErrors[name];
+                setErrors(updatedErrors);
+            }
+        }
+
+        if (name == 'phone' && !/^[6-9]\d{9}$/.test(value)) {
+            setErrors({
+                ...errors,
+                phone: 'फोन नंबर दहा अंकी प्रविष्ट करा'
+            })
+        }
     };
 
+    // console.log(formData);
     const validateForm = () => {
         const newErrors = {};
 
@@ -184,8 +226,13 @@ const NewSchool = () => {
         }
 
         // Username validation
+
         if (!formData.phone) {
             newErrors.phone = 'फोन नंबर प्रविष्ट करणे आवश्यक आहे';
+        }
+
+        if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            newErrors.phone = 'फोन नंबर दहा अंकी प्रविष्ट करा '
         }
 
         // Username validation
@@ -211,6 +258,13 @@ const NewSchool = () => {
         // if (!formData.role) {
         //     newErrors.role = 'कृपया एक भूमिका निवडा';
         // }
+
+        const englishOnlyFields = ['username', 'email', 'password', 'confirmPassword'];
+        englishOnlyFields.forEach(field => {
+            if (formData[field] && !isEnglish(formData[field])) {
+                newErrors[field] = 'कृपया केवळ इंग्रजी अक्षरे वापरा (Please use only English characters)';
+            }
+        });
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -238,29 +292,39 @@ const NewSchool = () => {
                     userData.append('logo', formData.logo);
                 }
 
-                
+
 
                 // Send the request
                 try {
-                    console.log(userData); // Check data before sending
+                    // console.log(userData); // Check data before sending
+                    // console.log(formData);
+
                     await apiService.post('school/', userData);
                     setSubmitStatus({
                         type: 'success',
-                        message: 'User account created successfully!'
+                        message: 'शाळेचे खाते यशस्वीरीत्या तयार झाले!'
                     });
+
+                    setTimeout(() => {
+                        setSubmitStatus(null);
+                    }, 6000);
                 } catch (error) {
                     console.error(error);
                     setSubmitStatus({
                         type: 'error',
-                        message: 'There was an error during submission.'
+                        message: 'शाळेचे खाते तयार करताना काही त्रुटी आली '
                     });
+
+                    setTimeout(() => {
+                        setSubmitStatus(null);
+                    }, 60000);
                 }
 
                 //  Reset form after successful submission
                 setFormData({
                     username: '',
                     email: '',
-                    schoolUdise:'',
+                    schoolUdise: '',
                     schoolName: '',
                     orgName: '',
                     phone: '',
@@ -295,7 +359,7 @@ const NewSchool = () => {
                                 <div className="card mb-3 border-0 bg-light">
                                     <div className="card-body p-3">
                                         <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold">
-                                    <i className="bi bi-info-circle"></i>
+                                            <i className="bi bi-info-circle"></i>
 
 
                                             शाळेची माहिती
@@ -374,9 +438,9 @@ const NewSchool = () => {
                                 <div className="card mb-3 border-0 bg-light">
                                     <div className="card-body p-3">
                                         <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold">
-                                        <i className="bi bi-person-fill"></i>
+                                            <i className="bi bi-person-fill"></i>
 
-                                        मुख्याध्यापकांची माहिती
+                                            मुख्याध्यापकांची माहिती
                                         </h5>
                                         <Row>
 
@@ -448,15 +512,15 @@ const NewSchool = () => {
                                                     </Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
-                                        </Row>  
+                                        </Row>
                                     </div>
                                 </div>
                                 <div className="card mb-3 border-0 bg-light">
                                     <div className="card-body p-3">
                                         <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold">
 
-                                        <i className="bi bi-file-earmark-text"></i>
-                                        इतर माहिती
+                                            <i className="bi bi-file-earmark-text"></i>
+                                            इतर माहिती
                                         </h5>
                                         <Row>
                                             <Col>

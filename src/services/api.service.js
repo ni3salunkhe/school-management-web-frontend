@@ -3,7 +3,14 @@ import axios from "axios";
 
 const apiService = {
   url: "http://localhost:8080/",
-
+  
+   api : axios.create({
+    baseURL: 'http://localhost:8080',
+    headers: {
+      'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+    }
+  })
+  ,
   postlogin(endpoint, data) {
     return axios.post(`${this.url}${endpoint}`, data)
   },

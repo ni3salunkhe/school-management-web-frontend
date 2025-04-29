@@ -130,12 +130,13 @@ const Subscription = () => {
                 console.log(flag)
                 if(flag === "renew"){
                     await apiService.post("api/subscription/renew", userData);
-                    alert("subscription renew hogaya lgata hein" + formData);
+                    alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
                     setButtonText("मंजूर कर");
                     setFlag("");
                 }else{
                     await apiService.post("api/subscription/create", formData);
-                    alert("Bhai data gaya hoga dekh ek baar" + formData)
+                    // alert("Bhai data gaya hoga dekh ek baar" + formData)
+                    alert("subscription यशस्वीरीत्या नोंदवली आहे!");
                 }
             } catch (error) {
                 console.log(error)

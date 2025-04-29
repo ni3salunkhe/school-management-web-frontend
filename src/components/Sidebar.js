@@ -63,7 +63,7 @@ const Sidebar = ({sidebarItems, role}) => {
       <div
         className="d-none d-md-block overflow-auto"
         style={{
-          width: '250px',
+          width: '300px',
           backgroundColor: "white",
           position: 'sticky',
           top: '56px',

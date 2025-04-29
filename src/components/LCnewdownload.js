@@ -13,6 +13,7 @@ function LCnewdownload() {
     const [error, setError] = useState(null);
     const [isduplicate, setIsDuplicate] = useState(false); // Initialize with false
     const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+    const [date,setDate]=useState('');
 
     const A4_WIDTH_PX = 794;
     const A4_HEIGHT_PX = 900;
@@ -28,7 +29,8 @@ function LCnewdownload() {
                     // Assuming printed: true means it's NOT a duplicate (original)
                     setIsDuplicate(response.data.newlcprinted);
                     console.log(isduplicate);
-
+                    const date=new Date();
+                    setDate(date);
                 } else {
                     setError("No data received from server");
                 }
@@ -546,7 +548,7 @@ function LCnewdownload() {
                             <div className="mt-3">
                                 <p>वरील माहिती शालेय दैनिक मुल्यांकनानुसार आहे.</p>
                                 <div className="d-flex justify-content-between mt-3">
-                                    <p>दिनांक:{leavingInfo.lcDate}</p>
+                                    <p>दिनांक:{date.getFullYear()}-{date.getMonth()}-{date.getDate()}</p>
                                     <p>वर्गशिक्षक</p>
                                     <p>शिक्षक</p>
                                     <p>मुख्याध्यापक</p>
