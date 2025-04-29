@@ -60,7 +60,6 @@ const Login = () => {
         }
 
         // Check subscription for non-developer users
-        alert(decoded.udiseNo)
         const isSubscriptionValid = await checkSubscription(decoded.udiseNo);
       
         if (!isSubscriptionValid) {

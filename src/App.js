@@ -1,37 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import HeadmasterDashboard from './pages/HeadmasterDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import ClerkDashboard from './pages/ClerkDashboard';
-import NavBarS from './components/NavBarS';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Attendance from './components/Attendance';
 import Layout from './components/Layout';
 import Developer from './pages/Developer';
-import AddSchoolInfo from './components/AddSchoolInfo';
-import AddStaffMember from './components/AddStaffMember';
-import AddClass from './components/AddClass';
-import AddClassTeacher from './components/AddClassTeacher';
-import Pdfgenerator from './components/Pdfgenerator';
-import AddStudent from './components/AddStudent';
-import AddNewStudentAcademicYear from './components/AddNewStudentAcademicYear';
-
-import AddNewStudentAcademicYearForm from './components/AddNewStudentAcademicYearForm';
-import UpdateStudentAcademicYearForm from './components/UpdateStudentAcademicYearForm';
-import UpdateStudentAcademicYear from './components/UpdateStudentAcademicYear';
-import UpdateStudentAllAcademic from './components/UpdateStudentAllAcademic';
-import LColdForm from './components/LColdForm';
-import StudentList from './components/StudentList';
-import ReportsShows from './components/ReportsShows';
-import LCdownload from './components/LCdownload';
-import LCnewdownload from './components/LCnewdownload';
-import BonafideCertificate from './components/BonafideCertificate';
-import PresentyCertificate from './components/PresentyCertificate';
-import SingleStudentInfo from './components/SingleStudentInfo';
+import { authService } from './services/authService';
 
 function App() {
+
+  useEffect(()=>{
+    const authenticated=authService.isAuthenticated();
+  })
+
   const location = useLocation();
   const isLoginPage = location.pathname === '/';
   const componentMap = ['StudentManagement']
@@ -55,16 +39,6 @@ function App() {
     <div>
 
       <div style={{ "minHeight": "45px" }}></div>
-
-      
-      
-      {/* {!isLoginPage && (
-        <>
-          <NavBarS />
-          <div style={{ "minHeight": "45px" }}></div>
-        </>
-      )} */}
-
        <Routes>
         <Route path="/" element={<Login />} />
         <Route
