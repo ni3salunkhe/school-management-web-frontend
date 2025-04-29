@@ -7,8 +7,11 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
     const id = jwtDecode(sessionStorage.getItem('token'))?.id;
     const [students, setStudents] = useState([])
     const [selectedStudents, setSelectedStudents] = useState([])
+    const [standard,setStandard]=useState([]);
     const [errors, setErrors] = useState({})
     const [existingAttendance, setExistingAttendance] = useState([])
+    
+    console.log(selectedClass);
     
     const now = new Date()
     const day = now.toISOString().split('T')[0]
@@ -26,11 +29,18 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
             if (Array.isArray(response.data)) {
                 
                 setStudents(response.data)
+                
             }
+            const res1 = await apiService.getdata(`classteacher/getbyid/${selectedClass}`)
+            setStandard(res1.data.standardMaster.standard+" "+res1.data.division.name);
+            
         } catch (error) {
             console.error("Error fetching students:", error)
         }
     }
+    console.log(students);
+   ;
+    
 
     const handleStudentSelection = (registerNumber) => {
         setSelectedStudents(prev =>
@@ -120,7 +130,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
                                 </td>
                                 <td>{student.studentName}</td>
                                 <td>{student.registerNumber}</td>
-                                <td>{student.className || '6A'}</td>
+                                <td>{standard || 'unavailable'}</td>
                                 <td>
                                     {isSelected
                                         ? <span className="text-danger fw-bold">❌ अनुपस्थित</span>
