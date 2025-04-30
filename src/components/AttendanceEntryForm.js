@@ -27,7 +27,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
         try {
             const response = await apiService.getdata(`student/byclass/${selectedClass}`)
             if (Array.isArray(response.data)) {
-                
+
                 setStudents(response.data)
                 
             }
@@ -48,7 +48,7 @@ const AttendanceEntryForm = ({ udiseNo, selectedClass }) => {
                 ? prev.filter(id => id !== registerNumber)
                 : [...prev, registerNumber]
         )
-        
+
     }
 
     const handleSelectAll = () => {
