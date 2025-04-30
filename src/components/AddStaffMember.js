@@ -3,6 +3,7 @@ import { BiUser, BiIdCard, BiEnvelope, BiPhone, BiLockAlt, BiBook, BiBriefcase }
 import '../styling/formstyle.css'
 import apiService from '../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 function AddStaffMember() {
     const [formData, setFormData] = useState({
@@ -63,9 +64,9 @@ function AddStaffMember() {
 
         // Username validation
         if (name === "username") {
-            if (!value) {
+            if (!value.trim()) {
                 newErrors.username = 'वापरकर्तानाव प्रविष्ट करा';
-            } else if (!isEnglish(value)) {
+            } else if (!isEnglish(value.trim())) {
                 newErrors.username = "कृपया केवळ इंग्रजी अक्षरे आणि संख्या प्रविष्ट करा";
             }
             else if (currentStaff.some(staff => staff.username === value.trim())) {
@@ -75,9 +76,9 @@ function AddStaffMember() {
 
         // Password validation
         if (name === "password") {
-            if (!value) {
+            if (!value.trim()) {
                 newErrors.password = 'पासवर्ड प्रविष्ट करा';
-            } else if (!isEnglish(value)) {
+            } else if (!isEnglish(value.trim())) {
                 newErrors.password = "कृपया केवळ इंग्रजी अक्षरे आणि संख्या प्रविष्ट करा";
             }
         }
@@ -140,7 +141,12 @@ function AddStaffMember() {
             const payload = { ...formData, school };
             console.log("Form submitted:", payload);
             apiService.postdata("staff/", payload).then((response) => {
-                alert("माहिती यशस्वीपणे प्रणालीमध्ये समाविष्ट करण्यात आली आहे.");
+                Swal.fire({
+                    title: "माहिती यशस्वीपणे प्रणालीमध्ये समाविष्ट करण्यात आली आहे...!",
+                    icon: "success",
+                    draggable: true
+                });
+            
             })
             setFormData({
                 fname: '',

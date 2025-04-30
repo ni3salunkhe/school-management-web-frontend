@@ -4,6 +4,7 @@ import { BsGear } from 'react-icons/bs'
 import { FaBox, FaCalendarAlt, FaCog } from 'react-icons/fa'
 import apiService from '../services/api.service'
 import { format, addYears, subDays } from 'date-fns';
+import Swal from 'sweetalert2'
 
 const Subscription = () => {
     const [schools, setSchools] = useState([])
@@ -138,13 +139,23 @@ const Subscription = () => {
                 console.log(flag)
                 if (flag === "renew") {
                     await apiService.post("api/subscription/renew", userData);
-                    alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
+                    // alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
+                    Swal.fire({
+                        title: "subscription नूतनीकरण यशस्वीरीत्या झाले आहे!",
+                        icon: "success",
+                        draggable: true
+                    });
                     setButtonText("मंजूर कर");
                     setFlag("");
                 } else {
                     await apiService.post("api/subscription/create", formData);
                     // alert("Bhai data gaya hoga dekh ek baar" + formData)
-                    alert("subscription यशस्वीरीत्या नोंदवली आहे!");
+                    // alert("subscription यशस्वीरीत्या नोंदवली आहे!");
+                    Swal.fire({
+                        title: "subscription यशस्वीरीत्या नोंदवली आहे!",
+                        icon: "success",
+                        draggable: true
+                    });
                 }
             } catch (error) {
                 console.log(error)
@@ -192,7 +203,7 @@ const Subscription = () => {
                                                 value={formData.udiseNumber}
                                                 isInvalid={!!errors.udiseNumber}
                                             >
-                                                <option value="">शाळेचा Udise क्रमांक निवडा</option>
+                                                <option value="">शाळा निवडा</option>
                                                 {Array.isArray(schools) && schools.map((school) => (
                                                     <option key={school.udiseNo} value={school.udiseNo}>{school.schoolName}</option>
                                                 ))}

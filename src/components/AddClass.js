@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 import Next from './Next';
 
 function AddClass() {
@@ -159,13 +160,16 @@ function AddClass() {
         };
 
         apiService.postdata("Division/", divisionPayload)
-            .then(() => {
-                alert("तुकड्या यशस्वीरीत्या नोंद केल्या गेल्या आहेत");
+            .then((response) => {
+                Swal.fire({
+                    title: "तुकड्या यशस्वीरीत्या नोंद केल्या गेल्या आहेत..!",
+                    icon: "success",
+                    draggable: true
+                });
                 setDivisionName({ division: '' });
+                setIsShows(false);
+
                 return apiService.getbyid("Division/getbyudise/", udiseNo);
-            })
-            .then(response => {
-                setAllDivision(response.data);
             })
             .catch(error => {
                 console.error("Error adding divisions:", error);

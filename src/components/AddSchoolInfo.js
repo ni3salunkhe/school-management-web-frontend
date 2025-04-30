@@ -4,6 +4,7 @@ import { AiOutlineMobile } from 'react-icons/ai'; // Unused, but kept if needed 
 import { BiUpload, BiPhone, BiInfoCircle, BiGlobeAlt, BiMap, BiListUl, BiMobile, BiImageAdd, BiIdCard } from 'react-icons/bi';
 import '../styling/formstyle.css';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 import Next from './Next';
 
 
@@ -131,7 +132,7 @@ function AddSchoolInfo() {
           boardDivision: fetchedSchoolData?.boardDivision || '',
           boardIndexNo: fetchedSchoolData?.boardIndexNo || '',
           schoolApprovalNo: fetchedSchoolData?.schoolApprovalNo || '',
-          headMasterPassword:fetchedSchoolData.headMasterPassword || ''
+          headMasterPassword: fetchedSchoolData.headMasterPassword || ''
           // Don't reset logo here if already selected by user
         }));
 
@@ -232,9 +233,7 @@ function AddSchoolInfo() {
       if (newValue.length > 0 && newValue.length < 6) {
         fieldErrors.pincode = 'पिनकोड ६ अंकी असावा';
       }
-      // The final validation happens in validateForm
     }
-    // --- End Input Specific Validation ---
 
     setErrors(fieldErrors); // Update errors immediately for feedback
 
@@ -299,9 +298,7 @@ function AddSchoolInfo() {
       setIsLoading(true); // Show loading indicator during submission
       const submissionData = new FormData(); // Use FormData for file upload
 
-      // Prepare the schoolDto object matching backend expectations
       const schoolDto = {
-        // Include fields that might have changed or are required
         udiseNo: udiseNo,
         schoolName: formData.schoolName, // Include read-only fields if backend expects them
         schoolSlogan: formData.schoolSlogan,
@@ -318,9 +315,7 @@ function AddSchoolInfo() {
         schoolApprovalNo: formData.schoolApprovalNo,
         headMasterMobileNo: formData.headMasterMobileNo,
         headMasterPassword: formData.password,
-        // IMPORTANT: Remove hardcoded password in production!
-        // This should be handled via a separate, secure mechanism.
-        // headMasterPassword: '123456', // Avoid sending password like this
+       
       };
       // Append the JSON string of schoolDto
       submissionData.append('schoolDto', JSON.stringify(schoolDto));
@@ -331,19 +326,20 @@ function AddSchoolInfo() {
       }
 
       console.log(formData);
-      
 
       apiService
-        .put(`school/${udiseNo}`, submissionData) // Assuming URL is like this
-        // .putdata("school/", submissionData, udiseNo) // Or use your original signature if correct
+        .put(`school/${udiseNo}`, submissionData)
         .then((response) => {
-          alert('School info saved successfully!');
-          setSchoolData(response.data); 
+          // alert('School info saved successfully!');
+          setSchoolData(response.data);
           setIsShowsForm(true);
           const isComplete = isSchoolDataComplete(response.data);
           setIsShowsForm(!isComplete);
-          // Optionally reset the logo field in formData if needed
-          // setFormData(prev => ({...prev, logo: null}));
+          Swal.fire({
+            title: "शाळेची माहिती यशस्वीरीत्या संपादित केली आहे ..!",
+            icon: "success",
+            draggable: true
+          });
         })
         .catch((err) => {
           console.error('Error submitting form:', err);
@@ -353,8 +349,6 @@ function AddSchoolInfo() {
         .finally(() => {
           setIsLoading(false); // Hide loading indicator
         });
-
-      // Don't reset the form here immediately. Let the successful response update the state.
     } else {
       console.log("Validation Errors:", errors);
       alert("कृपया फॉर्ममधील त्रुटी तपासा."); // Please check errors in the form.
@@ -809,7 +803,9 @@ function AddSchoolInfo() {
                     </table>
                   </div>
                 </div>
-
+                <div>
+                  <button className='btn btn-secondary' onClick={()=>{setIsShowsForm(true)}}>शाळेची माहिती बदला</button>
+                </div>
               </div>
               <Next classname={'btn btn-primary float-end'} path={'/headmaster/class'} placeholder={'पुढे चला'}></Next>
             </div>
