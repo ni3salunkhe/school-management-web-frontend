@@ -22,7 +22,7 @@ function AddStaffMember() {
     const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const isEnglish = (text) => {
         // Allows English letters, numbers, and common special characters
-        return /^[A-Za-z0-9_.-]*$/.test(text);
+        return /^[A-Za-z0-9_.-@#$%&*]*$/.test(text);
     };
 
     useEffect(() => {

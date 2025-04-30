@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 function UpdateStudentAcademicYearForm() {
   const { id } = useParams();
 
-  console.log(id);
+  // console.log(id);
   const api = axios.create({
     baseURL: 'http://localhost:8080',
     headers: {
@@ -61,13 +61,13 @@ function UpdateStudentAcademicYearForm() {
         schoolUdiseNo: schoolUdiseNo
       }
     }).then((response) => {
-      console.log(response.data);
+      // console.log(response.data);
       setAcademicData(response.data);
     })
   }, []);
-
-  console.log(teachers);
-  console.log(classTeacherData);
+  
+  console.log(academicdata);
+  
 
   useEffect(() => {
     if (formData.division && formData.standardId) {
@@ -144,7 +144,7 @@ function UpdateStudentAcademicYearForm() {
         standardId: '',
         academicYear: ''
       })
-      console.log(payload);
+      // console.log(payload);
 
       apiService.putdata('academic/update-status/', payload, academicdata.id).then((response) => {
         alert("Data Added Succesfully");

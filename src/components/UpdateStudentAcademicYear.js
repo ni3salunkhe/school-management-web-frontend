@@ -59,7 +59,7 @@ function UpdateStudentAcademicYear() {
   // Fetch students after teacher data is available
   const fetchStudents = (searchParams = {}) => {
     if (!teacher.id) {
-      console.log("Teacher ID not available yet");
+      // console.log("Teacher ID not available yet");
       return;
     }
     
@@ -69,7 +69,7 @@ function UpdateStudentAcademicYear() {
     // Use the baseURL from api instance - don't repeat the full URL
     api.get(`/student/byclass/search/${teacher.id}`, { params })
       .then((response) => {
-        console.log("Student data received:", response.data);
+        // console.log("Student data received:", response.data);
         setResults(response.data);
         setLoading(false);
       })

@@ -303,16 +303,17 @@ function AddSchoolInfo() {
         schoolSlogan: formData.schoolSlogan,
         sansthaName: formData.sansthaName, // Include read-only fields if backend expects them
         medium: formData.medium,
-        state: formData.state ? { id: parseInt(formData.state) } : null, // Send object if backend expects it
-        district: formData.district ? { id: parseInt(formData.district) } : null,
-        tehsil: formData.tehsil ? { id: parseInt(formData.tehsil) } : null,
-        village: formData.village ? { id: parseInt(formData.village) } : null,
+        state: formData.state, // Send object if backend expects it
+        district: formData.district,
+        tehsil: formData.tehsil,
+        village: formData.village,
         pinCode: formData.pincode, // Map form 'pincode' to 'pinCode' for DTO
         board: formData.board,
         boardDivision: formData.boardDivision,
         boardIndexNo: formData.boardIndexNo,
         schoolApprovalNo: formData.schoolApprovalNo,
         headMasterMobileNo: formData.headMasterMobileNo,
+        
         // IMPORTANT: Remove hardcoded password in production!
         // This should be handled via a separate, secure mechanism.
         // headMasterPassword: '123456', // Avoid sending password like this
@@ -326,16 +327,15 @@ function AddSchoolInfo() {
         submissionData.append('logo', formData.logo);
       }
 
-      // Send data to backend (ensure API service handles PUT with FormData correctly)
-      // Make sure the URL construction in apiService.putdata is correct (e.g., /school/{udiseNo})
+      console.log(formData);
+      
+
       apiService
-        .putdata(`school/${udiseNo}`, submissionData) // Assuming URL is like this
-        // .putdata("school/", submissionData, udiseNo) // Or use your original signature if correct
+        .putdata(`school/`, submissionData, udiseNo) 
         .then((response) => {
           alert('School info saved successfully!');
-          // Refresh data after successful save
-          setSchoolData(response.data); // Update local state with response
-          setIsShowsForm(true); // Re-evaluate if form should be shown based on new data
+          setSchoolData(response.data); 
+          setIsShowsForm(true);
           const isComplete = isSchoolDataComplete(response.data);
           setIsShowsForm(!isComplete);
           // Optionally reset the logo field in formData if needed
@@ -372,14 +372,6 @@ function AddSchoolInfo() {
       {isShowsForm ? (
         // --- FORM VIEW ---
         <div className="container py-3">
-          {/* (Your existing Form JSX structure goes here) */}
-          {/* Ensure all input 'value' and 'onChange' props use the 'formData' and 'handleChange' */}
-          {/* Ensure all select 'value' props use the correct IDs from 'formData' */}
-          {/* Ensure disabled logic for selects uses 'formData.state', 'formData.district' etc. */}
-          {/* Ensure error messages are displayed correctly using the 'errors' state object */}
-
-          {/* ---- PASTE YOUR FORM JSX HERE ---- */}
-          {/* Example snippets to check: */}
           <div className="container py-3">
             <div className="row justify-content-center">
               <div className="col-lg-11">
