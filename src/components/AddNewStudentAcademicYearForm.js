@@ -208,9 +208,11 @@ function AddNewStudentAcademicYearForm() {
                                     </button>
                                 </div>
                                 
+                                
                                 {submitted && (
                                     <div className="mt-3 text-success">विद्यार्थ्याची शैक्षणिक माहिती यशस्वीरित्या जतन झाली!</div>
                                 )}
+
                             </form>
                         </div>
                     </div>

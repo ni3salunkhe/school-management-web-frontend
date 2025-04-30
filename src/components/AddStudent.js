@@ -3,6 +3,7 @@ import { BiMap, BiInfoCircle, BiUserCircle, BiBook, BiHome, BiUserPlus } from 'r
 import apiService from '../services/api.service';
 import CombinedDropdownInput from './CombinedDropdownInput'; // Assuming this component can handle error/validationClass props
 import { jwtDecode } from 'jwt-decode';
+import Next from './Next';
 
 // --- Marathi Date Conversion Helpers ---
 const marathiDays = [
@@ -670,11 +671,12 @@ function AddStudent() {
                                 </div>
 
                                 {/* Submit Button */}
-                                <div className="d-flex justify-content-center mt-4">
+                                <div className="d-flex justify-content-center mt-4 gap-5">
                                     <button type="submit" className="btn btn-primary btn-lg px-5 py-2 rounded-pill shadow-sm">
                                         <i className="bi bi-check-circle me-2"></i>
                                         नोंदणी सबमिट करा
                                     </button>
+                                    <Next classname={'btn btn-success btn-lg px-5 py-2 rounded-pill shadow-sm'} path={'/clerk/classteacher'} placeholder={'पुढे चला'}></Next>
                                 </div>
                             </form>
                         </div>

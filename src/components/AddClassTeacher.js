@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import Next from './Next';
 
 function AddClassTeacher() {
     const [formData, setFormData] = useState({
@@ -225,7 +226,7 @@ function AddClassTeacher() {
                                     )}
                                 </div>
 
-                                <div className="text-center mt-4">
+                                <div className="text-center mt-4 gap-5">
                                     <button 
                                         type="submit" 
                                         className="btn btn-primary px-4 py-2 rounded-pill shadow-sm"
@@ -233,7 +234,9 @@ function AddClassTeacher() {
                                     >
                                         {isLoading ? 'प्रक्रिया करत आहे...' : 'जतन करा'}
                                     </button>
+                                    <Next classname={'btn btn-success px-4 py-2 rounded-pill shadow-sm'} path={'/clerk/AddAcademicNewStudents'} placeholder={'पुढे चला'}></Next>
                                 </div>
+
 
                                 {submitted && (
                                     <div className="mt-3 text-success">वर्गशिक्षक यशस्वीरित्या जतन झाला!</div>

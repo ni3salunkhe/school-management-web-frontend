@@ -38,7 +38,7 @@ function StudentManagement({ role }) {
         return (
           <Routes>
             <Route path='student' element={<AddStudent />} />
-            <Route path='studentlist' element={<StudentList />} ></Route>
+            <Route path='list' element={<StudentList />} ></Route>
             <Route path='reports/:id' element={<ReportsShows />}></Route>
             <Route path='reports/lc-old/:id' element={<LColdForm />}></Route>
             <Route path='reports/download/:id' element={<LCdownload />}></Route>

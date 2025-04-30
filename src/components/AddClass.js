@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import Next from './Next';
 
 function AddClass() {
     const [formData, setFormData] = useState({
@@ -316,6 +317,7 @@ function AddClass() {
                                         >
                                             नवीन इयत्ता जोडा
                                         </button>
+                                        <Next classname={'btn btn-primary'} path={'/headmaster/staff'} placeholder={'पुढे चला'}></Next>
                                     </div>
                                 </div>
                             </div>

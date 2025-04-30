@@ -37,10 +37,10 @@ function NavBarS({ role }) {
             <Nav className="ms-auto align-items-center">
               <div className="d-flex align-items-center">
                 {role == "DEVELOPER" && <Nav className="ms-auto align-items-center">
-                  <Nav.Link as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
-                  <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
-                  <Nav.Link as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
-                  <Dropdown as={Nav.Item} className="me-2">
+                  <Nav.Link className="text-white" as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
+                  <Nav.Link className="text-white" as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
+                  <Nav.Link className="text-white" as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
+                  <Dropdown  as={Nav.Item} className="me-2">
                     <Dropdown.Toggle as={Nav.Link} style={{ color: "white" }}>
                       स्थान माहिती प्रविष्ट करणे
                       
@@ -51,7 +51,9 @@ function NavBarS({ role }) {
                       <Dropdown.Item as={Link} to={"/developer/tehsil"}>तालुका  प्रविष्ट करणे</Dropdown.Item>
                       <Dropdown.Item as={Link} to={"/developer/village"}>गाव किंवा शहर प्रविष्ट करणे</Dropdown.Item>
                     </Dropdown.Menu>
+
                   </Dropdown>
+                  <Nav.Link className="bg-danger text-white rounded-pill py-1" as={Link} to={"/"}><FiLogOut className="me-2" /> लॉगआऊट  </Nav.Link>
 
                 </Nav>}
                 {/* <Form className="me-2 d-none d-lg-block position-relative">
@@ -101,12 +103,12 @@ function NavBarS({ role }) {
                       <CgProfile style={{ width: '28px', height: '28px' }} />
                     </div>
                   </Dropdown.Toggle>
-                  <Dropdown.Menu className="dropdown-menu-end shadow">
+                  {/* <Dropdown.Menu className="dropdown-menu-end shadow">
                     <Dropdown.Item href="#profile"><FiUsers className="me-2" /> Profile</Dropdown.Item>
                     <Dropdown.Item href="#settings"><FiSettings className="me-2" /> Settings</Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> Logout</Dropdown.Item>
-                  </Dropdown.Menu>
+                  </Dropdown.Menu> */}
                 </Dropdown>
               </div>
             </Nav>

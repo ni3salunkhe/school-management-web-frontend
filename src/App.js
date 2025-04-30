@@ -26,7 +26,7 @@ function App() {
   ];
   const sidebarItemsClerk = [
     {
-      mainMenu: ['Student','StudentList','classteacher','AddAcademicNewStudents'],
+      mainMenu: ['Student','List','classteacher','AddAcademicNewStudents'],
     },
   ];
   const sidebarItemsTeacher = [

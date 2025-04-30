@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
+import Next from './Next';
 
 function DistrictForm() {
     const [formData, setFormData] = useState({
@@ -144,6 +145,7 @@ function DistrictForm() {
 
                                 <button type="submit" className="btn btn-success btn-sm">जतन करा</button>
                                 {submitted && <div className="mt-3 text-success">जिल्हा यशस्वीरित्या जतन झाला!</div>}
+                                <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/tehsil'} placeholder={'पुढे चला'}></Next>
                             </form>
                         </div>
                     </div>

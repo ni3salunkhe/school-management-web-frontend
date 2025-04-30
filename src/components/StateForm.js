@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
+import Next from './Next';
 
 function StateForm() {
     const [stateName, setStateName] = useState('');
@@ -106,6 +107,7 @@ function StateForm() {
                                 </div>
                                 <button type="submit" className="btn btn-success btn-sm">जतन करा</button>
                                 {submitted && <div className="mt-3 text-success">राज्य यशस्वीरित्या जतन झाले!</div>}
+                                <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/district'} placeholder={'पुढे चला'}></Next>
                             </form>
                         </div>
                     </div>

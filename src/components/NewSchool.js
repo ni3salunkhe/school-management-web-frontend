@@ -2,6 +2,7 @@ import React, { use, useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import apiService from '../services/api.service';
+import Next from './Next';
 
 
 const NewSchool = () => {
@@ -549,10 +550,11 @@ const NewSchool = () => {
                                 </div>
 
 
-                                <div className="d-flex justify-content-center mt-4">
-                                    <Button variant="primary" type="submit" className="btn btn-primary btn-md px-4 py-2 rounded-pill shadow-sm">
+                                <div className="d-flex justify-content-center mt-4 gap-5">
+                                    <Button variant="primary" type="submit" className="btn btn-success btn-md px-4 py-2 rounded-pill shadow-sm">
                                         खाते तयार करा
                                     </Button>
+                                    <Next classname={"btn btn-primary btn-md px-4 py-2 rounded-pill shadow-sm"} path={'/developer/subscription'} placeholder={'सदस्यता नोंदणी करा'}></Next>
                                 </div>
                             </Form>
                         </Card.Body>

@@ -4,6 +4,8 @@ import { AiOutlineMobile } from 'react-icons/ai'; // Unused, but kept if needed 
 import { BiUpload, BiPhone, BiInfoCircle, BiGlobeAlt, BiMap, BiListUl, BiMobile, BiImageAdd, BiIdCard } from 'react-icons/bi';
 import '../styling/formstyle.css';
 import { jwtDecode } from 'jwt-decode';
+import Next from './Next';
+
 
 // --- Helper Function to check if form data is complete ---
 // Customize this based on which fields *absolutely* must be filled
@@ -809,6 +811,7 @@ function AddSchoolInfo() {
                 </div>
 
               </div>
+              <Next classname={'btn btn-primary float-end'} path={'/headmaster/class'} placeholder={'पुढे चला'}></Next>
             </div>
           </div>
         </div>

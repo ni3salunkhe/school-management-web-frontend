@@ -3,6 +3,7 @@ import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap'
 import { BsGear } from 'react-icons/bs'
 import { FaBox, FaCalendarAlt, FaCog } from 'react-icons/fa'
 import apiService from '../services/api.service'
+import { format, addYears, subDays } from 'date-fns';
 
 const Subscription = () => {
     const [schools, setSchools] = useState([])
@@ -48,6 +49,13 @@ const Subscription = () => {
             ...prevState,
             [name]: value
         }))
+
+        if(name == 'startdate'){
+            setFormData(prevState => ({
+                ...prevState,
+                enddate: format(subDays(addYears(value, 1), 1),'yyyy-MM-dd')
+            }))
+        }
         if (name == 'udiseNumber' && value) {
             const response = await apiService.getbyid('api/subscription/check/', value)
             const data = await apiService.getbyid('api/subscription/', value)
