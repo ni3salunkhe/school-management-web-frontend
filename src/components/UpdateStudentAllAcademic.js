@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 function UpdateStudentAllAcademic() {
     const { id } = useParams();
@@ -146,9 +147,13 @@ function UpdateStudentAllAcademic() {
                 })
 
                 axios.put("http://localhost:8080/academic/update-student/bulk", payload).then((response) => {
-                    alert("Data Added Successfully");
+                   Swal.fire({
+                             title: "विद्यार्थ्याची शैक्षणीक माहिती संपादित केली आहे..!",
+                             icon: "success",
+                             draggable: true
+                           });
                 })
-                navigate(`teacher/Updateyear`);
+                navigate(`/teacher/Updateyear`);
             }
         }
 
@@ -171,11 +176,33 @@ function UpdateStudentAllAcademic() {
 
                         <div className="card-body p-4">
                             <form onSubmit={handleSubmit} className="fs-6">
+
+                                {/* Standard Select */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">इयत्ता</label>
+                                    <select
+                                        className={`form-control ${errors.standardId ? 'is-invalid' : ''}`}
+                                        name="standardId"
+                                        value={formData.standardId}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">-- इयत्ता निवडा --</option>
+                                        {standards.map(standard => (
+                                            <option key={standard.id} value={standard.id}>
+                                                {standard.standard}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.standardId && (
+                                        <div className="invalid-feedback">{errors.standardId}</div>
+                                    )}
+                                </div>
+
                                 {/* Division Select */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">तुकडी</label>
                                     <select
-                                         className={`form-control ${errors.division ? 'is-invalid' : ''}`}
+                                        className={`form-control ${errors.division ? 'is-invalid' : ''}`}
                                         name="division"
                                         value={formData.division}
                                         onChange={handleChange}
@@ -192,26 +219,6 @@ function UpdateStudentAllAcademic() {
                                     )}
                                 </div>
 
-                                {/* Standard Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">इयत्ता</label>
-                                    <select
-                                         className={`form-control ${errors.standardId ? 'is-invalid' : ''}`}
-                                        name="standardId"
-                                        value={formData.standardId}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- इयत्ता निवडा --</option>
-                                        {standards.map(standard => (
-                                            <option key={standard.id} value={standard.id}>
-                                                {standard.standard}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.standardId && (
-                                        <div className="invalid-feedback">{errors.standardId}</div>
-                                    )}
-                                </div>
 
                                 {/* Staff Select */}
                                 <div className="mb-3">

@@ -26,7 +26,7 @@ function AddClassTeacher() {
             try {
                 setIsLoading(true);
                 setApiError(null);
-                
+
                 const [divisionsRes, standardsRes, teachersRes, classteacherRes] = await Promise.all([
                     apiService.getbyid("Division/getbyudise/", schoolUdiseNo),
                     apiService.getbyid("standardmaster/getbyudise/", schoolUdiseNo),
@@ -159,28 +159,6 @@ function AddClassTeacher() {
                             )}
 
                             <form onSubmit={handleSubmit} className="fs-6">
-                                {/* Division Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">तुकडी</label>
-                                    <select
-                                        className={`form-select form-select-sm ${errors.division ? 'is-invalid' : ''}`}
-                                        name="division"
-                                        value={formData.division}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                    >
-                                        <option value="">-- तुकडी निवडा --</option>
-                                        {divisions.map(division => (
-                                            <option key={division.id} value={division.id}>
-                                                {division.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.division && (
-                                        <div className="invalid-feedback">{errors.division}</div>
-                                    )}
-                                </div>
-
                                 {/* Standard Select */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">इयत्ता</label>
@@ -200,6 +178,27 @@ function AddClassTeacher() {
                                     </select>
                                     {errors.standardMaster && (
                                         <div className="invalid-feedback">{errors.standardMaster}</div>
+                                    )}
+                                </div>
+                                {/* Division Select */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">तुकडी</label>
+                                    <select
+                                        className={`form-select form-select-sm ${errors.division ? 'is-invalid' : ''}`}
+                                        name="division"
+                                        value={formData.division}
+                                        onChange={handleChange}
+                                        disabled={isLoading}
+                                    >
+                                        <option value="">-- तुकडी निवडा --</option>
+                                        {divisions.map(division => (
+                                            <option key={division.id} value={division.id}>
+                                                {division.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.division && (
+                                        <div className="invalid-feedback">{errors.division}</div>
                                     )}
                                 </div>
 
@@ -226,8 +225,8 @@ function AddClassTeacher() {
                                 </div>
 
                                 <div className="text-center mt-4">
-                                    <button 
-                                        type="submit" 
+                                    <button
+                                        type="submit"
                                         className="btn btn-primary px-4 py-2 rounded-pill shadow-sm"
                                         disabled={isLoading || warning}
                                     >

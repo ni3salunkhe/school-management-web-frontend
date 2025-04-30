@@ -2,6 +2,7 @@ import React, { use, useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import apiService from '../services/api.service';
+import Swal from 'sweetalert2';
 
 
 const NewSchool = () => {
@@ -176,13 +177,12 @@ const NewSchool = () => {
             }
         }
 
-        if(name=='phone' && !/^[0-9]*$/.test(value))
-            {
-                setErrors({
-                    ...errors,
-                    phone:'कृपया फोन नंबर इंग्रजी नंबर प्रविष्ट करा'
-                })
-            }
+        if (name == 'phone' && !/^[0-9]*$/.test(value)) {
+            setErrors({
+                ...errors,
+                phone: 'कृपया फोन नंबर इंग्रजी नंबर प्रविष्ट करा'
+            })
+        }
 
         if (['username', 'email', 'password', 'confirmPassword'].includes(name)) {
             if (value && !isEnglish(value)) {
@@ -303,6 +303,12 @@ const NewSchool = () => {
                     setSubmitStatus({
                         type: 'success',
                         message: 'शाळेचे खाते यशस्वीरीत्या तयार झाले!'
+                    });
+
+                    Swal.fire({
+                        title: "शाळेची माहिती यशस्वीरीत्या संपादित केली आहे ..!",
+                        icon: "success",
+                        draggable: true
                     });
 
                     setTimeout(() => {

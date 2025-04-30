@@ -3,6 +3,7 @@ import { BiMap, BiInfoCircle, BiUserCircle, BiBook, BiHome, BiUserPlus } from 'r
 import apiService from '../services/api.service';
 import CombinedDropdownInput from './CombinedDropdownInput'; // Assuming this component can handle error/validationClass props
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 // --- Marathi Date Conversion Helpers ---
 const marathiDays = [
@@ -78,35 +79,35 @@ function AddStudent() {
         apparId: '',
         studentId: '',
         // Personal Information
-        gender: '', 
-        surName: '', 
-        studentName: '', 
-        fatherName: '', 
+        gender: '',
+        surName: '',
+        studentName: '',
+        fatherName: '',
         motherName: '',
-        nationality: '', 
-        motherTongue: '', 
-        religion: '', 
-        caste: '', 
+        nationality: '',
+        motherTongue: '',
+        religion: '',
+        caste: '',
         subCast: '',
-        dateOfBirth: '', 
+        dateOfBirth: '',
         dateOfBirthInWord: '',
         // Contact Information
-        residentialAddress: '', 
+        residentialAddress: '',
         mobileNo: '',
         // Birth Place Information
-        birthPlace: '', 
-        villageOfBirth: '', 
-        tehasilOfBirth: '', 
-        districtOfBirth: '', 
+        birthPlace: '',
+        villageOfBirth: '',
+        tehasilOfBirth: '',
+        districtOfBirth: '',
         stateOfBirth: '',
         // Academic Information
-        lastSchoolUdiseNo: '', 
-        admissionDate: '', 
+        lastSchoolUdiseNo: '',
+        admissionDate: '',
         whichStandardAdmitted: '',
         // Additional Information
-        adhaarNumber: '', 
-        ebcInformation: '', 
-        minorityInformation: '', 
+        adhaarNumber: '',
+        ebcInformation: '',
+        minorityInformation: '',
         casteCategory: ''
     };
 
@@ -241,7 +242,7 @@ function AddStudent() {
         // Special handling for date
         if (["studentName", "fatherName", "surName", "motherName"].includes(id)) {
             val = value.trim();
-        }        
+        }
 
         if (id === "dateOfBirth") {
             const marathiDate = getMarathiDateWords(value);
@@ -257,7 +258,7 @@ function AddStudent() {
             val = val ?? value
             setFormData(prev => ({
                 ...prev,
-                [id]:val
+                [id]: val
             }));
         }
 
@@ -310,6 +311,17 @@ function AddStudent() {
             // }
         }
 
+        if (value) {
+            const birthDate = new Date(value);
+            const today = new Date();
+            const minBirthDate = new Date(today.getFullYear() - 6, today.getMonth(), today.getDate());
+            
+            if (birthDate > minBirthDate) {
+              currentErrors.dateOfBirth = 'विद्यार्थ्याचे वय किमान ६ वर्षे असणे आवश्यक आहे.';
+            } else {
+              delete currentErrors.dateOfBirth;
+            }
+        }
         // Aadhaar No (Check length) - Optional immediate check
         if (id === 'adhaarNumber') {
             if (value && value.length !== 12) {
@@ -355,8 +367,11 @@ function AddStudent() {
         console.log('Submitting payload:', payload);
         apiService.postdata("student/", payload)
             .then((response) => {
-                alert("विद्यार्थ्याची माहिती यशस्वीरित्या जोडली.");
-                console.log(response);
+                Swal.fire({
+                    title: "विद्यार्थ्याची माहिती यशस्वीरित्या जोडली....!",
+                    icon: "success",
+                    draggable: true
+                });
                 // Fetch updated student list
                 if (school) {
                     apiService.getbyid('student/byudise/', school).then((res) => setStudents(res.data));

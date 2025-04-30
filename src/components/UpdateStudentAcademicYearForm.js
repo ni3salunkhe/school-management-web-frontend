@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import apiService from '../services/api.service';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 function UpdateStudentAcademicYearForm() {
   const { id } = useParams();
@@ -65,9 +66,9 @@ function UpdateStudentAcademicYearForm() {
       setAcademicData(response.data);
     })
   }, []);
-  
+
   console.log(academicdata);
-  
+
 
   useEffect(() => {
     if (formData.division && formData.standardId) {
@@ -147,10 +148,14 @@ function UpdateStudentAcademicYearForm() {
       // console.log(payload);
 
       apiService.putdata('academic/update-status/', payload, academicdata.id).then((response) => {
-        alert("Data Added Succesfully");
+        Swal.fire({
+          title: "विद्यार्थ्याची शैक्षणीक माहिती संपादित केली आहे..!",
+          icon: "success",
+          draggable: true
+        });
       });
 
-      navigate(`teacher/Updateyear`);
+      navigate(`/teacher/Updateyear`);
     }
   }
   return (
@@ -164,27 +169,6 @@ function UpdateStudentAcademicYearForm() {
 
             <div className="card-body p-4">
               <form onSubmit={handleSubmit} className="fs-6">
-                {/* Division Select */}
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">तुकडी</label>
-                  <select
-                    className={`form-control ${errors.division ? 'is-invalid' : ''}`}
-                    name="division"
-                    value={formData.division}
-                    onChange={handleChange}
-                  >
-                    <option value="">-- तुकडी निवडा --</option>
-                    {divisions.map(division => (
-                      <option key={division.id} value={division.id}>
-                        {division.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.division && (
-                    <div className="invalid-feedback">{errors.division}</div>
-                  )}
-
-                </div>
 
                 {/* Standard Select */}
                 <div className="mb-3">
@@ -207,6 +191,31 @@ function UpdateStudentAcademicYearForm() {
                   )}
 
                 </div>
+
+
+                {/* Division Select */}
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">तुकडी</label>
+                  <select
+                    className={`form-control ${errors.division ? 'is-invalid' : ''}`}
+                    name="division"
+                    value={formData.division}
+                    onChange={handleChange}
+                  >
+                    <option value="">-- तुकडी निवडा --</option>
+                    {divisions.map(division => (
+                      <option key={division.id} value={division.id}>
+                        {division.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.division && (
+                    <div className="invalid-feedback">{errors.division}</div>
+                  )}
+
+                </div>
+
+
 
                 <div className="mb-3">
                   <label className="form-label fw-semibold">शिक्षक</label>
@@ -244,7 +253,7 @@ function UpdateStudentAcademicYearForm() {
                     <option value="">-- Status निवडा --</option>
                     <option value="pass">Pass</option>
                     <option value="fail">Fail</option>
-                   
+
                   </select>
                   {errors.status && (
                     <div className="invalid-feedback">{errors.status}</div>

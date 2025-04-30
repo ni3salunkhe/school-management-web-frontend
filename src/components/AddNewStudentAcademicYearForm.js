@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 function AddNewStudentAcademicYearForm() {
     const { id } = useParams();
     const navigate = useNavigate();
-    
+
     const [formData, setFormData] = useState({
         division: '',
         standardId: '',
@@ -17,10 +17,10 @@ function AddNewStudentAcademicYearForm() {
     const [standards, setStandards] = useState([]);
     const [singleTeacher, setSingleTeacher] = useState();
     const [classTeacherData, setClassTeacherData] = useState([]);
-    const [warning,setWarning]=useState(false);
+    const [warning, setWarning] = useState(false);
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
-    
+
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
@@ -62,7 +62,7 @@ function AddNewStudentAcademicYearForm() {
 
     function validateForm() {
         const newErrors = {};
-        
+
         if (!formData.division) {
             newErrors.division = "कृपया तुकडी निवडा";
         }
@@ -79,7 +79,7 @@ function AddNewStudentAcademicYearForm() {
 
     function handleSubmit(event) {
         event.preventDefault();
-        
+
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -102,7 +102,7 @@ function AddNewStudentAcademicYearForm() {
             });
 
             setTimeout(() => {
-                navigate(`/clerk/newstudentacademicyear`);
+                navigate(`/clerk/AddAcademicNewStudents`);
                 setSubmitted(false);
             }, 2000);
         }).catch(error => {
@@ -124,28 +124,8 @@ function AddNewStudentAcademicYearForm() {
                             {errors.submit && (
                                 <div className="alert alert-danger mb-3">{errors.submit}</div>
                             )}
-                            
+
                             <form onSubmit={handleSubmit} className="fs-6">
-                                {/* Division Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">तुकडी</label>
-                                    <select
-                                        className={`form-select form-select-sm ${errors.division ? 'is-invalid' : ''}`}
-                                        name="division"
-                                        value={formData.division}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- तुकडी निवडा --</option>
-                                        {divisions.map(division => (
-                                            <option key={division.id} value={division.id}>
-                                                {division.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.division && (
-                                        <div className="invalid-feedback">{errors.division}</div>
-                                    )}
-                                </div>
 
                                 {/* Standard Select */}
                                 <div className="mb-3">
@@ -168,22 +148,45 @@ function AddNewStudentAcademicYearForm() {
                                     )}
                                 </div>
 
+
+                                {/* Division Select */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">तुकडी</label>
+                                    <select
+                                        className={`form-select form-select-sm ${errors.division ? 'is-invalid' : ''}`}
+                                        name="division"
+                                        value={formData.division}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">-- तुकडी निवडा --</option>
+                                        {divisions.map(division => (
+                                            <option key={division.id} value={division.id}>
+                                                {division.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.division && (
+                                        <div className="invalid-feedback">{errors.division}</div>
+                                    )}
+                                </div>
+
+
                                 {/* Teacher Display */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">शिक्षक</label>
                                     <div className={`form-control form-control-sm ${errors.teacher ? 'is-invalid' : ''}`}>
-                                        {singleTeacher ? 
-                                            `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 
+                                        {singleTeacher ?
+                                            `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` :
                                             'शिक्षक निवडले नाहीत'}
                                     </div>
                                     {/* {errors.teacher && (
                                         <div className="invalid-feedback">{errors.teacher}</div>
                                     )} */}
 
-                                    {warning &&(
+                                    {warning && (
                                         <div className='text-danger'>
-                                         <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                                         या वर्गासाठी कोणताही शिक्षक नियुक्त केला नाही</div>
+                                            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                            या वर्गासाठी कोणताही शिक्षक नियुक्त केला नाही</div>
                                     )}
                                 </div>
 
@@ -207,7 +210,7 @@ function AddNewStudentAcademicYearForm() {
                                         जतन करा
                                     </button>
                                 </div>
-                                
+
                                 {submitted && (
                                     <div className="mt-3 text-success">विद्यार्थ्याची शैक्षणिक माहिती यशस्वीरित्या जतन झाली!</div>
                                 )}
