@@ -143,7 +143,7 @@ function AddClass() {
 
         const divisionArray = divisionName.division
             .split(",")
-            .map(item => item.trim())
+            .map(item => item.trim().toUpperCase())
             .filter(item => item.length > 0);
 
         if (divisionArray.length === 0) {

@@ -51,7 +51,7 @@ const Subscription = () => {
         if (name == 'udiseNumber' && value) {
             const response = await apiService.getbyid('api/subscription/check/', value)
             const data = await apiService.getbyid('api/subscription/', value)
-            
+
             // Function to format date from YYYYMMDD to YYYY-MM-DD
             const formatDate = (dateString) => {
                 if (!dateString) return '';
@@ -81,7 +81,7 @@ const Subscription = () => {
                 setErrors({
                     ...errors,
                     udiseNumber: 'Already subscribed ! subsription not expired yet for this school School'
-                })                
+                })
             } else {
                 setIsExpired(true)
                 setErrors({
@@ -111,7 +111,7 @@ const Subscription = () => {
         if (!dateString) return '';
         // Check if already in YYYYMMDD format
         if (/^\d{4}\d{2}\d{2}$/.test(dateString)) return dateString;
-        
+
         // Convert from DDMMYYYY to YYYYMMDD
         const matches = dateString.match(/^(\d{2})(\d{2})(\d{4})$/);
         if (!matches) return dateString;
@@ -122,18 +122,18 @@ const Subscription = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const userData={
+                const userData = {
                     udiseNumber: formData.udiseNumber,
                     startdate: convertToYYYYMMDD(formData.startdate),
                     enddate: convertToYYYYMMDD(formData.enddate)
                 }
                 console.log(flag)
-                if(flag === "renew"){
+                if (flag === "renew") {
                     await apiService.post("api/subscription/renew", userData);
                     alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
                     setButtonText("मंजूर कर");
                     setFlag("");
-                }else{
+                } else {
                     await apiService.post("api/subscription/create", formData);
                     // alert("Bhai data gaya hoga dekh ek baar" + formData)
                     alert("subscription यशस्वीरीत्या नोंदवली आहे!");
@@ -148,6 +148,16 @@ const Subscription = () => {
             enddate: ''
         })
     }
+    // Add this function somewhere in your component file, maybe outside the component function
+    const formatDateToString = (date) => {
+        if (!(date instanceof Date) || isNaN(date)) {
+            return ''; // Return empty string for invalid dates
+        }
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
     return (
         <Container fluid
             className="d-flex justify-content-center align-items-center subuscription"

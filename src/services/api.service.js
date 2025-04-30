@@ -58,7 +58,13 @@ const apiService = {
       }
     })
   },
-
+  put(endpoint, data) {
+    return axios.put(`${this.url}${endpoint}`, data,{
+      headers: {
+        "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+      }
+    })
+  },
   
   getbyusername(endpoint, username) {
     return axios.get(`${this.url}${endpoint}${username}`, {

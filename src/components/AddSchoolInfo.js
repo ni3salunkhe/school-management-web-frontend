@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import apiService from '../services/api.service';
 import { AiOutlineMobile } from 'react-icons/ai'; // Unused, but kept if needed elsewhere
-import { BiUpload, BiPhone, BiInfoCircle, BiGlobeAlt, BiMap, BiListUl, BiMobile, BiImageAdd } from 'react-icons/bi';
+import { BiUpload, BiPhone, BiInfoCircle, BiGlobeAlt, BiMap, BiListUl, BiMobile, BiImageAdd, BiIdCard } from 'react-icons/bi';
 import '../styling/formstyle.css';
 import { jwtDecode } from 'jwt-decode';
 
@@ -61,6 +61,7 @@ function AddSchoolInfo() {
     boardIndexNo: '',
     schoolApprovalNo: '',
     logo: null, // Store the File object
+    password: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -128,6 +129,7 @@ function AddSchoolInfo() {
           boardDivision: fetchedSchoolData?.boardDivision || '',
           boardIndexNo: fetchedSchoolData?.boardIndexNo || '',
           schoolApprovalNo: fetchedSchoolData?.schoolApprovalNo || '',
+          headMasterPassword:fetchedSchoolData.headMasterPassword || ''
           // Don't reset logo here if already selected by user
         }));
 
@@ -303,21 +305,21 @@ function AddSchoolInfo() {
         schoolSlogan: formData.schoolSlogan,
         sansthaName: formData.sansthaName, // Include read-only fields if backend expects them
         medium: formData.medium,
-        state: formData.state ? { id: parseInt(formData.state) } : null, // Send object if backend expects it
-        district: formData.district ? { id: parseInt(formData.district) } : null,
-        tehsil: formData.tehsil ? { id: parseInt(formData.tehsil) } : null,
-        village: formData.village ? { id: parseInt(formData.village) } : null,
+        state: formData.state, // Send object if backend expects it
+        district: formData.district,
+        tehsil: formData.tehsil,
+        village: formData.village,
         pinCode: formData.pincode, // Map form 'pincode' to 'pinCode' for DTO
         board: formData.board,
         boardDivision: formData.boardDivision,
         boardIndexNo: formData.boardIndexNo,
         schoolApprovalNo: formData.schoolApprovalNo,
         headMasterMobileNo: formData.headMasterMobileNo,
+        headMasterPassword: formData.password,
         // IMPORTANT: Remove hardcoded password in production!
         // This should be handled via a separate, secure mechanism.
         // headMasterPassword: '123456', // Avoid sending password like this
       };
-
       // Append the JSON string of schoolDto
       submissionData.append('schoolDto', JSON.stringify(schoolDto));
 
@@ -329,7 +331,7 @@ function AddSchoolInfo() {
       // Send data to backend (ensure API service handles PUT with FormData correctly)
       // Make sure the URL construction in apiService.putdata is correct (e.g., /school/{udiseNo})
       apiService
-        .putdata(`school/${udiseNo}`, submissionData) // Assuming URL is like this
+        .put(`school/${udiseNo}`, submissionData) // Assuming URL is like this
         // .putdata("school/", submissionData, udiseNo) // Or use your original signature if correct
         .then((response) => {
           alert('School info saved successfully!');
@@ -615,6 +617,7 @@ function AddSchoolInfo() {
                                   onChange={handleChange}             // Use handleChange
                                   placeholder="मुख्यध्यापकांचा मोबाईल नंबर"
                                   maxLength={10}
+                                  readOnly
                                 />
                                 {/* Display error inside or outside input-group based on styling */}
                                 {errors.headMasterMobileNo && <div className="invalid-feedback d-block">{errors.headMasterMobileNo}</div>}
@@ -623,6 +626,20 @@ function AddSchoolInfo() {
                               {/* {errors.headMasterMobileNo && <div className="invalid-feedback d-block">{errors.headMasterMobileNo}</div>} */}
                             </div>
                           </div>
+                        </div>
+                      </div>
+                      <div className="mb-4 bg-light p-3 rounded">
+                        <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                          <BiIdCard className="me-2" />
+                          पासवर्ड बदला
+                        </h5>
+                        <div className="row g-3"></div>
+                        <div className="col-md-6">
+                          <label className="form-label fw-semibold small">पासवर्ड / password</label>
+                          <input id='password' type="password" name="password" className={`form-control form-control-sm ${errors.password ? 'is-invalid' : ''}`} value={formData.password} onChange={handleChange} placeholder='password' />
+                          {errors.password && <div className="invalid-feedback">
+                            {errors.password}
+                          </div>}
                         </div>
                       </div>
 
@@ -634,12 +651,7 @@ function AddSchoolInfo() {
                             <div className="col-md-6 mb-2">
                               <label htmlFor="logo" className="form-label fw-semibold small">शाळेचे लोगो</label>
                               {/* Display existing logo if available */}
-                              {schoolData?.logo && !formData.logo && (
-                                <div className='mb-2'>
-                                  <img src={schoolData.logo} alt="Current Logo" style={{ maxWidth: '100px', maxHeight: '100px', display: 'block' }} />
-                                  <span className='small text-muted'>Current logo. Upload a new file to replace it.</span>
-                                </div>
-                              )}
+
                               <div className="input-group input-group-sm mb-2">
                                 <input
                                   type="file"

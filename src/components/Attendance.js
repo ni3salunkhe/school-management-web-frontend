@@ -13,17 +13,36 @@ const Attendance = () => {
     const [activeTab, setActiveTab] = useState("create")
     const [selectedClass, setSelectedClass] = useState('')
     const [errors, setErrors] = useState({})
+    const [isDataPresent,setIsDataPresent]=useState(true)
     const [teacherName, setTeacherName] = useState('')
     
 
-    const classTeacher=async()=>{
-       const response = await apiService.getdata(`classteacher/getbyid/${id}`)     
-       setTeacherName(response.data.staff.fname+" "+response.data.staff.fathername+" "+response.data.staff.lname);
-       setSelectedClass(id)
-    }
+    const classTeacher = async () => {
+        try {
+          const response = await apiService.getdata(`classteacher/getbyid/${id}`);
+          const staff = response?.data?.staff;
+      
+          if (staff) {
+            const fullName = `${staff.fname || ''} ${staff.fathername || ''} ${staff.lname || ''}`.trim();
+            setTeacherName(fullName);
+            setSelectedClass(id);
+          } else {
+            setTeacherName(null);
+            setSelectedClass(null);
+            setIsDataPresent(false);
+          }
+        } catch (error) {
+          console.error("Error fetching class teacher:", error);
+          setTeacherName('Error fetching teacher');
+          setSelectedClass(null);
+        }
+      };
+      
     classTeacher();
+    
     return (
-        <Container fluid className="d-flex justify-content-center align-items-center py-3">
+        <>
+            {isDataPresent===true ?(<Container fluid className="d-flex justify-content-center align-items-center py-3">
             <Card className="shadow-lg" style={{ width: '100%', maxWidth: '800px' }}>
                 <Card.Header as="h3" className="text-center p-3 bg-primary text-white">
                     विद्यार्थी उपस्थिती नोंदणी
@@ -82,7 +101,10 @@ const Attendance = () => {
                     </Card>
                 </Card.Body>
             </Card>
-        </Container>
+        </Container>):(<div className='mt-5'>
+            <h1  className='text-center'>लिपिकाशी संपर्क साधा . सध्या कोणतीही माहिती नाही </h1>
+        </div>)}
+        </>
     )
 }
 
