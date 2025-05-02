@@ -20,6 +20,7 @@ import AddNewStudentAcademicYearForm from '../components/AddNewStudentAcademicYe
 import UpdateStudentAcademicYear from '../components/UpdateStudentAcademicYear';
 import UpdateStudentAcademicYearForm from '../components/UpdateStudentAcademicYearForm';
 import UpdateStudentAllAcademic from '../components/UpdateStudentAllAcademic';
+import StaffList from '../components/StaffList';
 
 
 
@@ -30,8 +31,9 @@ function StudentManagement({ role }) {
         return (
           <Routes>
             <Route path='school' element={<AddSchoolInfo />} />
-            <Route path='staff' element={<AddStaffMember />} />
+            <Route path='staff' element={<StaffList />} />
             <Route path='class' element={<AddClass />} />
+            <Route path='staffAdd' element={<AddStaffMember/>} />
           </Routes>
         );
       case 'CLERK':

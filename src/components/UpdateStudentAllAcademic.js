@@ -29,18 +29,42 @@ function UpdateStudentAllAcademic() {
     const [warning, setWarning] = useState(false);
     const [errors, setErrors] = useState({});
     const location = useLocation();
+    const [statusForFormLoad, setStatusForFormLoad] = useState();
+    const [promotedStandard, setPromotedStandard] = useState();
+
     const { selectedStudents } = location.state || { selectedStudents: [] };
     console.log(selectedStudents);
 
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const studentId = selectedStudents[0];
-
+    console.log(studentId);
+    
     const api = axios.create({
         baseURL: 'http://localhost:8080',
         headers: {
             'Authorization': `Bearer ${sessionStorage.getItem('token')}`
         }
     });
+
+    const calculateAcademicYear = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+        // If current month is June (5) or later, academic year is currentYear-nextYear
+        if (currentMonth >= 5) {
+            return `${currentYear}-${String(currentYear + 1).slice(-2)}`;
+        }
+        // For January (0) to May (4), academic year is previousYear-currentYear
+        return `${currentYear - 1}-${String(currentYear).slice(-2)}`;
+    };
+
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            academicYear: calculateAcademicYear()
+        }));
+    }, []);
 
     useEffect(() => {
         apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {
@@ -69,6 +93,20 @@ function UpdateStudentAllAcademic() {
 
     console.log(teachers);
     // console.log(classTeacherData);
+
+    useEffect(() => {
+        if (formData?.status === "Pass") {
+            if (standards.length > 0 && academicdata?.standard) {
+                const nextStandard = standards.find(st => st.standard === academicdata.standard.standard + 1);
+                setPromotedStandard(nextStandard);
+                if (nextStandard) {
+                    setFormData(prev => ({ ...prev, standardId: nextStandard.id }));
+                }
+            }
+        } else if (formData.status === "fail") {
+            setFormData(prev => ({ ...prev, standardId: academicdata?.standard?.id }));
+        }
+    }, [standards, academicdata, formData.status]);
 
     useEffect(() => {
         if (formData.division && formData.standardId) {
@@ -128,34 +166,36 @@ function UpdateStudentAllAcademic() {
             setErrors(validationErrors);
             return;
         }
-        if (formData.status === "pass") {
-            if (formData.standardId == academicdata?.standard?.id) {
-                alert("इयत्ता बदला (Please change the standard)");
-                return;
-            }
-            else {
-                const payload = {
-                    ...formData,
-                    studentIds: selectedStudents,
-                    schoolUdiseNo,
-                    classTeacher: singleTeacher?.id
-                };
-                setFormData({
-                    division: '',
-                    standardId: '',
-                    academicYear: ''
-                })
 
-                axios.put("http://localhost:8080/academic/update-student/bulk", payload).then((response) => {
-                   Swal.fire({
-                             title: "विद्यार्थ्याची शैक्षणीक माहिती संपादित केली आहे..!",
-                             icon: "success",
-                             draggable: true
-                           });
-                })
-                navigate(`/teacher/Updateyear`);
-            }
+        if (statusForFormLoad === 'Pass' &&
+            academicdata?.standard?.id &&
+            parseInt(formData.standardId) <= academicdata.standard.id) {
+            alert("इयत्ता बदला (Please change the standard)");
+            return;
         }
+
+        const payload = {
+            ...formData,
+            studentIds:selectedStudents,
+            schoolUdiseNo,
+            classTeacher: singleTeacher?.id
+        };
+        api.put("http://localhost:8080/academic/update-student/bulk", payload).then((response) => {
+            Swal.fire({
+                title: "विद्यार्थ्याची शैक्षणीक माहिती संपादित केली आहे..!",
+                icon: "success",
+                draggable: true
+            });
+            navigate(`/teacher/Updateyear`);
+        }).catch(() => {
+            Swal.fire({
+                title: "Error",
+                text: "माहिती अपडेट करताना त्रुटी आली",
+                icon: "error"
+            });
+        });
+
+
 
         // console.log(payload);
 
@@ -177,26 +217,41 @@ function UpdateStudentAllAcademic() {
                         <div className="card-body p-4">
                             <form onSubmit={handleSubmit} className="fs-6">
 
-                                {/* Standard Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">इयत्ता</label>
+
+                                <div className="mb-4">
+                                    <label className="form-label ">विद्यार्थी पास आहेत का नापास ? </label>
                                     <select
-                                        className={`form-control ${errors.standardId ? 'is-invalid' : ''}`}
-                                        name="standardId"
-                                        value={formData.standardId}
-                                        onChange={handleChange}
+                                        className={`form-select ${errors.status ? 'is-invalid' : ''}`}
+                                        name='status'
+                                        value={formData.status}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setStatusForFormLoad(value);
+                                            setFormData(prev => ({ ...prev, status: value }));
+                                            if (errors.status) setErrors(prev => ({ ...prev, status: '' }));
+                                        }}
                                     >
-                                        <option value="">-- इयत्ता निवडा --</option>
-                                        {standards.map(standard => (
-                                            <option key={standard.id} value={standard.id}>
-                                                {standard.standard}
-                                            </option>
-                                        ))}
+                                        <option value="">-- Status निवडा --</option>
+                                        <option value="Pass">Pass</option>
+                                        <option value="fail">Fail</option>
                                     </select>
-                                    {errors.standardId && (
-                                        <div className="invalid-feedback">{errors.standardId}</div>
-                                    )}
+                                    {errors.status && <div className="invalid-feedback">{errors.status}</div>}
                                 </div>
+
+                                {/* Standard Select */}
+                                {statusForFormLoad === 'Pass' && (
+                                    <>
+                                        <div className="mb-3">
+                                            <label className="form-label">इयत्ता</label>
+                                            <input
+                                                className='form-control'
+                                                value={promotedStandard?.standard || ''}
+                                                readOnly
+                                            />
+                                            {errors.standardId && <div className="invalid-feedback">{errors.standardId}</div>}
+                                        </div>
+                                    </>
+                                )}
 
                                 {/* Division Select */}
                                 <div className="mb-3">
@@ -239,30 +294,14 @@ function UpdateStudentAllAcademic() {
                                         name='academicYear'
                                         value={formData.academicYear}
                                         placeholder='उदा. 2024-25'
-                                        onChange={handleChange}
+                                        readOnly
                                     />
                                     {errors.academicYear && (
                                         <div className="invalid-feedback">{errors.academicYear}</div>
                                     )}
                                 </div>
 
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">Status</label>
-                                    <select
-                                        className={`form-control ${errors.status ? 'is-invalid' : ''}`}
-                                        name='status'
-                                        value={formData.status}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- Status निवडा --</option>
-                                        <option value="pass">Pass</option>
-                                        <option value="fail">Fail</option>
 
-                                    </select>
-                                    {errors.status && (
-                                        <div className="invalid-feedback">{errors.status}</div>
-                                    )}
-                                </div>
 
                                 <div className="text-center mt-4">
                                     <button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">

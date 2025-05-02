@@ -1,24 +1,18 @@
-
-import React from 'react'
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import apiService from '../services/api.service';
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 
 function UpdateStudentAcademicYearForm() {
   const { id } = useParams();
-
-  // console.log(id);
-  const api = axios.create({
-    baseURL: 'http://localhost:8080',
-    headers: {
-      'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-    }
-  });
-
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedStudents } = location.state || { selectedStudents: [] };
+  const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token')).udiseNo;
+  const studentId = id;
+
   const [formData, setFormData] = useState({
     division: '',
     standardId: '',
@@ -29,173 +23,195 @@ function UpdateStudentAcademicYearForm() {
   const [divisions, setDivisions] = useState([]);
   const [standards, setStandards] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [singleTeacher, setSingleTeacher] = useState();
   const [classTeacherData, setClassTeacherData] = useState([]);
+  const [singleTeacher, setSingleTeacher] = useState(null);
   const [academicdata, setAcademicData] = useState('');
+  const [statusForFormLoad, setStatusForFormLoad] = useState();
+  const [promotedStandard, setPromotedStandard] = useState();
+
   const [warning, setWarning] = useState(false);
   const [errors, setErrors] = useState({});
-  const location = useLocation();
 
-  const { selectedStudents } = location.state || { selectedStudents: [] }
+  const api = axios.create({
+    baseURL: 'http://localhost:8080',
+    headers: {
+      'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+    }
+  });
 
 
-  const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token')).udiseNo;
-  const studentId = id;
+  const calculateAcademicYear = () => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+    // If current month is June (5) or later, academic year is currentYear-nextYear
+    if (currentMonth >= 5) {
+      return `${currentYear}-${String(currentYear + 1).slice(-2)}`;
+    }
+    // For January (0) to May (4), academic year is previousYear-currentYear
+    return `${currentYear - 1}-${String(currentYear).slice(-2)}`;
+  };
+
 
   useEffect(() => {
-    apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {
-      setDivisions(response.data);
-    });
-    apiService.getbyid("standardmaster/getbyudise/", schoolUdiseNo).then((response) => {
-      setStandards(response.data);
-    });
-    apiService.getbyid("staff/getbyudise/", schoolUdiseNo).then((response) => {
-      setTeachers(response.data);
-    });
-    apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo).then((response) => {
-      // console.log(response.data);
-      setClassTeacherData(response.data);
-    });
-    api.get("http://localhost:8080/academic/student-school", {
-      params: {
-        studentId: studentId,
-        schoolUdiseNo: schoolUdiseNo
-      }
-    }).then((response) => {
-      // console.log(response.data);
-      setAcademicData(response.data);
-    })
+    setFormData(prev => ({
+      ...prev,
+      academicYear: calculateAcademicYear()
+    }));
   }, []);
 
-  console.log(academicdata);
+  useEffect(() => {
+    apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((res) => setDivisions(res.data));
+    apiService.getbyid("standardmaster/getbyudise/", schoolUdiseNo).then((res) => setStandards(res.data));
+    apiService.getbyid("staff/getbyudise/", schoolUdiseNo).then((res) => setTeachers(res.data));
+    apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo).then((res) => setClassTeacherData(res.data));
 
+    api.get("/academic/student-school", {
+      params: { studentId, schoolUdiseNo }
+    }).then((res) => setAcademicData(res.data));
+  }, [schoolUdiseNo, studentId]);
+
+
+  useEffect(() => {
+    if (formData?.status === "Pass") {
+      if (standards.length > 0 && academicdata?.standard) {
+        const nextStandard = standards.find(st => st.standard === academicdata.standard.standard + 1);
+        setPromotedStandard(nextStandard);
+        if (nextStandard) {
+          setFormData(prev => ({ ...prev, standardId: nextStandard.id }));
+        }
+      }
+    } else if (formData.status === "fail") {
+      setFormData(prev => ({ ...prev, standardId: academicdata?.standard?.id }));
+    }
+  }, [standards, academicdata, formData.status]);
 
   useEffect(() => {
     if (formData.division && formData.standardId) {
-      const filter = classTeacherData.find(ct =>
+      const match = classTeacherData.find(ct =>
         ct?.division?.id === parseInt(formData.division) &&
         ct?.standardMaster?.id === parseInt(formData.standardId)
       );
-      setSingleTeacher(filter);
-      setWarning(!filter)
+      setSingleTeacher(match);
+      setWarning(!match);
     } else {
       setSingleTeacher(null);
     }
   }, [formData.division, formData.standardId, classTeacherData]);
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    const newValue = name === "status" ? value.toLowerCase() : value;
-    setFormData({
-      ...formData,
-      [name]: newValue
-    });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const newValue = name === 'status' ? value.toLowerCase() : value;
+    setFormData(prev => ({ ...prev, [name]: newValue }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
 
-  }
-
-  function validateForm() {
+  const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.division) {
-      newErrors.division = "कृपया तुकडी निवडा";
-    }
-    if (!formData.standardId) {
-      newErrors.standardId = "कृपया इयत्ता निवडा";
-    }
+    if (!formData.division) newErrors.division = "कृपया तुकडी निवडा";
+    if (statusForFormLoad === 'Pass' && !formData.standardId) newErrors.standardId = "कृपया इयत्ता निवडा";
     if (!formData.academicYear) {
       newErrors.academicYear = "कृपया शैक्षणिक वर्ष प्रविष्ट करा";
     } else if (!/^\d{4}-\d{2}$/.test(formData.academicYear)) {
-      newErrors.academicYear = "कृपया योग्य स्वरूपात शैक्षणिक वर्ष प्रविष्ट करा (उदा. 2024-25)";
+      newErrors.academicYear = "योग्य स्वरूपात शैक्षणिक वर्ष प्रविष्ट करा (उदा. 2024-25)";
     }
     if (!formData.status) {
       newErrors.status = "कृपया status निवडा";
     } else if (!['pass', 'fail', 'promoted', 'demoted'].includes(formData.status.toLowerCase())) {
-      newErrors.status = "कृपया valid status निवडा (pass, fail, promoted, demoted)";
+      newErrors.status = "valid status निवडा (pass, fail, promoted, demoted)";
     }
-
     return newErrors;
-  }
+  };
 
-
-  function handleSubmit(event) {
-    event.preventDefault();
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    if (formData.standardId == academicdata?.standard?.id) {
+    if (statusForFormLoad === 'Pass' &&
+      academicdata?.standard?.id &&
+      parseInt(formData.standardId) <= academicdata.standard.id) {
       alert("इयत्ता बदला (Please change the standard)");
       return;
     }
-    else {
-      const payload = {
-        ...formData,
-        studentId: id,
-        schoolUdiseNo,
-        classTeacher: singleTeacher?.id
-      };
-      setFormData({
-        division: '',
-        standardId: '',
-        academicYear: ''
-      })
-      // console.log(payload);
 
-      apiService.putdata('academic/update-status/', payload, academicdata.id).then((response) => {
+    const payload = {
+      ...formData,
+      studentId,
+      schoolUdiseNo,
+      classTeacher: singleTeacher?.id
+    };
+
+    apiService.putdata('academic/update-status/', payload, academicdata.id)
+      .then(() => {
         Swal.fire({
-          title: "विद्यार्थ्याची शैक्षणीक माहिती संपादित केली आहे..!",
-          icon: "success",
-          draggable: true
+          title: "विद्यार्थ्याची शैक्षणीक माहिती अपडेट केली आहे..!",
+          icon: "success"
+        });
+        navigate(`/teacher/Updateyear`);
+      }).catch(() => {
+        Swal.fire({
+          title: "Error",
+          text: "माहिती अपडेट करताना त्रुटी आली",
+          icon: "error"
         });
       });
+  };
 
-      navigate(`/teacher/Updateyear`);
-    }
-  }
   return (
     <div className="container py-3">
       <div className="row justify-content-center">
         <div className="col-lg-6">
           <div className="card shadow-sm border-0 rounded-3">
-            <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
-              <h3 className="mb-0 fw-bold fs-4 heading-font">विद्यार्थी शैक्षणिक माहिती अपडेट करा</h3>
+            <div className="card-header bg-primary bg-gradient text-white text-center p-3">
+              <h3 className="mb-0 fw-bold fs-4">विद्यार्थी शैक्षणिक माहिती अपडेट करा</h3>
+              <p className='mb-0 small'>Student: {academicdata?.studentId?.studentName || '...'} | सध्याची : इयत्ता {academicdata?.standard?.standard} / तुकडी  {academicdata?.division?.name || 'N/A'}</p>
             </div>
 
             <div className="card-body p-4">
-              <form onSubmit={handleSubmit} className="fs-6">
-
-                {/* Standard Select */}
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">इयत्ता</label>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <label className="form-label ">विद्यार्थी पास आहे का नापास ? </label>
                   <select
-                    className={`form-control ${errors.standardId ? 'is-invalid' : ''}`}
-                    name="standardId"
-                    value={formData.standardId}
-                    onChange={handleChange}
+                    className={`form-select ${errors.status ? 'is-invalid' : ''}`}
+                    name='status'
+                    value={formData.status}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setStatusForFormLoad(value);
+                      setFormData(prev => ({ ...prev, status: value }));
+                      if (errors.status) setErrors(prev => ({ ...prev, status: '' }));
+                    }}
                   >
-                    <option value="">-- इयत्ता निवडा --</option>
-                    {standards.map(standard => (
-                      <option key={standard.id} value={standard.id}>
-                        {standard.standard}
-                      </option>
-                    ))}
+                    <option value="">-- Status निवडा --</option>
+                    <option value="Pass">Pass</option>
+                    <option value="fail">Fail</option>
                   </select>
-                  {errors.standardId && (
-                    <div className="invalid-feedback">{errors.standardId}</div>
-                  )}
-
+                  {errors.status && <div className="invalid-feedback">{errors.status}</div>}
                 </div>
 
+                {statusForFormLoad === 'Pass' && (
+                  <>
+                    <div className="mb-3">
+                      <label className="form-label">इयत्ता</label>
+                      <input
+                        className='form-control'
+                        value={promotedStandard?.standard || ''}
+                        readOnly
+                      />
+                      {errors.standardId && <div className="invalid-feedback">{errors.standardId}</div>}
+                    </div>
+                  </>
+                )}
 
-                {/* Division Select */}
                 <div className="mb-3">
-                  <label className="form-label fw-semibold">तुकडी</label>
+                  <label className="form-label">तुकडी</label>
                   <select
                     className={`form-control ${errors.division ? 'is-invalid' : ''}`}
                     name="division"
@@ -203,75 +219,51 @@ function UpdateStudentAcademicYearForm() {
                     onChange={handleChange}
                   >
                     <option value="">-- तुकडी निवडा --</option>
-                    {divisions.map(division => (
-                      <option key={division.id} value={division.id}>
-                        {division.name}
-                      </option>
+                    {divisions.map(div => (
+                      <option key={div.id} value={div.id}>{div.name}</option>
                     ))}
                   </select>
-                  {errors.division && (
-                    <div className="invalid-feedback">{errors.division}</div>
-                  )}
-
+                  {errors.division && <div className="invalid-feedback">{errors.division}</div>}
                 </div>
 
-
-
                 <div className="mb-3">
-                  <label className="form-label fw-semibold">शिक्षक</label>
-                  <div className="form-control form-control-sm">
+                  <label className="form-label">शिक्षक</label>
+                  <div className="form-control">
                     {singleTeacher ? `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 'शिक्षक निवडले नाहीत'}
                   </div>
-                  {warning == true && <div className='mt-3 text-danger'>
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    या वर्गासाठी कोणताही शिक्षक नियुक्त केला नाही</div>}
+                  {warning && (
+                    <div className='mt-2 text-danger'>
+                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                      या वर्गासाठी शिक्षक नियुक्त नाही
+                    </div>
+                  )}
                 </div>
 
-                {/* Academic Year Input */}
                 <div className="mb-3">
-                  <label className="form-label fw-semibold">शैक्षणिक वर्ष</label>
+                  <label className="form-label">शैक्षणिक वर्ष</label>
                   <input
                     className={`form-control ${errors.academicYear ? 'is-invalid' : ''}`}
                     name='academicYear'
-                    value={formData.academicYear}
                     placeholder='उदा. 2024-25'
-                    onChange={handleChange}
+                    value={formData.academicYear}
+                    readOnly
                   />
-                  {errors.academicYear && (
-                    <div className="invalid-feedback">{errors.academicYear}</div>
-                  )}
+                  {errors.academicYear && <div className="invalid-feedback">{errors.academicYear}</div>}
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Status</label>
-                  <select
-                    className={`form-control ${errors.status ? 'is-invalid' : ''}`}
-                    name='status'
-                    value={formData.status}
-                    onChange={handleChange}
-                  >
-                    <option value="">-- Status निवडा --</option>
-                    <option value="pass">Pass</option>
-                    <option value="fail">Fail</option>
-
-                  </select>
-                  {errors.status && (
-                    <div className="invalid-feedback">{errors.status}</div>
-                  )}
-                </div>
-
-                <div className="text-center mt-4">
-                  <button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
-                    जतन करा
+                <div className="text-center">
+                  <button type="submit" className="btn btn-success w-100 fw-bold">
+                    अपडेट करा
                   </button>
                 </div>
               </form>
             </div>
+
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default UpdateStudentAcademicYearForm
+export default UpdateStudentAcademicYearForm;

@@ -24,6 +24,27 @@ function AddNewStudentAcademicYearForm() {
 
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
+
+    const calculateAcademicYear = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+        // If current month is June (5) or later, academic year is currentYear-nextYear
+        if (currentMonth >= 5) {
+            return `${currentYear}-${String(currentYear + 1).slice(-2)}`;
+        }
+        // For January (0) to May (4), academic year is previousYear-currentYear
+        return `${currentYear - 1}-${String(currentYear).slice(-2)}`;
+    };
+
+      useEffect(() => {
+        setFormData(prev => ({
+          ...prev,
+          academicYear: calculateAcademicYear()
+        }));
+      }, []);
+
     useEffect(() => {
         apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {
             setDivisions(response.data);
@@ -202,7 +223,7 @@ function AddNewStudentAcademicYearForm() {
                                         name='academicYear'
                                         value={formData.academicYear}
                                         placeholder='उदा. 2024-25'
-                                        onChange={handleChange}
+                                        readOnly
                                     />
                                     {errors.academicYear && (
                                         <div className="invalid-feedback">{errors.academicYear}</div>

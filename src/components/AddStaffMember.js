@@ -164,7 +164,7 @@ function AddStaffMember() {
             if (result.isConfirmed || result.isDenied) {
                 try {
 
-                    const payload = { ...formData, school };
+                    const payload = { ...formData, school ,status:'working'};
                     console.log("Form submitted:", payload);
                     await apiService.postdata("staff/", payload)
 
