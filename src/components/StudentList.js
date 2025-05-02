@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import apiService from '../services/api.service';
+import Next from './Next';
 
 
 function StudentList() {
@@ -116,7 +117,10 @@ function StudentList() {
             <div className="row justify-content-center">
                 <div className="col-12 col-lg-10">
                     <div className="text-center mb-4">
-                        <div className="p-4 bg-white rounded shadow" >
+                        <div className="p-4 bg-white rounded shadow position-relative" >
+                        <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/'} placeholder={'X'}></Next>
+                            </div>
                             <h2 className="fw-bold text-dark mb-0" style={{ fontSize: '2rem' }}>
                                 <FaUserGraduate className="me-2 text-primary" />
                                 सर्व विद्यार्थ्याची यादी

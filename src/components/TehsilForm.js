@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import Next from './Next';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+
 
 function TehsilForm() {
     const [allDistricts, setAllDistricts] = useState([]);
@@ -12,6 +15,7 @@ function TehsilForm() {
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -94,22 +98,47 @@ function TehsilForm() {
             return;
         }
 
-        try {
-            setIsLoading(true);
-            await apiService.postdata("tehsil/", trimmedFormData);
 
-            // Refresh tehsils list after successful submission
-            const response = await apiService.getdata("tehsil/");
-            setTehsils(response.data);
+        const result = await Swal.fire({
+            title: 'तालुका जतन करायचे आहे का?',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'जतन करा',
+            denyButtonText: 'जतन करा आणि पुढे चला',
+            cancelButtonText: 'रद्द करा'
+        });
 
-            setSubmitted(true);
-            setFormData({ tehsilName: '', district: '' });
-            setTimeout(() => setSubmitted(false), 1500);
-        } catch (error) {
-            console.error("Error saving tehsil:", error);
-            setErrors({ submit: "तालुका जतन करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा." });
-        } finally {
-            setIsLoading(false);
+        if (result.isConfirmed || result.isDenied) {
+            try {
+                setIsLoading(true);
+                await apiService.postdata("tehsil/", trimmedFormData);
+
+                const response1 = await apiService.getdata("tehsil/");
+                setTehsils(response1.data);
+
+                setSubmitted(true);
+                setFormData({ tehsilName: '', district: '' });
+                setTimeout(() => setSubmitted(false), 1500);
+                await Swal.fire('यशस्वी!', 'तालुका जतन झाले.', 'success');
+                setTimeout(() => setSubmitted(false), 1500);
+                setSubmitted(true);
+                setFormData({ districtName: '', stateid: '' });
+                setErrors({});
+                // Refresh state list
+                const response = await apiService.getdata("district/");
+                setAllDistricts(response.data);
+
+                if (result.isDenied) {
+                    navigate('/developer/village');
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire('त्रुटी!', 'डेटा जतन करण्यात अडचण आली.', 'error');
+            } finally {
+                setIsLoading(false);
+            }
         }
     }
 
@@ -118,7 +147,10 @@ function TehsilForm() {
             <div className="row justify-content-center">
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
-                        <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                        <div className="card-header bg-primary bg-gradient text-white p-3 text-center position-relative">
+                            <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer/state'} placeholder={'X'}></Next>
+                            </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">तालुका प्रविष्ट करा</h3>
                         </div>
 

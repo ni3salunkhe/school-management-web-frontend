@@ -197,7 +197,10 @@ function AddClass() {
                     <div className="row justify-content-center">
                         <div className="col-lg-8">
                             <div className="card shadow-sm border-0 rounded-3">
-                                <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                                <div className="card-header bg-primary bg-gradient text-white p-3 text-center position-relative">
+                                    <div className="position-absolute top-0 end-0 m-2">
+                                        <Next classname={'btn bg-danger text-white btn-sm'} path={'/headmaster/school'} placeholder={'X'}></Next>
+                                    </div>
                                     <h3 className="mb-0 fw-bold fs-4 heading-font">इयत्ता नोंदणी</h3>
                                 </div>
 
@@ -295,6 +298,9 @@ function AddClass() {
                         <div className="col-lg-8">
                             <div className="card shadow-sm border-0 rounded-3">
                                 <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                                    <div className="position-absolute top-0 end-0 m-2">
+                                        <Next classname={'btn bg-danger text-white btn-sm'} path={'/headmaster/school'} placeholder={'X'}></Next>
+                                    </div>
                                     <h3 className="mb-0 fw-bold fs-4 heading-font">शाळेतील इयत्ता</h3>
                                 </div>
                                 <div className="card-body p-4">
@@ -314,14 +320,18 @@ function AddClass() {
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="text-center mt-4">
-                                        <button
-                                            className="btn btn-outline-primary"
-                                            onClick={() => setIsShows(true)}
-                                        >
-                                            नवीन इयत्ता जोडा
-                                        </button>
-                                        <Next classname={'btn btn-primary'} path={'/headmaster/staff'} placeholder={'पुढे चला'}></Next>
+                                    <div className="d-flex justify-content-center text-center mt-4 gap-3">
+                                        <div>
+                                            <button
+                                                className="btn btn-outline-primary"
+                                                onClick={() => setIsShows(true)}
+                                            >
+                                                नवीन इयत्ता जोडा
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <Next classname={'btn btn-primary'} path={'/headmaster/staff'} placeholder={'पुढे चला'}></Next>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

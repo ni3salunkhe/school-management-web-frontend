@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import Next from './Next';
 
 function AddNewStudentAcademicYearForm() {
     const { id } = useParams();
@@ -117,6 +118,9 @@ function AddNewStudentAcademicYearForm() {
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                        <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
+                            </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">विद्यार्थि शैक्षणिक माहिती अपडेट करा</h3>
                         </div>
 

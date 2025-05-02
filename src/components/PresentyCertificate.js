@@ -112,7 +112,7 @@ function PresentyCertificate() {
           className="btn btn-primary"
           onClick={handlePrint}
         >
-          Print Leaving Certificate
+          Print 75% Presenty Certificate
         </button>
       </div>
 

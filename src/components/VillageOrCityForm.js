@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import apiService from '../services/api.service'
 import Next from './Next';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 function VillageOrCityForm() {
     const [formData, setFormData] = useState({
@@ -12,6 +14,7 @@ function VillageOrCityForm() {
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         apiService.getdata("tehsil/").then((response) => {
@@ -53,12 +56,12 @@ function VillageOrCityForm() {
             //     ...prev,
             //     villageName: "हे गाव/शहर आधीच अस्तित्वात आहे."
             // }));
-            newErrors.villageName="हे गाव/शहर आधीच अस्तित्वात आहे."
+            newErrors.villageName = "हे गाव/शहर आधीच अस्तित्वात आहे."
         }
         return newErrors;
     }
 
-    function handleSubmit(e) {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const trimmedFormData = {
@@ -72,25 +75,48 @@ function VillageOrCityForm() {
             return;
         }
 
-        setIsLoading(true);
+        const result = await Swal.fire({
+            title: 'गाव/शहर जतन करायचे आहे का?',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'जतन करा',
+            denyButtonText: 'जतन करा आणि पुढे चला',
+            cancelButtonText: 'रद्द करा'
+        });
 
-        apiService.postdata("village/", trimmedFormData)
-            .then(() => {
+        if (result.isConfirmed || result.isDenied) {
+            try {
+                setIsLoading(true);
+
+                apiService.postdata("village/", trimmedFormData)
+
+                const response1 = await apiService.getdata("village/");
+                setVillage(response1.data);
+
+                setSubmitted(true);
+                setFormData({ tehsilName: '', district: '' });
+                setTimeout(() => setSubmitted(false), 1500);
+                await Swal.fire('यशस्वी!', 'गाव/शहर जतन झाले.', 'success');
+                setTimeout(() => setSubmitted(false), 1500);
                 setSubmitted(true);
                 setFormData({ villageName: '', tehsilid: '' });
                 setErrors({});
-                setTimeout(() => {
-                    setSubmitted(false)
-                }, 1500);
-                setVillage((prev) => [...prev, trimmedFormData]);
-            })
-            .catch((error) => {
-                console.error("Error saving village:", error);
-                setErrors({ submit: "गाव/शहर जतन करताना त्रुटी आली." });
-            })
-            .finally(() => {
+                // Refresh state list
+                const response = await apiService.getdata("tehsil/");
+                setTehsil(response.data);
+
+                if (result.isDenied) {
+                    navigate('/developer/state');
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire('त्रुटी!', 'डेटा जतन करण्यात अडचण आली.', 'error');
+            } finally {
                 setIsLoading(false);
-            });
+            }
+        }
     }
 
     return (
@@ -98,7 +124,10 @@ function VillageOrCityForm() {
             <div className="row justify-content-center">
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
-                        <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                        <div className="card-header bg-primary bg-gradient text-white p-3 text-center position-relative">
+                            <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer/state'} placeholder={'X'}></Next>
+                            </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">गाव किंवा शहर प्रविष्ट करा</h3>
                         </div>
 
@@ -156,7 +185,7 @@ function VillageOrCityForm() {
                                 {submitted && !isLoading && (
                                     <div className="mt-3 text-success">गाव/शहर यशस्वीरित्या जतन झाले!</div>
                                 )}
-                                <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/state'} placeholder={'पुढे चला'}></Next>
+                                {/* <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/state'} placeholder={'पुढे चला'}></Next> */}
                             </form>
                         </div>
                     </div>

@@ -3,6 +3,7 @@ import { BiSearch } from 'react-icons/bi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import Next from './Next';
 
 function AddNewStudentAcademicYear() {
     const [surName, setSurName] = useState('');
@@ -76,7 +77,10 @@ function AddNewStudentAcademicYear() {
                 <div className="col-12 col-lg-10">
                     {/* Header with official-looking design */}
                     <div className="text-center mb-4">
-                        <div className="p-3 bg-white rounded shadow-sm">
+                        <div className="p-3 bg-white rounded shadow-sm position-relative">
+                        <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
+                            </div>
                             <h2 className="fw-bold text-dark mb-1" style={{ fontSize: '1.8rem' }}>
                                 विद्यार्थ्यांची शैक्षणिक माहिती नोंदणी फॉर्म
                             </h2>

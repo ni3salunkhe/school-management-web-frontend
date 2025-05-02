@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import Next from './Next';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 function StateForm() {
     const [stateName, setStateName] = useState('');
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [allStates, setAllStates] = useState([]);
-
+    const navigate=useNavigate();
     useEffect(() => {
         apiService.getdata("state/")
             .then((response) => {
@@ -37,7 +39,7 @@ function StateForm() {
         setErrors(newError);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const trimmedStateName = stateName.trim();
         let validationErrors = {};
@@ -58,24 +60,39 @@ function StateForm() {
             return;
         }
 
-        apiService.postdata("state/", { stateName: trimmedStateName })
-            .then(() => {
-                alert("राज्य यशस्वीरित्या जतन झाले!");
+        const result = await Swal.fire({
+            title: 'राज्य जतन करायचे आहे का?',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'जतन करा',
+            denyButtonText: 'जतन करा आणि पुढे चला',
+            cancelButtonText: 'रद्द करा'
+        });
+    
+        if (result.isConfirmed || result.isDenied) {
+            try {
+                await apiService.postdata("state/", { stateName: trimmedStateName });
+    
+                await Swal.fire('यशस्वी!', 'राज्य जतन झाले.', 'success');
+                setTimeout(() => setSubmitted(false), 1500);
                 setSubmitted(true);
                 setStateName('');
-                setTimeout(() => {
-                    setSubmitted(false);
-                }, 1500);
                 setErrors({});
                 // Refresh state list
-                apiService.getdata("state/").then((response) => {
-                    setAllStates(response.data);
-                });
-            })
-            .catch((error) => {
+                const response = await apiService.getdata("state/");
+                setAllStates(response.data);
+    
+                if (result.isDenied) {
+                    navigate('/developer/district');
+                }
+    
+            } catch (error) {
                 console.error("Error:", error);
-                alert("डेटा जतन करण्यात अडचण आली.");
-            });
+                Swal.fire('त्रुटी!', 'डेटा जतन करण्यात अडचण आली.', 'error');
+            }
+        }
+    
     };
 
     return (
@@ -83,7 +100,10 @@ function StateForm() {
             <div className="row justify-content-center">
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
-                        <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                        <div className="card-header bg-primary bg-gradient text-white p-3 text-center position-relative">
+                            <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer'} placeholder={'X'}></Next>
+                            </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">राज्य प्रविष्ट करा</h3>
                         </div>
 
@@ -107,7 +127,7 @@ function StateForm() {
                                 </div>
                                 <button type="submit" className="btn btn-success btn-sm">जतन करा</button>
                                 {submitted && <div className="mt-3 text-success">राज्य यशस्वीरित्या जतन झाले!</div>}
-                                <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/district'} placeholder={'पुढे चला'}></Next>
+                                {/* <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/district'} placeholder={'पुढे चला'}></Next> */}
                             </form>
                         </div>
                     </div>

@@ -5,6 +5,7 @@ import CombinedDropdownInput from './CombinedDropdownInput'; // Assuming this co
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
 import Next from './Next';
+import { useNavigate } from 'react-router-dom';
 
 // --- Marathi Date Conversion Helpers ---
 const marathiDays = [
@@ -36,6 +37,7 @@ function getMarathiDateWords(dateStr) {
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) return '';
 
+        
         const day = date.getDate();
         const month = date.getMonth(); // 0-indexed
         const year = date.getFullYear();
@@ -70,6 +72,7 @@ function AddStudent() {
     const [standards, setStandards] = useState([]);
     const [students, setStudents] = useState([]);
     const [errors, setErrors] = useState({}); // Combined state for immediate feedback and submit errors
+    const navigate=useNavigate();
     // Removed separate warningMessage state, integrated into errors
 
     const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
@@ -316,11 +319,11 @@ function AddStudent() {
             const birthDate = new Date(value);
             const today = new Date();
             const minBirthDate = new Date(today.getFullYear() - 6, today.getMonth(), today.getDate());
-            
+
             if (birthDate > minBirthDate) {
-              currentErrors.dateOfBirth = 'विद्यार्थ्याचे वय किमान ६ वर्षे असणे आवश्यक आहे.';
+                currentErrors.dateOfBirth = 'विद्यार्थ्याचे वय किमान ६ वर्षे असणे आवश्यक आहे.';
             } else {
-              delete currentErrors.dateOfBirth;
+                delete currentErrors.dateOfBirth;
             }
         }
         // Aadhaar No (Check length) - Optional immediate check
@@ -348,7 +351,7 @@ function AddStudent() {
 
 
     // --- Handle Submit ---
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validateForm()) {
@@ -365,23 +368,35 @@ function AddStudent() {
 
         // --- Submit Logic ---
         const payload = { ...formData, school };
-        console.log('Submitting payload:', payload);
-        apiService.postdata("student/", payload)
-            .then((response) => {
-                Swal.fire({
-                    title: "विद्यार्थ्याची माहिती यशस्वीरित्या जोडली....!",
-                    icon: "success",
-                    draggable: true
-                });
-                // Fetch updated student list
+
+        const result = await Swal.fire({
+            title: 'जिल्हा जतन करायचे आहे का?',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'जतन करा',
+            denyButtonText: 'जतन करा आणि पुढे चला',
+            cancelButtonText: 'रद्द करा'
+        });
+
+        if (result.isConfirmed || result.isDenied) {
+            try {
+                await apiService.postdata("student/", payload)
+
+                await Swal.fire('यशस्वी!', 'विद्यार्थी माहिती जतन झाली.', 'success');
+
                 if (school) {
                     apiService.getbyid('student/byudise/', school).then((res) => setStudents(res.data));
                 }
                 setFormData(initialFormData); // Reset form
                 setErrors({}); // Clear errors
-            })
-            .catch(error => {
-                console.error("Error submitting form:", error);
+
+                if (result.isDenied) {
+                    navigate('/clerk/classteacher');
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
                 let errorMsg = "माहिती सबमिट करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.";
                 if (error.response && error.response.data) {
                     // Try to extract backend error message
@@ -394,8 +409,10 @@ function AddStudent() {
                         setErrors(prev => ({ ...prev, registerNumber: error.response.data.registerNumber }));
                     }
                 }
-                alert(errorMsg);
-            });
+                Swal.fire('त्रुटी!', errorMsg, 'error');
+
+            }
+        }
     }
 
     // Helper to get validation class
@@ -411,7 +428,10 @@ function AddStudent() {
                 <div className="col-lg-11">
                     <div className="card shadow-sm border-0 rounded-3 overflow-hidden">
                         {/* Header */}
-                        <div className="card-header bg-primary bg-gradient text-white p-3">
+                        <div className="card-header bg-primary bg-gradient text-white p-3 position-relative">
+                        <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
+                            </div>
                             <div className="d-flex justify-content-center align-items-center">
                                 {/* <BiUserCircle className="fs-4 me-2" />  */}
                                 <BiUserPlus className="fs-2 me-2" />
@@ -691,7 +711,7 @@ function AddStudent() {
                                         <i className="bi bi-check-circle me-2"></i>
                                         नोंदणी सबमिट करा
                                     </button>
-                                    <Next classname={'btn btn-success btn-lg px-5 py-2 rounded-pill shadow-sm'} path={'/clerk/classteacher'} placeholder={'पुढे चला'}></Next>
+                                    {/* <Next classname={'btn btn-success btn-lg px-5 py-2 rounded-pill shadow-sm'} path={'/clerk/classteacher'} placeholder={'पुढे चला'}></Next> */}
                                 </div>
                             </form>
                         </div>

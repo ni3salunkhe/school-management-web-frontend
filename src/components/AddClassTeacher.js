@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import apiService from '../services/api.service';
 import { jwtDecode } from 'jwt-decode';
 import Next from './Next';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 function AddClassTeacher() {
     const [formData, setFormData] = useState({
@@ -19,7 +21,7 @@ function AddClassTeacher() {
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
-
+    const navigate=useNavigate();
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
     useEffect(() => {
@@ -118,30 +120,54 @@ function AddClassTeacher() {
             return;
         }
 
-        try {
-            setIsLoading(true);
-            setApiError(null);
+        const result = await Swal.fire({
+            title: 'कर्मचारी खाते तयार करायचे आहे का?',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'जतन करा',
+            denyButtonText: 'जतन करा आणि पुढे चला',
+            cancelButtonText: 'रद्द करा'
+        });
 
-            const payload = { ...formData, schoolUdiseNo };
-            await apiService.postdata("classteacher/", payload);
+        if (result.isConfirmed || result.isDenied) {
+            try {
+                setIsLoading(true);
+                setApiError(null);
+    
+                const payload = { ...formData, schoolUdiseNo };
+                await apiService.postdata("classteacher/", payload);
+    
+                // Refresh data after successful submission
+                const response = await apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo);
+                setClassTeacherData(response.data);
+                await Swal.fire({
+                    title: "कर्मचारीची माहिती यशस्वीरीत्या संपादित केली आहे ..!",
+                    icon: "success",
+                    draggable: true
+                });
+    
+                setSubmitted(true);
+                setFormData({
+                    division: '',
+                    staff: '',
+                    standardMaster: ''
+                });
+    
+                setTimeout(() => setSubmitted(false), 1500);
 
-            // Refresh data after successful submission
-            const response = await apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo);
-            setClassTeacherData(response.data);
+                
 
-            setSubmitted(true);
-            setFormData({
-                division: '',
-                staff: '',
-                standardMaster: ''
-            });
+                if (result.isDenied) {
+                    navigate('/clerk/AddAcademicNewStudents');
+                }
 
-            setTimeout(() => setSubmitted(false), 1500);
-        } catch (error) {
-            console.error("Error saving class teacher:", error);
-            setApiError("वर्गशिक्षक जतन करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
-        } finally {
-            setIsLoading(false);
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire('त्रुटी!', 'डेटा जतन करण्यात अडचण आली.', 'error');
+            }finally {
+                setIsLoading(false);
+            }
         }
     }
 
@@ -151,6 +177,9 @@ function AddClassTeacher() {
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
+                        <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
+                            </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">वर्गशिक्षक नियुक्ती</h3>
                         </div>
 
@@ -226,14 +255,14 @@ function AddClassTeacher() {
                                 </div>
 
                                 <div className="text-center mt-4 gap-5">
-                                    <button 
-                                        type="submit" 
+                                    <button
+                                        type="submit"
                                         className="btn btn-primary px-4 py-2 rounded-pill shadow-sm"
                                         disabled={isLoading || warning}
                                     >
                                         {isLoading ? 'प्रक्रिया करत आहे...' : 'जतन करा'}
                                     </button>
-                                    <Next classname={'btn btn-success px-4 py-2 rounded-pill shadow-sm'} path={'/clerk/AddAcademicNewStudents'} placeholder={'पुढे चला'}></Next>
+                                    {/* <Next classname={'btn btn-success px-4 py-2 rounded-pill shadow-sm'} path={'/clerk/AddAcademicNewStudents'} placeholder={'पुढे चला'}></Next> */}
                                 </div>
 
 

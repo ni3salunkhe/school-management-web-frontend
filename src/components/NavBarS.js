@@ -5,6 +5,7 @@ import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiPlusCircle, FiFilt
 import { CgProfile } from "react-icons/cg";
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import '../styling/NavBar.css';
 
 function NavBarS({ role }) {
   const handleShowSidebar = () => setShowSidebar(true);
@@ -20,7 +21,7 @@ function NavBarS({ role }) {
   return (
     <div className="navbar-wrapper">
       <Navbar
-        style={{ backgroundColor: "#111111", padding: '0.5rem' }}
+        style={{ backgroundColor: "black", padding: '0.5rem' }}
         variant="dark"
         expand="md"
         fixed="top"
@@ -35,17 +36,17 @@ function NavBarS({ role }) {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto align-items-center">
-              <div className="d-flex align-items-center">
+              <>
                 {role == "DEVELOPER" && <Nav className="ms-auto align-items-center">
-                  <Nav.Link className="text-white" as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
-                  <Nav.Link className="text-white" as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
-                  <Nav.Link className="text-white" as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
-                  <Dropdown  as={Nav.Item} className="me-2">
-                    <Dropdown.Toggle as={Nav.Link} style={{ color: "white" }}>
+                  <Nav.Link className="" as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
+                  <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
+                  <Nav.Link as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
+                  <Dropdown as={Nav.Item} className="me-2">
+                    <Dropdown.Toggle as={Nav.Link} >
                       स्थान माहिती प्रविष्ट करणे
-                      
+
                     </Dropdown.Toggle>
-                    <Dropdown.Menu>
+                    <Dropdown.Menu style={{ color: "white", backgroundColor: "black", padding: '0.5rem' }}>
                       <Dropdown.Item as={Link} to={"/developer/state"}>राज्य प्रविष्ट करणे</Dropdown.Item>
                       <Dropdown.Item as={Link} to={"/developer/district"}>जिल्हा  प्रविष्ट करणे</Dropdown.Item>
                       <Dropdown.Item as={Link} to={"/developer/tehsil"}>तालुका  प्रविष्ट करणे</Dropdown.Item>
@@ -56,61 +57,16 @@ function NavBarS({ role }) {
                   <Nav.Link className="bg-danger text-white rounded-pill py-1" as={Link} to={"/"}><FiLogOut className="me-2" /> लॉगआऊट  </Nav.Link>
 
                 </Nav>}
-                {/* <Form className="me-2 d-none d-lg-block position-relative">
-                  <Form.Control
-                    type="search"
-                    placeholder="Search..."
-                    className="form-control-sm rounded-pill"
-                    style={{ width: '200px', paddingRight: '30px' }}
-                  />
-                  <FiSearch className="position-absolute" style={{ right: '10px', top: '7px' }} />
-                </Form> */}
-
-                {/* <Dropdown align="end" className="me-2">
-                  <Dropdown.Toggle 
-                    style={{ backgroundColor: 'transparent', color: "white", border: 'none' }} 
-                    className="btn-sm position-relative p-1" 
-                    id="notification-dropdown"
+                  <div className="d-flex align-items-center text-white ">
+                  <span className="d-none d-md-inline me-2 p-2">{`${role}`.toUpperCase()}</span>
+                  <div
+                    className="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                    style={{ width: '32px', height: '32px' }}
                   >
-                    <FiBell size={20} />
-                    <Badge 
-                      bg="danger" 
-                      pill 
-                      className="position-absolute top-0 start-100 translate-middle"
-                      style={{ fontSize: '0.6rem' }}
-                    >
-                      4
-                    </Badge>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu className="dropdown-menu-end shadow-sm">
-                    <Dropdown.Header>Notifications</Dropdown.Header>
-                    <Dropdown.Item>New circular pending approval</Dropdown.Item>
-                    <Dropdown.Item>5 circulars awaiting review</Dropdown.Item>
-                    <Dropdown.Item>System maintenance scheduled</Dropdown.Item>
-                    <Dropdown.Divider />
-                    <Dropdown.Item className="text-center">View all notifications</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown> */}
-
-                <Dropdown align="end">
-                  <Dropdown.Toggle
-                    style={{ backgroundColor: 'transparent', color: "white", border: 'none' }}
-                    className="btn-sm d-flex align-items-center"
-                    id="profile-dropdown"
-                  >
-                    <span className="d-none d-md-inline me-2">{`${role}`.toUpperCase()}</span>
-                    <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                      <CgProfile style={{ width: '28px', height: '28px' }} />
-                    </div>
-                  </Dropdown.Toggle>
-                  {/* <Dropdown.Menu className="dropdown-menu-end shadow">
-                    <Dropdown.Item href="#profile"><FiUsers className="me-2" /> Profile</Dropdown.Item>
-                    <Dropdown.Item href="#settings"><FiSettings className="me-2" /> Settings</Dropdown.Item>
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> Logout</Dropdown.Item>
-                  </Dropdown.Menu> */}
-                </Dropdown>
-              </div>
+                    <CgProfile style={{ width: '28px', height: '28px', color: '#0d6efd' }} />
+                  </div>
+                </div>
+              </>
             </Nav>
           </Navbar.Collapse>
         </Container>

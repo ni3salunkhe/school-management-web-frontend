@@ -5,6 +5,8 @@ import { FaBox, FaCalendarAlt, FaCog } from 'react-icons/fa'
 import apiService from '../services/api.service'
 import { format, addYears, subDays } from 'date-fns';
 import Swal from 'sweetalert2'
+import { useNavigate } from 'react-router-dom'
+import Next from './Next'
 
 const Subscription = () => {
     const [schools, setSchools] = useState([])
@@ -12,6 +14,8 @@ const Subscription = () => {
     const [isExpired, setIsExpired] = useState(false)
     const [flag, setFlag] = useState("")
     const [buttonText, setButtonText] = useState("मंजूर कर")
+    const navigate = useNavigate();
+
     const fetchSchools = async () => {
         try {
             const response = await apiService.getdata('school/');
@@ -130,35 +134,54 @@ const Subscription = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            try {
-                const userData = {
-                    udiseNumber: formData.udiseNumber,
-                    startdate: convertToYYYYMMDD(formData.startdate),
-                    enddate: convertToYYYYMMDD(formData.enddate)
+           
+
+            const result = await Swal.fire({
+                title: 'शाळेचे खाते तयार करायचे आहे का?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'जतन करा',
+                denyButtonText: 'जतन करा आणि पुढे चला',
+                cancelButtonText: 'रद्द करा'
+            });
+
+            if (result.isConfirmed || result.isDenied) {
+                try {
+                    const userData = {
+                        udiseNumber: formData.udiseNumber,
+                        startdate: convertToYYYYMMDD(formData.startdate),
+                        enddate: convertToYYYYMMDD(formData.enddate)
+                    }
+                    if (flag === "renew") {
+                        await apiService.post("api/subscription/renew", userData);
+                        // alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
+                        await Swal.fire({
+                            title: "शाळेची माहिती यशस्वीरीत्या संपादित केली आहे ..!",
+                            icon: "success",
+                            draggable: true
+                        });
+                        setButtonText("मंजूर कर");
+                        setFlag("");
+                    } else {
+                        await apiService.post("api/subscription/create", formData);
+                        
+                        Swal.fire({
+                            title: "subscription यशस्वीरीत्या नोंदवली आहे!",
+                            icon: "success",
+                            draggable: true
+                        });
+
+                    }
+                    fetchSchools();
+                    if (result.isDenied) {
+                        navigate('/developer');
+                    }
+
+                } catch (error) {
+                    console.error("Error:", error);
+                    Swal.fire('त्रुटी!', 'डेटा जतन करण्यात अडचण आली.', 'error');
                 }
-                console.log(flag)
-                if (flag === "renew") {
-                    await apiService.post("api/subscription/renew", userData);
-                    // alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
-                    Swal.fire({
-                        title: "subscription नूतनीकरण यशस्वीरीत्या झाले आहे!",
-                        icon: "success",
-                        draggable: true
-                    });
-                    setButtonText("मंजूर कर");
-                    setFlag("");
-                } else {
-                    await apiService.post("api/subscription/create", formData);
-                    // alert("Bhai data gaya hoga dekh ek baar" + formData)
-                    // alert("subscription यशस्वीरीत्या नोंदवली आहे!");
-                    Swal.fire({
-                        title: "subscription यशस्वीरीत्या नोंदवली आहे!",
-                        icon: "success",
-                        draggable: true
-                    });
-                }
-            } catch (error) {
-                console.log(error)
             }
         }
         setFormData({
@@ -167,7 +190,6 @@ const Subscription = () => {
             enddate: ''
         })
     }
-    // Add this function somewhere in your component file, maybe outside the component function
     const formatDateToString = (date) => {
         if (!(date instanceof Date) || isNaN(date)) {
             return ''; // Return empty string for invalid dates
@@ -182,6 +204,9 @@ const Subscription = () => {
             className="d-flex justify-content-center align-items-center subuscription"
             style={{ height: '100vh' }} >
             <Card style={{ height: '33rem', width: '40rem' }} className='shadow-lg'>
+            <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer/school'} placeholder={'X'}></Next>
+                            </div>
                 <Card.Header as="h3" className="text-center p-3 bg-primary">सदस्यता नूतनीकरण करा</Card.Header>
                 <Card.Body>
                     <Form onSubmit={handleSubmit}>

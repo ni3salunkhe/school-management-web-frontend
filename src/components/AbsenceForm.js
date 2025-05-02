@@ -6,11 +6,14 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState([])
   const [errors, setErrors] = useState({})
-
   const now = new Date()
   const day = now.toISOString().split('T')[0]
   const monthnyear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
+
+  const [formData, setFormData] = useState({
+    date: '' || day
+  })
 
   useEffect(() => {
     if (udiseNo && selectedClass) {
@@ -23,7 +26,7 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
       const response = await apiService.getdata(`api/attendance/by-udise-std-monthnyear/${udiseNo}/${selectedClass}/${monthnyear}`)
       if (Array.isArray(response.data)) {
         const filtered = response.data.filter(
-            student => String(student.std).includes(String(selectedClass))
+          student => String(student.std).includes(String(selectedClass))
         )
         setStudents(filtered)
         console.log(response.data)
@@ -49,9 +52,35 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
     }
   }
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }))
+    if (name === 'date') {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      if (selectedDate > today) {
+        setErrors(prevState => ({ ...prevState, [name]: 'महाशय तारीख आजपर्यंतचीच निवडू शकता.' }));
+        setFormData(prevState => ({
+          ...prevState,
+          [name]: day
+        }))
+      } else {
+        setErrors(prevState => ({ ...prevState, [name]: '' }));
+      }
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    if (formData.date === '') {
+      
+      setErrors({ date: 'महाशय तारीख निवडणे आवश्यक आहे.' })
+      return
+    }
     if (!selectedClass) {
       setErrors({ class: 'Please select a class' })
       return
@@ -66,7 +95,7 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
       const attendanceData = {
         udiseNo,
         studentRegisterId: selectedStudents,
-        day
+        day: formData.date
       }
       await apiService.putData(`api/attendance/mark-absent`, attendanceData)
       alert('👉 विद्यार्थ्यांची गैरहजेरी यशस्वीरित्या नोंदवली गेली!')
@@ -80,8 +109,27 @@ const AbsenceForm = ({ udiseNo, selectedClass }) => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <h5>🚫 अनुपस्थित विद्यार्थ्यांची नोंद</h5>
-
+      <div className='d-flex justify-content-between align-items-center'>
+        <h5>🚫 अनुपस्थित विद्यार्थ्यांची नोंद</h5>
+        <div>
+          <Form.Group>
+            <Form.Label>
+              अनुपस्थित तारीख निवडा
+            </Form.Label>
+            <Form.Control
+              name='date'
+              type='date'
+              value={formData.date}
+              onChange={handleChange}
+              isInvalid={!!errors.date}
+            >
+            </Form.Control>
+            <Form.Control.Feedback type='invalid' >
+              {errors.date}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+      </div>
       <Table bordered hover responsive className="mt-3 text-center">
         <thead className="table-light">
           <tr>

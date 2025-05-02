@@ -690,6 +690,9 @@ function AddSchoolInfo() {
         <div className='container-fluid py-4'>
           <div className="card shadow-lg border-0 rounded-lg overflow-hidden">
             {/* Header with gradient blue background */}
+             <div className="position-absolute top-0 end-0 m-2">
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/headmaster'} placeholder={'X'}></Next>
+                            </div>
             <div className="card-header text-white py-3" style={{ background: 'linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%)' }}>
               <div className="d-flex align-items-center">
                 {schoolData?.logo && (
