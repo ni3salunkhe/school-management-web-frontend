@@ -293,8 +293,6 @@ const NewSchool = () => {
                     userData.append('logo', formData.logo);
                 }
 
-
-
                 // Send the request
                 try {
                     // console.log(userData); // Check data before sending

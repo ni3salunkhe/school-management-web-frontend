@@ -138,7 +138,7 @@ function AddStaffMember() {
         console.log("Form submitted:", formData);
         // TODO: Send formData to backend
         if (validateForm()) {
-            const payload = { ...formData, school };
+            const payload = { ...formData, school ,status:'working'};
             console.log("Form submitted:", payload);
             apiService.postdata("staff/", payload).then((response) => {
                 Swal.fire({

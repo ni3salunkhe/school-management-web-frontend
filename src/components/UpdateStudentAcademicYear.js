@@ -71,6 +71,8 @@ function UpdateStudentAcademicYear() {
       .then((response) => {
         // console.log("Student data received:", response.data);
         setResults(response.data);
+        console.log(response.data);
+        
         setLoading(false);
       })
       .catch((error) => {
