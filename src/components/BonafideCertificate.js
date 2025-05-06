@@ -10,13 +10,21 @@ function BonafideCertificate() {
     const { id } = useParams();
     const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [academicData, setAcademicData] = useState();
+    const date=new Date();
+
+    const api = axios.create({
+        baseURL: 'http://localhost:8080',
+        headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+        }
+    })
 
     useEffect(() => {
         apiService.getbyid('student/', id).then((response) => {
             setStudentData(response.data);
         });
 
-        apiService.api.get("http://localhost:8080/academic/student-school", {
+        api.get("http://localhost:8080/academic/student-school", {
             params: {
                 studentId: id,
                 schoolUdiseNo: udise
@@ -105,7 +113,7 @@ function BonafideCertificate() {
         </body>
         </html>
     `);
-    printWindow.document.close();
+        printWindow.document.close();
     }
 
     const CertificateTemplate = ({ isOfficeCopy = false }) => (
@@ -113,7 +121,7 @@ function BonafideCertificate() {
             {isOfficeCopy && (
                 <div className="office-copy-label">OFFICE COPY</div>
             )}
-            
+
             {/* Header Section */}
             <div className="row">
                 <div className="col-3">
@@ -205,15 +213,15 @@ function BonafideCertificate() {
                     </div>
                 </div>
             </div>
-            
+
             <div className='pt-3'>
-                <p>प्रमाणपत्र देण्यात येते की ,कुमार/कुमारी <span className='fw-bold'>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> हा/ही दिनांक {studentData?.admissionDate} ते दिनांक { } पर्यंत या विद्यालयाचा प्रामाणिक विद्यार्थी/विद्यार्थिनी {academicData?.status === "learning" ? ("आहे") : ("होता/होती")}.ती सन {academicData?.academicYear} या वर्षी {academicData?.standard?.standard} ईयत्तेमध्ये शिक्षण घेत {academicData?.status === "learning" ? ("आहे") : ("होता/होती")}.<br />विद्यालयाच्या नोंदणीबुकावरून त्याची/तिची जन्म तारीख (अंकी) {studentData?.dateOfBirth} ही आहे. जन्म तारीख (अक्षरी) {studentData?.dateOfBirthInWord} ही आहे. जन्मस्थळ {studentData?.birthPlace} तालुका {studentData?.tehasilOfBirth?.tehsilName} जिल्हा {studentData?.districtOfBirth?.districtName} राज्य {studentData?.stateOfBirth?.stateName} आहे. त्याचा/तिचा धर्म {studentData?.religion} जात {studentData?.caste || ''} पोटजात {studentData?.subCaste || '_______'}आहे .माझ्या माहितीनुसार त्याची/तिची वर्तणूक चांगली आहे प्रमाणपत्र मागणीनुसार [] कामी देण्यात आले.</p>
+                <p>प्रमाणपत्र देण्यात येते की ,{studentData?.gender === "पुरुष" ? ("कुमार") : ("कुमारी")} <span className='fw-bold'>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> {studentData?.gender === "पुरुष" ? ("हा") : ("ही")} दिनांक <span className='fw-bold'>{studentData?.admissionDate}</span>  ते दिनांक <span className='fw-bold'>{academicData?.academicYear}</span>  पर्यंत या विद्यालयाचा प्रामाणिक {studentData?.gender === "पुरुष" ? ("विद्यार्थी") : ("विद्यार्थिनी")} {academicData?.status === "learning" ? ("आहे") : ("होता/होती")}.ती सन <span className='fw-bold'>{academicData?.academicYear}</span>  या वर्षी  <span className='fw-bold'>{academicData?.standard?.standard}</span>  ईयत्तेमध्ये शिक्षण घेत {academicData?.status === "learning" ? ("आहे") : ("होता/होती")}.<br />विद्यालयाच्या नोंदणीबुकावरून {studentData?.gender === "पुरुष" ? ("त्याची") : ("तिची")} जन्म तारीख (अंकी) <span className='fw-bold'>{studentData?.dateOfBirth}</span> ही आहे. जन्म तारीख (अक्षरी) <span className='fw-bold'>{studentData?.dateOfBirthInWord}</span> ही आहे. जन्मस्थळ <span className='fw-bold'>{studentData?.birthPlace}</span> तालुका <span className='fw-bold'>{studentData?.tehasilOfBirth?.tehsilName}</span> जिल्हा <span className='fw-bold'>{studentData?.districtOfBirth?.districtName}</span> राज्य <span className='fw-bold'>{studentData?.stateOfBirth?.stateName}</span> आहे. {studentData?.gender === "पुरुष" ? ("त्याचा") : ("तिचा")} धर्म <span className='fw-bold'>{studentData?.religion}</span> जात <span className='fw-bold'>{studentData?.caste || ''}</span> पोटजात <span className='fw-bold'>{studentData?.subCaste || '_______'}</span> आहे. माझ्या माहितीनुसार {studentData?.gender === "पुरुष" ? ("त्याची") : ("तिची")} वर्तणूक चांगली आहे प्रमाणपत्र मागणीनुसार [] कामी देण्यात आले.</p>
             </div>
-            
+
             <div className='row mt-4'>
                 <div className='col-6'>
                     <p>स्थळ :- </p>
-                    <p>दिनांक :-</p>
+                    <p>दिनांक :-  {date.getFullYear()}-{date.getMonth()}-{date.getDate()}</p>
                 </div>
                 <div className='col-6'>
                     {isOfficeCopy ? (
@@ -228,7 +236,7 @@ function BonafideCertificate() {
                     )}
                 </div>
             </div>
-            
+
             {isOfficeCopy && (
                 <div className="mt-4 text-center border-top pt-3">
                     <p className="mb-2"><strong>मोबाईल क्र./आधार क्र.</strong></p>
@@ -263,7 +271,7 @@ function BonafideCertificate() {
                     <div className="certificate-page">
                         <CertificateTemplate />
                     </div>
-                    
+
                     {/* Office Copy - Second Page */}
                     <div className="certificate-page">
                         <CertificateTemplate isOfficeCopy={true} />

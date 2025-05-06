@@ -7,40 +7,58 @@ function PresentyCertificate() {
 
   const { id } = useParams();
   const [studentData, setStudentData] = useState();
-  const[academicData,setAcademicData]=useState();
-  const[lastAcademicData,setLastAcademicData]=useState();
+  const [academicData, setAcademicData] = useState();
+  const [lastAcademicData, setLastAcademicData] = useState();
   const udise = 12345678093;
   const printContentRef = useRef(null);
   const navigate = useNavigate();
+
+  const date = new Date();
 
   const A4_WIDTH_PX = 794;
   const A4_HEIGHT_PX = 900;
 
   useEffect(() => {
-    apiService.getbyid('student/', id).then((response) => {
-      console.log('Student Data:', response.data);
-      setStudentData(response.data);
-    });
-  
-    axios.get("http://localhost:8080/academic/student-school", {
+    // Fetch student data
+    apiService.getbyid('student/', id)
+      .then((response) => {
+        console.log('Student Data:', response.data);
+        setStudentData(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching student data:', error);
+      });
+
+    // Fetch academic data
+    apiService.api.get("http://localhost:8080/academic/student-school", {
       params: {
         studentId: id,
         schoolUdiseNo: udise
       }
-    }).then((response) => {
-      console.log('Academic Data:', response.data);
-      setAcademicData(response.data);
-  
-      // Now that we have academicData, call the last year data API
-      apiService.getbyid('academicold/lastyear/', response.data.id).then((lastYearResponse) => {
-        console.log('Last Year Academic:', lastYearResponse.data);
-        setLastAcademicData(lastYearResponse.data);
+    })
+      .then((response) => {
+        console.log('Academic Data:', response.data);
+        setAcademicData(response.data);
+
+        // Fetch last year's data after getting academic data
+        apiService.getbyid('academicold/lastyear/', response.data.id)
+          .then((lastYearResponse) => {
+            console.log('Last Year Academic:', lastYearResponse.data);
+            setLastAcademicData(lastYearResponse.data);
+          })
+          .catch((error) => {
+            console.error('Error fetching last year data:', error);
+            alert("मागील वर्षाची शैक्षणिक माहिती मिळाली नाही");
+            navigate(`/clerk/reports/${id}`)
+          });
+      })
+      .catch((error) => {
+        console.error("Error fetching academic data:", error);
+        // alert("विद्यार्थ्याची शाळा माहिती मिळाली नाही");
+        navigate('/fallback-route'); // Specify a proper fallback route
       });
-    }).catch((error) => {
-      console.error("Error fetching academic data:", error);
-    });
-  }, [id, udise]);
-  
+  }, [id, udise, navigate]);
+
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -215,12 +233,12 @@ function PresentyCertificate() {
             </div>
 
             <div>
-              <p>प्रमाणपत्र  देण्यात येते की ,कुमार/कुमारी <span>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> चालू वर्ष { academicData?.academicYear} मध्ये {academicData?.standard?.standard } मध्ये शिकत आहे.मागील शैक्षणिक {lastAcademicData?.academicYear} वर्ष मध्ये त्याची/तिची उपस्थिती ७५% पेक्षा जास्त होती. दाखला मागणीव न देणेत आला असे.</p>
+              <p>प्रमाणपत्र देण्यात येते की ,{studentData?.gender === "पुरुष" ? ("कुमार") : ("कुमारी")} <span className='fw-bold'>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> चालू वर्ष <span className='fw-bold'>{academicData?.academicYear}</span>  मध्ये <span className='fw-bold'>{academicData?.standard?.standard}</span>  मध्ये शिकत आहे.मागील शैक्षणिक  <span className='fw-bold'>{lastAcademicData?.academicYear}</span> वर्ष मध्ये  {studentData?.gender === "पुरुष" ? ("त्याची") : ("तिची")} उपस्थिती ७५% पेक्षा जास्त होती. दाखला मागणीवरुन देणेत आला असे.</p>
             </div>
             <div className='row'>
               <div className='col-6'>
                 <p>स्थळ :- </p>
-                <p>दिनांक :-</p>
+                <p>दिनांक :- {date.getFullYear()}-{date.getMonth()}-{date.getDate()}</p>
               </div>
               <div className='col-6'>
                 <p>मुख्याध्यापक</p>

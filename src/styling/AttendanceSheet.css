@@ -1,0 +1,208 @@
+/* Base Styles */
+.attendance-component-wrapper {
+    width: 100%;
+}
+
+.attendance-sheet {
+    /* font-size: 9pt; */ /* Base font size controlled by table */
+    width: 100%;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt; /* Smaller base font for screen to mimic density */
+    table-layout: auto; /* Auto layout for screen */
+}
+
+.custom-table th,
+.custom-table td {
+    border: 1px solid #000;
+    padding: 2px 3px; /* Slightly more padding for screen */
+    vertical-align: middle; /* Default vertical alignment */
+    word-wrap: break-word; /* Allow wrapping */
+}
+
+.custom-table th {
+    background-color: #f8f9fa; /* Lighter grey */
+    font-weight: bold;
+    text-align: center;
+    white-space: normal; /* Allow header text to wrap */
+    line-height: 1.15;
+}
+
+/* Specific Column Styling (Screen) */
+.custom-table .info-col {
+    min-width: 60px; /* Minimum width for info columns */
+    white-space: normal;
+}
+.custom-table .sr-no-col {
+     width: 35px; /* Fixed width for Sr.No */
+     min-width: 35px;
+     white-space: normal;
+}
+.custom-table .name-header-col {
+    min-width: 120px;
+    white-space: normal; /* Allow wrapping */
+}
+.custom-table .name-col { /* Data cell for name */
+     white-space: normal; /* Allow wrapping */
+}
+
+.custom-table .day-col {
+    min-width: 30px; /* Narrower day columns */
+    max-width: 35px;
+    font-size: 0.9em; /* Slightly smaller font */
+    padding: 1px 2px;
+    text-align: center;
+    white-space: nowrap; /* Keep day header parts on one line if possible */
+}
+
+.custom-table .day-col div {
+    line-height: 1.1;
+    display: block;
+}
+
+.custom-table .attendance-mark {
+     font-size: 0.9em; /* Font size for P/A/H markers */
+     padding: 1px; /* Minimal padding */
+}
+
+
+.custom-table .summary-col {
+    min-width: 55px;
+    white-space: normal; /* Allow wrapping */
+    text-align: center;
+    font-size: 0.9em;
+}
+.custom-table .total-header-col {
+    font-weight: bold;
+}
+.custom-table .working-days-data,
+.custom-table .total-col-data {
+    font-weight: bold; /* Make summary data bold */
+    font-size: 0.9em;
+}
+
+
+/* Header Info Styling (Screen Only) */
+.header-info {
+    font-size: 10pt;
+    gap: 15px; /* Space between items */
+}
+.header-info strong {
+    margin-right: 5px;
+}
+
+/* Print Styles */
+@media print {
+    /* Basic reset */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide everything except the printable area */
+    body * {
+        visibility: hidden;
+    }
+    .d-print-none { /* Bootstrap class to hide */
+        display: none !important;
+    }
+    #printable-area, #printable-area * {
+        visibility: visible;
+    }
+    #printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%; /* Take full width */
+        height: auto;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden; /* Prevent accidental overflow */
+    }
+
+    /* Page setup */
+    @page {
+        size: A4 landscape;
+        margin: 0.7cm; /* Adjust margins for printer compatibility */
+    }
+
+    /* Table adjustments for print */
+    .custom-table {
+        width: 100% !important;
+        font-size: 6.5pt !important; /* Drastically reduced font size */
+        table-layout: fixed !important; /* CRITICAL for width control */
+        border-collapse: collapse !important;
+        border: 1px solid #000 !important; /* Ensure outer border prints */
+        overflow: hidden; /* Clip content if it overflows cell */
+    }
+
+    .custom-table th,
+    .custom-table td {
+        padding: 1px 1px !important; /* Minimal padding */
+        border: 1px solid #000 !important;
+        page-break-inside: avoid !important;
+        vertical-align: middle !important;
+        text-align: center; /* Center most content */
+        overflow: hidden; /* Hide overflow */
+        text-overflow: ellipsis; /* Indicate overflow */
+        white-space: normal; /* Allow wrapping by default in print */
+    }
+
+    .custom-table th {
+        background-color: #f8f9fa !important; /* Ensure background prints */
+        line-height: 1.1 !important;
+        font-weight: bold !important;
+    }
+
+    /* --- Column Width Control for Print (Percentages - Adjust as needed!) --- */
+    /* These percentages need to add up roughly to 100% */
+    /* Tweak these values based on your print preview */
+
+    .custom-table .info-col { width: 3.5%; } /* Estimate for info columns */
+    .custom-table .sr-no-col { width: 2%; }    /* Sr No */
+    .custom-table .name-header-col,
+    .custom-table .name-col {
+        width: 8%; /* Student/Mother Name */
+        text-align: left !important; /* Left align names */
+        padding-left: 2px !important;
+    }
+
+    .custom-table .day-col {
+        width: 1.6%; /* Approx width per day col: (100 - (sum of fixed %)) / num_days */
+        /* Adjust 1.6% based on actual number of days (e.g., slightly more for 28 days, less for 31) */
+        font-size: 0.95em !important; /* Relative to 6.5pt */
+        padding: 0 !important; /* Almost no padding */
+        white-space: normal !important; /* Allow day headers to wrap if needed */
+    }
+     .custom-table .day-col div {
+        line-height: 1.05 !important;
+        display: block !important;
+    }
+    .custom-table .attendance-mark {
+         font-size: 1em !important; /* Relative to 6.5pt */
+         padding: 0 !important;
+    }
+
+
+    .custom-table .summary-col {
+        width: 3.5%; /* Summary columns */
+        font-size: 0.9em !important; /* Relative to 6.5pt */
+    }
+    .custom-table .total-header-col,
+    .custom-table .total-col-data {
+         font-weight: bold !important;
+    }
+    .custom-table .working-days-data,
+    .custom-table .total-col-data {
+         font-weight: bold !important;
+         font-size: 1em !important; /* Relative to 6.5pt */
+    }
+    /* --- End Column Width Control --- */
+
+}

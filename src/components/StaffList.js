@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'; // Added useCallback
 import apiService from '../services/api.service'; // Assuming this path is correct
 import { jwtDecode } from 'jwt-decode';
-import { BiSearch } from 'react-icons/bi';
+import { BiReset, BiSearch } from 'react-icons/bi';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ function debounce(func, delay) {
 
 function StaffList() {
     // State Hooks
-    const [udise, setUdise] = useState(null);
+    const [udise, setUdise] = useState(jwtDecode(sessionStorage.getItem('token'))?.udiseNo);
     const [allStaff, setAllStaff] = useState([]);
     const [filteredStaff, setFilteredStaff] = useState([]);
     const [searchFirstName, setSearchFirstName] = useState('');
@@ -238,12 +238,12 @@ function StaffList() {
                                 <div className="d-flex mt-2 mt-md-0 ms-md-auto"> {/* Use ms-md-auto to push right */}
                                     <button
                                         onClick={clearSearch}
-                                        className="btn btn-secondary d-flex align-items-center px-3 py-1"
+                                        className="btn btn-danger d-flex align-items-center px-3 py-1"
                                         disabled={loading || (!searchFirstName && !searchFatherName && !searchSurName)} // Disable if loading or already clear
                                         style={{ height: '32px' }}
                                         type="button"
                                     >
-                                        साफ करा
+                                        <BiReset className='me-1' size="1.8em"/>
                                     </button>
                                 </div>
                             </div>

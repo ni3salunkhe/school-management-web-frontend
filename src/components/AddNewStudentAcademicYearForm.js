@@ -14,6 +14,7 @@ function AddNewStudentAcademicYearForm() {
         academicYear: ''
     });
 
+    const [studentData, setStudentData] = useState();
     const [divisions, setDivisions] = useState([]);
     const [standards, setStandards] = useState([]);
     const [singleTeacher, setSingleTeacher] = useState();
@@ -38,12 +39,13 @@ function AddNewStudentAcademicYearForm() {
         return `${currentYear - 1}-${String(currentYear).slice(-2)}`;
     };
 
-      useEffect(() => {
-        setFormData(prev => ({
-          ...prev,
-          academicYear: calculateAcademicYear()
-        }));
-      }, []);
+    // useEffect(() => {
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         standardId: studentData?.whichStandardAdmitted.id,
+    //         academicYear: calculateAcademicYear()
+    //     }));
+    // }, []);
 
     useEffect(() => {
         apiService.getbyid("Division/getbyudise/", schoolUdiseNo).then((response) => {
@@ -55,7 +57,19 @@ function AddNewStudentAcademicYearForm() {
         apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo).then((response) => {
             setClassTeacherData(response.data);
         });
-    }, []);
+        apiService.getbyid("student/", id).then((response) => {
+            setStudentData(response.data);
+            // Set standardId when student data is loaded
+            setFormData(prev => ({
+                ...prev,
+                standardId: response.data?.whichStandardAdmitted?.id || '',
+                academicYear: calculateAcademicYear()
+            }));
+        }).catch(error => {
+            console.error("Error fetching student data:", error);
+        });
+
+    }, [id, schoolUdiseNo]);
 
     useEffect(() => {
         if (formData.division && formData.standardId) {
@@ -115,6 +129,15 @@ function AddNewStudentAcademicYearForm() {
             classTeacher: singleTeacher?.id
         };
 
+        if (warning) {
+            setErrors({ submit: "कृपया वर्गासाठी शिक्षक नियुक्त करा" });
+            return;
+        }
+        if (payload.classTeacher === null) {
+            setErrors({ submit: "कृपया वर्गासाठी शिक्षक नियुक्त करा" });
+            return;
+        }
+
         apiService.postdata('academic/', payload).then((response) => {
             setSubmitted(true);
             setFormData({
@@ -139,10 +162,29 @@ function AddNewStudentAcademicYearForm() {
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
-                        <div className="position-absolute top-0 end-0 m-2">
+                            <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
                             </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">विद्यार्थि शैक्षणिक माहिती अपडेट करा</h3>
+                            <div className="bg-white bg-opacity-10 p-3 mt-3 rounded-3">
+                                {studentData?.studentName && (
+                                    <div className="student-info">
+                                        <div className="d-flex align-items-center justify-content-center">
+                                            <h5 className="mb-0 text-white fw-bold">
+                                                {studentData?.studentName} {studentData?.fatherName} {studentData?.surName}
+                                            </h5>
+                                        </div>
+
+                                        {studentData?.whichStandardAdmitted && (
+                                            <div className="d-flex justify-content-center mt-2">
+                                                <span className="badge bg-light text-primary px-3 py-2 fs-6">
+                                                    इयत्ता: {studentData?.whichStandardAdmitted?.standard}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="card-body p-4">
@@ -151,26 +193,16 @@ function AddNewStudentAcademicYearForm() {
                             )}
 
                             <form onSubmit={handleSubmit} className="fs-6">
-
-                                {/* Standard Select */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">इयत्ता</label>
-                                    <select
-                                        className={`form-select form-select-sm ${errors.standardId ? 'is-invalid' : ''}`}
-                                        name="standardId"
-                                        value={formData.standardId}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- इयत्ता निवडा --</option>
-                                        {standards.map(standard => (
-                                            <option key={standard.id} value={standard.id}>
-                                                {standard.standard}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.standardId && (
+                                    <input
+                                        className="form-control"
+                                        value={studentData?.whichStandardAdmitted.standard || ''}
+                                        readOnly
+                                    />
+                                    {/* {errors.standardId && (
                                         <div className="invalid-feedback">{errors.standardId}</div>
-                                    )}
+                                    )} */}
                                 </div>
 
 
@@ -201,7 +233,7 @@ function AddNewStudentAcademicYearForm() {
                                     <label className="form-label fw-semibold">शिक्षक</label>
                                     <div className={`form-control form-control-sm ${errors.teacher ? 'is-invalid' : ''}`}>
                                         {singleTeacher ?
-                                            `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` :
+                                            `${singleTeacher.staff.fname} ${singleTeacher.staff.fathername} ${singleTeacher.staff.lname}` :
                                             'शिक्षक निवडले नाहीत'}
                                     </div>
                                     {/* {errors.teacher && (
@@ -231,7 +263,7 @@ function AddNewStudentAcademicYearForm() {
                                 </div>
 
                                 <div className="text-center mt-4">
-                                    <button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                                    <button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm" disabled={!singleTeacher}>
                                         जतन करा
                                     </button>
                                 </div>
@@ -245,7 +277,77 @@ function AddNewStudentAcademicYearForm() {
                     </div>
                 </div>
             </div>
+            <div className="card border-0 mt-4 rounded-0" style={{ boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+                <div className="card-header bg-primary text-white p-2">
+                    <div className="d-flex justify-content-between align-items-center">
+                        <h3 className="mb-0 fw-bold fs-6">वर्गांची यादी</h3>
+                        {/* {!error && ( */}
+                            <div className="text-white">
+                                एकूण वर्ग: {classTeacherData.length}
+                            </div>
+                        {/* )} */}
+                    </div>
+                </div>
+                <div className="card-body p-0">
+                    {classTeacherData.length > 0 ? (
+                        <div className="table-responsive">
+                            <table className="table table-bordered table-striped mb-0">
+                                <thead className="bg-light">
+                                    <tr>
+                                        <th scope="col" width="5%" className="text-center">क्र.</th>
+                                        <th scope="col" width="10%">इयत्ता</th>
+                                        <th scope="col" width="10%">तुकडी</th>
+                                        <th scope="col" width="25%" className="text-center">वर्ग  शिक्षकाचे नाव</th>
+                                        {/* <th scope="col" width="25%" className="text-center"> वर्ग शिक्षकाचे आडनाव</th> */}
+                                        {/* <th scope="col" width="10%">Status</th> */}
+                                        {/* <th scope="col" width="15%" className="text-center">क्रिया</th> */}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {classTeacherData.map((classdata, index) => (
+                                        <tr key={classdata.id || index}>
+                                            <td className="text-center">{index + 1}</td>
+                                            <td>{classdata?.standardMaster?.standard || '-'}</td>
+                                            <td>{classdata?.division?.name || '-'}</td>
+                                            <td>{classdata?.staff?.fname || '-'} {classdata?.staff?.fathername || '_'} {classdata?.staff?.lname}</td>
+                                            {/* <td>{classdata?.staff?.lname || '-'}</td> */}
+                                            {/* <td><span className={`badge ${classdata.status === 'left' ? 'bg-danger' : 'bg-success'}`}>
+                                                                {classdata.status}
+                                                            </span></td>      */}
+                                            {/* <td className="text-center">
+                                                <button
+                                                    className="btn btn-sm btn-outline-warning"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    onClick={() => { navigate(`/clerk/editclassteacher/${classdata.id}`) }}
+                                                >
+                                                    वर्गशीक्षक बदला
+                                                </button>
+                                            </td> */}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    ) : (
+                        <div className="text-center py-4 text-muted">
+
+                            {classTeacherData.length === 0  ?
+                                "या शाळेसाठी वर्ग नोंदणी केली  नाही." : // No staff registered for this school
+                                "दिलेल्या निकषांनुसार कोणताही वर्ग सापडला नाही." // No results matching search
+                            }
+
+                            {/* {classTeacherData.length > 0  && (searchFirstName || searchFatherName || searchSurName) &&
+                                "शोध निकषांशी जुळणारे वर्ग नाहीत."
+                            } */}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
+
+
     );
 }
 

@@ -21,6 +21,10 @@ import UpdateStudentAcademicYear from '../components/UpdateStudentAcademicYear';
 import UpdateStudentAcademicYearForm from '../components/UpdateStudentAcademicYearForm';
 import UpdateStudentAllAcademic from '../components/UpdateStudentAllAcademic';
 import StaffList from '../components/StaffList';
+import ListOfClass from '../components/ListOfClass';
+import EditClassTeacher from '../components/EditClassTeacher';
+import AttendanceReport from '../components/AttendanceReport';
+import AttendanceCoverPage from '../components/AttendanceCoverPage';
 
 
 
@@ -40,7 +44,7 @@ function StudentManagement({ role }) {
         return (
           <Routes>
             <Route path='student' element={<AddStudent />} />
-            <Route path='list' element={<StudentList />} ></Route>
+            <Route path='listofstudents' element={<StudentList />} ></Route>
             <Route path='reports/:id' element={<ReportsShows />}></Route>
             <Route path='reports/lc-old/:id' element={<LColdForm />}></Route>
             <Route path='reports/download/:id' element={<LCdownload />}></Route>
@@ -49,9 +53,13 @@ function StudentManagement({ role }) {
             <Route path='reports/bonfide/:id' element={<BonafideCertificate />}></Route>
             <Route path='reports/prsenty/:id' element={<PresentyCertificate />}></Route>
             <Route path='singlestudentinfo/:id' element={<SingleStudentInfo />}></Route>
-            <Route path='classteacher/' element={<AddClassTeacher/>}></Route>
+            <Route path='classes/' element={<AddClassTeacher/>}></Route>
+            <Route path='changeclassteacher/' element={<ListOfClass/>}/>
             <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear/>}></Route>
             <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm/>}/>
+            <Route path='editclassteacher/:id' element={<EditClassTeacher/>}/>
+            <Route path='attendancereport' element={<AttendanceReport/>}/>
+            <Route path='attendencecover' element={<AttendanceCoverPage/>}/>
           </Routes>
         );
       case 'TEACHER':

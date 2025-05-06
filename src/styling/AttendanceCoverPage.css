@@ -1,0 +1,170 @@
+body {
+    /* Basic body styling for screen */
+    font-family: sans-serif; /* Or a specific font */
+}
+
+.report-wrapper {
+    border: 2px solid #000;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    background-color: #fff; /* Ensure white background for print */
+}
+
+.report-table {
+    font-size: 0.75rem; /* Smaller font for tables */
+    margin-bottom: 0.5rem; /* Spacing between tables */
+}
+
+.report-table th,
+.report-table td {
+    padding: 0.15rem 0.3rem !important; /* Compact padding */
+    vertical-align: middle;
+    border: 1px solid #888 !important; /* Lighter gray border inside tables */
+}
+ .report-table thead th {
+     background-color: #e9ecef; /* Header background */
+     font-weight: bold;
+     border-bottom-width: 2px !important;
+     border-bottom-color: #555 !important;
+ }
+
+.bordered-box {
+    border: 1px solid #000;
+    padding: 0.2rem 0.4rem;
+    min-height: 30px; /* Ensure minimum height */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center content by default */
+    font-weight: bold;
+}
+.bordered-box-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.1rem;
+    font-weight: normal;
+}
+ .bordered-box-small-text {
+    font-size: 0.7rem;
+    font-weight: normal;
+    line-height: 1.1;
+ }
+
+.section-title {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+}
+
+ .sub-table-title {
+     font-weight: bold;
+     font-size: 0.7rem;
+     margin-bottom: 0.1rem;
+     text-align: center;
+ }
+
+.header-line {
+    border-bottom: 1px solid #000;
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.2rem;
+    text-align: center;
+}
+.header-line-thick {
+    border-bottom: 2px solid #000;
+     padding-bottom: 0.2rem;
+    margin-bottom: 0.2rem;
+    text-align: center;
+}
+.logo-placeholder {
+    width: 80px;
+    height: 50px;
+    border: 1px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.syllabus-title {
+    font-weight: bold;
+    text-align: center;
+    margin: 0.5rem 0;
+     font-size: 0.9rem;
+}
+ .syllabus-title span {
+     font-size: 1.2em; /* Make asterisks slightly larger */
+     vertical-align: middle;
+ }
+
+/* --- Print Styles --- */
+@media print {
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: sans-serif; /* Ensure font consistency */
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide elements not meant for printing */
+    .d-print-none { display: none !important; }
+
+    /* Ensure only the printable area is targeted */
+    body * { visibility: hidden; }
+    #printable-catalog, #printable-catalog * { visibility: visible; }
+    #printable-catalog {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important; /* Show all content */
+        font-size: 9pt !important; /* Base print font size */
+    }
+
+     .report-wrapper {
+         border: 2px solid #000 !important;
+         padding: 0.3cm !important; /* Add some internal padding for print */
+         width: 100% !important;
+         box-sizing: border-box; /* Include padding/border in width */
+     }
+
+     .report-table {
+         font-size: 7.5pt !important; /* Smaller font for tables in print */
+         page-break-inside: avoid !important; /* Try to keep tables together */
+     }
+     .report-table th,
+     .report-table td {
+        padding: 1px 2px !important; /* Tighter print padding */
+        border: 1px solid #333 !important; /* Ensure darker borders print */
+     }
+      .report-table thead th {
+          background-color: #e9ecef !important; /* Force background print */
+      }
+
+     .bordered-box {
+         border: 1px solid #000 !important;
+         font-size: 8pt !important;
+     }
+     .bordered-box-label {
+         font-size: 7pt !important;
+     }
+      .bordered-box-small-text {
+         font-size: 6.5pt !important;
+     }
+
+    .header-line, .header-line-thick {
+        border-color: #000 !important;
+    }
+
+    /* Adjust column widths slightly if needed for print */
+    /* Example: .col-print-adjust { width: 23% !important; } */
+
+    @page {
+        size: A4 portrait;
+        margin: 1.0cm; /* Adjust print margins */
+    }
+}
