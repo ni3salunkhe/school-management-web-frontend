@@ -259,7 +259,7 @@ const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1)
             <div className='row'>
               <div className='col-6'>
                 <p>स्थळ :- </p>
-                <p>दिनांक :-</p>
+                <p>दिनांक :- {date.getFullYear()}-{date.getMonth()}-{date.getDate()}</p>
               </div>
               <div className='col-6'>
                 <p>मुख्याध्यापक</p>

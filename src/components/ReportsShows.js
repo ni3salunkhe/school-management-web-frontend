@@ -26,8 +26,8 @@ function ReportsShows() {
     useEffect(() => {
         const fetchStudentData = async () => {
             try {
-                setLoading(true);
-                await new Promise(resolve => setTimeout(resolve, 800));
+                // setLoading(true);
+                // await new Promise(resolve => setTimeout(resolve, 800));
 
                 const response = await apiService.getbyid("student/", id);
                 if (response?.data) {
@@ -64,25 +64,35 @@ function ReportsShows() {
         fetchAcademicData();
     }, [id, udise]);
 
-    const handleReportClick = (reportType) => {
+    const handleReportClick = async (reportType) => {
         if (reportType === "lc-old") {
-            apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
-                .then((response) => {
-                    console.log(response.data);
-
-                    if (response.data === true) {
-                        navigate(`/clerk/reports/download/${id}`);
-                    } else {
-                        navigate(`/clerk/reports/${reportType}/${id}`);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error while checking data presence:", error);
-                    navigate(`/clerk/reports/${reportType}/${id}`);
-                });
+            const lcDataResponse= await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise);
+                // console.log(response.data);
+                if (lcDataResponse.data?.newlcprinted === false) {
+                    apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
+                        .then((response) => {
+                            if (response.data === true) {
+                                navigate(`/clerk/reports/download/${id}`);
+                            } else {
+                                navigate(`/clerk/reports/${reportType}/${id}`);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error while checking data presence:", error);
+                            navigate(`/clerk/reports/${reportType}/${id}`);
+                        });
+                }
+                else{
+                    alert("तुम्ही नवीन फॉरमॅट मध्ये शाळा सोडलेला दाखल घेतलेला आहे !");
+                }
         }
         else if (reportType === "lc-new") {
-            apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
+
+            const lcDataResponse= await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise);
+
+            if(lcDataResponse.data?.printed===false)
+            {
+                apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
                 .then((response) => {
                     if (response.data === true) {
                         navigate(`/clerk/reports/lcnewdownload/${id}`);
@@ -94,6 +104,11 @@ function ReportsShows() {
                     console.error("Error while checking data presence:", error);
                     navigate(`/clerk/reports/${reportType}/${id}`);
                 });
+            }
+            else{
+                alert("तुम्ही जुन्या फॉरमॅट मध्ये शाळा सोडलेला दाखल घेतलेला आहे !");
+            }
+            
         }
         else if (reportType === "bonafide") {
             navigate(`/clerk/reports/bonfide/${id}`)

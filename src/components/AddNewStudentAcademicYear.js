@@ -32,6 +32,7 @@ function AddNewStudentAcademicYear() {
         api.get('student/search', { params })
             .then(response => {
                 setResults(response.data);
+                console.log(response.data);
                 setLoading(false);
             })
             .catch(error => {
@@ -166,11 +167,12 @@ function AddNewStudentAcademicYear() {
                                         <table className="table table-bordered mb-0">
                                             <thead className="bg-light">
                                                 <tr>
-                                                    <th width="25%">विद्यार्थ्याचे नाव</th>
+                                                    <th width="20%">विद्यार्थ्याचे नाव</th>
                                                     <th width="15%">आडनाव</th>
                                                     <th width="20%">वडिलांचे नाव</th>
                                                     <th width="20%">आईचे नाव</th>
-                                                    <th width="20%">क्रिया</th>
+                                                    <th width="10%">इयत्ता</th>
+                                                    <th width="15%">क्रिया</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -180,6 +182,7 @@ function AddNewStudentAcademicYear() {
                                                         <td>{student.surName}</td>
                                                         <td>{student.fatherName}</td>
                                                         <td>{student.motherName}</td>
+                                                        <td>{student.whichStandardAdmitted.id}</td>
                                                         <td>
                                                             <button
                                                                 className="btn btn-sm btn-outline-primary"

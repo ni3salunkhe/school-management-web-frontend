@@ -1,79 +1,86 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
+import { Navigate, useParams } from 'react-router-dom'
 import apiService from '../services/api.service';
-import { jwtDecode } from 'jwt-decode';
 import Next from './Next';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
-function AddClassTeacher() {
+function EditClassTeacher() {
+
+    const { id } = useParams();
     const [formData, setFormData] = useState({
-        division: '',
         staff: '',
-        standardMaster: ''
-    });
-
-    const [divisions, setDivisions] = useState([]);
-    const [standards, setStandards] = useState([]);
-    const [teachers, setTeachers] = useState([]);
-    const [classteacherdata, setClassTeacherData] = useState([]);
-    const [errors, setErrors] = useState({});
-    const [warning, setWarning] = useState(false);
+    })
+    const [classTeacherData, setClassTeacherData] = useState([]);
+    const [allClassTeacherData, setAllClassTeacherData] = useState([]);
     const [submitted, setSubmitted] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [apiError, setApiError] = useState(null);
-    const navigate = useNavigate();
-    const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+    const [warning, setWarning] = useState();
+    const [isLoading, setIsLoading] = useState();
+    const [errors, setError] = useState({});
+    const [apierror, setApiError] = useState('');
+    const [teachers, setTeachers] = useState([]);
+    const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+
+    const fetchData = async () => {
+        try {
+            await apiService.getbyid("classteacher/", id).then((response) => {
+                console.log(response.data);
+                setClassTeacherData(response.data);
+            })
+        }
+        catch {
+            console.log("data is not available");
+            setApiError("Failed to load Data")
+        }
+    }
+
+    const getAllClassTeacherData = async () => {
+        try {
+           await apiService.getbyid("classteacher/getbyudise/", school).then((response) => {
+                console.log(response.data);
+                setAllClassTeacherData(response.data);
+            })
+        }
+        catch {
+            setApiError("Failed to load data");
+        }
+    }
+
+    const getAllTeacher = async () => {
+        try {
+            await apiService.getbyid("staff/getbyudise/", school).then((response) => {
+                const activeTeachers = response.data.filter(teacher => teacher.role.toLowerCase() === "teacher" && teacher.status.toLowerCase() === "working");
+
+                const unassignedTeachers = activeTeachers.filter(teacher => {
+                    return !allClassTeacherData.some(
+                        classTeacher => classTeacher.staff?.id === teacher.id
+                    );
+                });
+                setTeachers(unassignedTeachers);
+            
+                // setTeachers(activeTeachers);
+            })
+        }
+        catch {
+            setApiError("Failed to load Teachers Data please load Again !");
+        }
+    }
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                setApiError(null);
-    
-                const [divisionsRes, standardsRes, teachersRes, classteacherRes] = await Promise.all([
-                    apiService.getbyid("Division/getbyudise/", schoolUdiseNo),
-                    apiService.getbyid("standardmaster/getbyudise/", schoolUdiseNo),
-                    apiService.getbyid("staff/getbyudise/", schoolUdiseNo),
-                    apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo)
-                ]);
-    
-                setDivisions(divisionsRes.data);
-                setStandards(standardsRes.data);
-                setClassTeacherData(classteacherRes.data);
-    
-                // Now filter only after class teacher data is available
-                const availableTeachers = teachersRes.data
-                    .filter(staff => staff.role?.toLowerCase() === 'teacher' && staff.status?.toLowerCase() === 'working')
-                    .filter(staff => !classteacherRes.data.some(ct => ct.staff?.id === staff.id));
-    
-                setTeachers(availableTeachers);
-    
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setApiError("डेटा लोड करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-    
         fetchData();
-    }, [schoolUdiseNo]);
-    
+        getAllTeacher();
+        getAllClassTeacherData();
+    }, [id, school])
 
-    function handleChange(event) {
+    const handleChange = (event) => {
         const { name, value } = event.target;
-
-        const updatedFormData = {
-            ...formData,
+        const upadatedFormData = {
             [name]: value
-        };
+        }
 
-        const newErrors = { ...errors };
-        delete newErrors[name]; // Clear any existing error for this field
+        const newErrors = {}
 
-        // Check if teacher is already assigned
         if (name === 'staff' && value) {
-            const isAssigned = classteacherdata.some(
+            const isAssigned = allClassTeacherData.some(
                 (item) => item?.staff?.id?.toString() === value
             );
 
@@ -82,102 +89,36 @@ function AddClassTeacher() {
             }
         }
 
-        // Check if standard+division pair is already assigned
-        if (updatedFormData.standardMaster && updatedFormData.division) {
-            const isCombinationAssigned = classteacherdata.some(
-                (item) =>
-                    item?.standardMaster?.id?.toString() === updatedFormData.standardMaster.toString() &&
-                    item?.division?.id?.toString() === updatedFormData.division.toString()
-            );
+        setError(newErrors);
 
-            setWarning(isCombinationAssigned);
-        } else {
-            setWarning(false);
-        }
+        setFormData(upadatedFormData)
 
-        setErrors(newErrors);
-        setFormData(updatedFormData);
     }
 
-    function validateForm() {
+    const handleSubmit = (e) => {
+        e.preventDefault(); // prevent default form submission
+
         const newErrors = {};
-
-        if (!formData.division) {
-            newErrors.division = "कृपया तुकडी निवडा.";
-        }
         if (!formData.staff) {
-            newErrors.staff = "कृपया शिक्षक निवडा.";
-        }
-        if (!formData.standardMaster) {
-            newErrors.standardMaster = "कृपया इयत्ता निवडा.";
+            newErrors.staff = "कृपया शिक्षक निवडा";
         }
 
-        return newErrors;
-    }
-
-    async function handleSubmit(event) {
-        event.preventDefault();
-
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
+        if (Object.keys(newErrors).length > 0) {
+            setError(newErrors);
             return;
         }
 
-        if (warning) {
-            return;
-        }
-
-        const result = await Swal.fire({
-            title: 'वर्गशिक्षक नियुक्ती जतन करायचे आहे का?',
-            icon: 'question',
-            showCancelButton: true,
-            showDenyButton: true,
-            confirmButtonText: 'जतन करा',
-            denyButtonText: 'जतन करा आणि पुढे चला',
-            cancelButtonText: 'रद्द करा'
-        });
-
-        if (result.isConfirmed || result.isDenied) {
-            try {
-                setIsLoading(true);
-                setApiError(null);
-
-                const payload = { ...formData, schoolUdiseNo };
-                await apiService.postdata("classteacher/", payload);
-
-                // Refresh data after successful submission
-                const response = await apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo);
-                setClassTeacherData(response.data);
-                await Swal.fire({
-                    title: "वर्गशिक्षक नियुक्ती यशस्वीरीत्या संपादित केली आहे ..!",
-                    icon: "success",
-                    draggable: true
-                });
-
+        apiService.putdata("classteacher/editclassteacher/", formData, id)
+            .then((response) => {
                 setSubmitted(true);
-                setFormData({
-                    division: '',
-                    staff: '',
-                    standardMaster: ''
-                });
-
-                setTimeout(() => setSubmitted(false), 1500);
-
-
-
-                if (result.isDenied) {
-                    navigate('/clerk/AddAcademicNewStudents');
-                }
-
-            } catch (error) {
-                console.error("Error:", error);
-                Swal.fire('त्रुटी!', 'डेटा जतन करण्यात अडचण आली.', 'error');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }
+                setWarning(false);
+                // alert("डेटा यशस्वीरित्या जतन झाला!");
+                Navigate("clerck/classteacher")
+            })
+            .catch(() => {
+                setWarning(true);
+            });
+    };
 
     return (
         <div className="container py-3">
@@ -188,19 +129,19 @@ function AddClassTeacher() {
                             <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
                             </div>
-                            <h3 className="mb-0 fw-bold fs-4 heading-font">वर्गशिक्षक नियुक्ती</h3>
+                            <h3 className="mb-0 fw-bold fs-4 heading-font">वर्गशिक्षक बदलणे फॉर्म </h3>
+                            <p className='mb-0 small'>सध्याचे वर्ग शिक्षक: {classTeacherData?.staff?.fname || '...'} {classTeacherData?.staff?.fathername || '...'} {classTeacherData?.staff?.lname || '...'}</p>
                         </div>
 
                         <div className="card-body p-4">
-                            {apiError && (
-                                <div className="alert alert-danger mb-4">{apiError}</div>
+                            {apierror && (
+                                <div className="alert alert-danger mb-4">{apierror}</div>
                             )}
 
                             <form onSubmit={handleSubmit} className="fs-6">
-                                {/* Standard Select */}
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">इयत्ता</label>
-                                    <select
+                                    {/* <select
                                         className={`form-select form-select-sm ${errors.standardMaster ? 'is-invalid' : ''}`}
                                         name="standardMaster"
                                         value={formData.standardMaster}
@@ -213,15 +154,16 @@ function AddClassTeacher() {
                                                 {standard.standard}
                                             </option>
                                         ))}
-                                    </select>
+                                    </select> */}
+                                    <input className='form-control' value={classTeacherData?.standardMaster?.standard}></input>
                                     {errors.standardMaster && (
                                         <div className="invalid-feedback">{errors.standardMaster}</div>
                                     )}
                                 </div>
-                                {/* Division Select */}
+
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">तुकडी</label>
-                                    <select
+                                    {/* <select
                                         className={`form-select form-select-sm ${errors.division ? 'is-invalid' : ''}`}
                                         name="division"
                                         value={formData.division}
@@ -234,13 +176,14 @@ function AddClassTeacher() {
                                                 {division.name}
                                             </option>
                                         ))}
-                                    </select>
+                                    </select> */}
+                                    <input className='form-control' value={classTeacherData?.division?.name}></input>
                                     {errors.division && (
                                         <div className="invalid-feedback">{errors.division}</div>
                                     )}
                                 </div>
 
-                                {/* Staff Select */}
+
                                 <div className="mb-3">
                                     <label className="form-label fw-semibold">शिक्षक</label>
                                     <select
@@ -254,6 +197,7 @@ function AddClassTeacher() {
                                         {teachers.map(teacher => (
                                             <option key={teacher.id} value={teacher.id}>
                                                 {teacher.fname} {teacher.fathername} {teacher.lname}
+
                                             </option>
                                         ))}
                                     </select>
@@ -270,7 +214,6 @@ function AddClassTeacher() {
                                     >
                                         {isLoading ? 'प्रक्रिया करत आहे...' : 'जतन करा'}
                                     </button>
-                                    {/* <Next classname={'btn btn-success px-4 py-2 rounded-pill shadow-sm'} path={'/clerk/AddAcademicNewStudents'} placeholder={'पुढे चला'}></Next> */}
                                 </div>
 
 
@@ -288,20 +231,19 @@ function AddClassTeacher() {
                     </div>
                 </div>
             </div>
-
             <div className="card border-0 mt-4 rounded-0" style={{ boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
                 <div className="card-header bg-primary text-white p-2">
                     <div className="d-flex justify-content-between align-items-center">
                         <h3 className="mb-0 fw-bold fs-6">वर्गांची यादी</h3>
                         {/* {!error && ( */}
                         <div className="text-white">
-                            एकूण वर्ग: {classteacherdata.length}
+                            एकूण वर्ग: {allClassTeacherData.length}
                         </div>
                         {/* )} */}
                     </div>
                 </div>
                 <div className="card-body p-0">
-                    {classteacherdata.length > 0 ? (
+                    {allClassTeacherData.length > 0 ? (
                         <div className="table-responsive">
                             <table className="table table-bordered table-striped mb-0">
                                 <thead className="bg-light">
@@ -316,7 +258,7 @@ function AddClassTeacher() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {classteacherdata.map((classdata, index) => (
+                                    {allClassTeacherData.map((classdata, index) => (
                                         <tr key={classdata.id || index}>
                                             <td className="text-center">{index + 1}</td>
                                             <td>{classdata?.standardMaster?.standard || '-'}</td>
@@ -345,12 +287,12 @@ function AddClassTeacher() {
                     ) : (
                         <div className="text-center py-4 text-muted">
 
-                            {classteacherdata.length === 0 ?
+                            {allClassTeacherData.length === 0 ?
                                 "या शाळेसाठी वर्ग नोंदणी केली  नाही." : // No staff registered for this school
                                 "दिलेल्या निकषांनुसार कोणताही वर्ग सापडला नाही." // No results matching search
                             }
 
-                            {/* {classteacherdata.length > 0  && (searchFirstName || searchFatherName || searchSurName) &&
+                            {/* {allClassTeacherData.length > 0  && (searchFirstName || searchFatherName || searchSurName) &&
                                 "शोध निकषांशी जुळणारे वर्ग नाहीत."
                             } */}
                         </div>
@@ -358,7 +300,7 @@ function AddClassTeacher() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
 
-export default AddClassTeacher;
+export default EditClassTeacher

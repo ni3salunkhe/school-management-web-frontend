@@ -37,7 +37,7 @@ function getMarathiDateWords(dateStr) {
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) return '';
 
-        
+
         const day = date.getDate();
         const month = date.getMonth(); // 0-indexed
         const year = date.getFullYear();
@@ -74,6 +74,7 @@ function AddStudent() {
     const [standards, setStandards] = useState([]);
     const [students, setStudents] = useState([]);
     const [errors, setErrors] = useState({}); // Combined state for immediate feedback and submit errors
+    const navigate = useNavigate();
     const navigate=useNavigate();
 
     const isOnlyMarathi = (input) => {
@@ -172,6 +173,14 @@ function AddStudent() {
         } else { setFilteredVillages([]); }
     }, [formData.tehasilOfBirth, villages, formData.villageOfBirth]);
 
+    const isDateValid = (dateString) => {
+        const inputDate = new Date(dateString);
+        const today = new Date();
+        // Set both dates to midnight for accurate comparison
+        today.setHours(0, 0, 0, 0);
+        inputDate.setHours(0, 0, 0, 0);
+        return inputDate <= today;
+    };
 
     // --- Validation Function (for Submit) ---
     const validateForm = useCallback(() => {
@@ -231,8 +240,11 @@ function AddStudent() {
         if (!formData.villageOfBirth) newErrors.villageOfBirth = 'गाव निवडणे आवश्यक आहे.';
 
         // ** Academic Info **
-        if (!formData.admissionDate) newErrors.admissionDate = 'प्रवेश तारीख आवश्यक आहे.';
-        if (!formData.whichStandardAdmitted) newErrors.whichStandardAdmitted = 'प्रवेश इयत्ता निवडणे आवश्यक आहे.';
+        if (!formData.admissionDate) {
+            newErrors.admissionDate = 'प्रवेश तारीख आवश्यक आहे.';
+        } else if (!isDateValid(formData.admissionDate)) {
+            newErrors.admissionDate = 'कृपया आजची किंवा मागील तारीख निवडा';
+        } if (!formData.whichStandardAdmitted) newErrors.whichStandardAdmitted = 'प्रवेश इयत्ता निवडणे आवश्यक आहे.';
 
         // ** Additional Info **
         if (formData.adhaarNumber && !adhaarRegex.test(formData.adhaarNumber)) newErrors.adhaarNumber = 'आधार कार्ड नंबर १२ अंकी असावा.';
@@ -279,6 +291,13 @@ function AddStudent() {
             }));
         }
 
+        if (id === 'admissionDate' && value) {
+            if (!isDateValid(value)) {
+                currentErrors.admissionDate = "कृपया आजची किंवा मागील तारीख निवडा";
+            } else {
+                delete currentErrors.admissionDate;
+            }
+        }
 
         // --- Immediate Validation for Specific Fields ---
         const checkUniqueness = (fieldId, fieldValue) => {
@@ -467,7 +486,7 @@ function AddStudent() {
                     <div className="card shadow-sm border-0 rounded-3 overflow-hidden">
                         {/* Header */}
                         <div className="card-header bg-primary bg-gradient text-white p-3 position-relative">
-                        <div className="position-absolute top-0 end-0 m-2">
+                            <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
                             </div>
                             <div className="d-flex justify-content-center align-items-center">
@@ -710,7 +729,7 @@ function AddStudent() {
                                                 <label htmlFor="whichStandardAdmitted" className="form-label fw-semibold small">प्रवेश इयत्ता *</label>
                                                 <select className={`form-select form-select-sm ${getValidationClass('whichStandardAdmitted')}`} id="whichStandardAdmitted" value={formData.whichStandardAdmitted} onChange={handleChange} required aria-describedby="whichStandardAdmittedError">
                                                     <option value="">-- इयत्ता निवडा --</option>
-                                                    {standards.map(standard => (<option key={standard.id} value={standard.value}>{standard.standard}</option>))}
+                                                    {standards.map(standard => (<option key={standard.id} value={standard.id}>{standard.standard}</option>))}
                                                 </select>
                                                 {errors.whichStandardAdmitted && <div id="whichStandardAdmittedError" className="invalid-feedback">{errors.whichStandardAdmitted}</div>}
                                             </div>

@@ -25,28 +25,32 @@ function LColdForm() {
     });
 
     useEffect(() => {
+        fetchStudentData();
+    }, []);
+
+    const fetchStudentData = async () => {
         try {
-            apiService.getbyid("student/", id).then((response) => {
+            await apiService.getbyid("student/", id).then((response) => {
                 setStudentData(response.data);
-                console.log(response.data);
+                // console.log(response.data);
             });
         } catch (err) {
             setError('विद्यार्थ्याची माहिती लोड करण्यात अडचण आली. कृपया पुन्हा प्रयत्न करा.');
         }
-    }, []);
+    }
 
     function handleChange(e) {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     }
 
-    function handleSubmit(e) {
+    const handleSubmit = async(e) => {
         e.preventDefault();
         const payload = { ...formData, schoolUdise: udise, studentId: id };
         // You can send `payload` to backend here via POST if needed
         console.log('Form Payload:', payload);
         // alert("navigating");
-        apiService.post("leavinginfo/", payload).then((response) => {
+         await apiService.post("leavinginfo/", payload).then((response) => {
         })
         setFormData({
             reasonOfLeavingSchool: '',
