@@ -16,6 +16,10 @@ function TehsilForm() {
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    function isOnlyMarathi(input) {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -56,6 +60,10 @@ function TehsilForm() {
             if (isDuplicate) {
                 setErrors(prev => ({ ...prev, tehsilName: "हा तालुका आधीच अस्तित्वात आहे." }));
             }
+        }
+
+        if (!isOnlyMarathi(value)) {
+            setErrors(prev => ({ ...prev, tehsilName: "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा" }));
         }
     }
 
@@ -206,7 +214,7 @@ function TehsilForm() {
                                 {submitted && !isLoading && (
                                     <div className="mt-3 text-success">तालुका यशस्वीरित्या जतन झाला!</div>
                                 )}
-                                <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/village'} placeholder={'पुढे चला'}></Next>
+                                {/* <Next classname={'btn px-4 py-1 btn-primary btn-sm float-end'} path={'/developer/village'} placeholder={'पुढे चला'}></Next> */}
                             </form>
                         </div>
                     </div>

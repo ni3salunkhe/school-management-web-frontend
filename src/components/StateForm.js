@@ -10,6 +10,11 @@ function StateForm() {
     const [submitted, setSubmitted] = useState(false);
     const [allStates, setAllStates] = useState([]);
     const navigate=useNavigate();
+    function isOnlyMarathi(input) {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    }
+
     useEffect(() => {
         apiService.getdata("state/")
             .then((response) => {
@@ -34,6 +39,10 @@ function StateForm() {
         );
         if (isDuplicate) {
             newError.stateName = "हे राज्य आधीच अस्तित्वात आहे.";
+        }
+
+        if (!isOnlyMarathi(value)) {
+            newError.stateName = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
         }
 
         setErrors(newError);

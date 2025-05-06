@@ -121,7 +121,7 @@ function AddClassTeacher() {
         }
 
         const result = await Swal.fire({
-            title: 'कर्मचारी खाते तयार करायचे आहे का?',
+            title: 'वर्गशिक्षक नियुक्ती जतन करायचे आहे का?',
             icon: 'question',
             showCancelButton: true,
             showDenyButton: true,
@@ -142,7 +142,7 @@ function AddClassTeacher() {
                 const response = await apiService.getbyid("classteacher/getbyudise/", schoolUdiseNo);
                 setClassTeacherData(response.data);
                 await Swal.fire({
-                    title: "कर्मचारीची माहिती यशस्वीरीत्या संपादित केली आहे ..!",
+                    title: "वर्गशिक्षक नियुक्ती यशस्वीरीत्या संपादित केली आहे ..!",
                     icon: "success",
                     draggable: true
                 });
@@ -245,7 +245,7 @@ function AddClassTeacher() {
                                         <option value="">-- शिक्षक निवडा --</option>
                                         {teachers.map(teacher => (
                                             <option key={teacher.id} value={teacher.id}>
-                                                {teacher.fname}
+                                                {teacher.fname} {teacher.fathername} {teacher.lname}
                                             </option>
                                         ))}
                                     </select>

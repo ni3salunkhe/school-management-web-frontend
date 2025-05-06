@@ -19,7 +19,8 @@ function debounce(func, delay) {
 
 function StaffList() {
     // State Hooks
-    const [udise, setUdise] = useState(null);
+
+    const [udise, setUdise] = useState(jwtDecode(sessionStorage.getItem('token'))?.udiseNo);
     const [allStaff, setAllStaff] = useState([]);
     const [filteredStaff, setFilteredStaff] = useState([]);
     const [searchFirstName, setSearchFirstName] = useState('');
@@ -57,26 +58,25 @@ function StaffList() {
             setError("Failed to decode token.");
             console.error("Error decoding token:", err);
         }
+        getData();
     }, []);
 
     const getData =async()=>{
-        await apiService.getbyid('staff/getbyudise/', udise)
-        .then((response) => {
+        try{
+        const response =await apiService.getbyid('staff/getbyudise/', udise)
+        
             const staffData = Array.isArray(response?.data) ? response.data : [];
             setAllStaff(staffData);
-            console.log(response.data);
-            
             setFilteredStaff(staffData); // Initially show all staff
-        })
-        .catch((err) => {
+        }catch(err)  {
             console.error("Error fetching staff data:", err);
             setError("Failed to load staff data.");
             setAllStaff([]);
             setFilteredStaff([]);
-        })
-        .finally(() => {
+        }
+        finally{
             setLoading(false);
-        });
+        };
     }
 
     // Fetch data when udise is available
@@ -141,7 +141,7 @@ function StaffList() {
         setSearchSurName('');
     };
 
-    function changeStatus(id) {
+    function changeStatus (id) {
 
         const isleft = allStaff.find(staff => staff.id === id && staff.status === "left")
 
@@ -161,9 +161,8 @@ function StaffList() {
                     setFormData(prev => ({ ...prev, status: "left" }))
                     apiService.getbyid("staff/status/",id).then((response)=>{
                         Swal.fire("Saved!", "", "success");
+                        getData();
                     })
-                    
-                    getData();
                 } else if (result.isDenied) {
                     Swal.fire("Changes are not saved", "", "info");
                 }

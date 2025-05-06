@@ -46,6 +46,8 @@ function getMarathiDateWords(dateStr) {
         const monthText = marathiMonths[month];
         const yearText = marathiYearWordsLookup[year] || year.toString(); // Use the lookup
 
+    
+
         if (!dayText || !monthText || yearText === year.toString()) {
             console.warn("Could not convert date parts to Marathi", { day, month, year });
             return ""; // Return empty if any part failed
@@ -73,6 +75,11 @@ function AddStudent() {
     const [students, setStudents] = useState([]);
     const [errors, setErrors] = useState({}); // Combined state for immediate feedback and submit errors
     const navigate=useNavigate();
+
+    const isOnlyMarathi = (input) => {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    };
     // Removed separate warningMessage state, integrated into errors
 
     const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
@@ -178,7 +185,7 @@ function AddStudent() {
 
         // Helper for uniqueness check
         const isTaken = (field, value) => {
-            if (!value) return false; // Don't check empty strings
+            if (!value) return false; 
             return students.some(
                 (item) => item[field]?.toString().trim() === value.toString().trim() && item.school?.udiseNo === school
             );
@@ -229,6 +236,7 @@ function AddStudent() {
 
         // ** Additional Info **
         if (formData.adhaarNumber && !adhaarRegex.test(formData.adhaarNumber)) newErrors.adhaarNumber = 'आधार कार्ड नंबर १२ अंकी असावा.';
+        else if ( formData.adhaarNumber && isTaken('adhaarNumber', formData.adhaarNumber)) newErrors.adhaarNumber = 'हा आधार कार्ड नंबर आधीच अस्तित्वात आहे.';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -248,6 +256,11 @@ function AddStudent() {
             val = value.trim();
         }
 
+        if(id === "studentName" || id === "fatherName" || id === "surName" || id === "motherName" || id === "residentialAddress" || id === "birthPlace" || id === "villageOfBirth" || id === "tehasilOfBirth" || id === "districtOfBirth" || id === "stateOfBirth" || id === "minorityInformation" || id === "casteCategory" || id === "ebcInformation" || id === "subCast" || id === "caste" || id === "religion" || id === "motherTongue" || id === "nationality" ){
+            if(value && !isOnlyMarathi(value)){
+                currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
+            }
+        }
         if (id === "dateOfBirth") {
             const marathiDate = getMarathiDateWords(value);
             setFormData(prev => ({
@@ -309,6 +322,9 @@ function AddStudent() {
             if (value && value.length !== 10) {
                 currentErrors.mobileNo = "मोबाईल नंबर १० अंकी असावा.";
             }
+            else if (value && checkUniqueness('mobileNo', value)) {
+                currentErrors.mobileNo = "हा मोबाईल नंबर आधीच अस्तित्वात आहे.";
+            }
             // You could add regex test here too for immediate feedback if desired
             // else if (value && !/^\d+$/.test(value)) {
             //    currentErrors.mobileNo = "मोबाईल नंबरमध्ये फक्त अंक असावेत.";
@@ -331,6 +347,18 @@ function AddStudent() {
             if (value && value.length !== 12) {
                 currentErrors.adhaarNumber = "आधार कार्ड नंबर १२ अंकी असावा.";
             }
+            else if (value && checkUniqueness('adhaarNumber', value)) {
+                currentErrors.adhaarNumber = "हा आधार कार्ड नंबर आधीच अस्तित्वात आहे.";
+            }
+        }
+
+        if(id === "residentialAddress"){
+            if(value && value.length < 6){
+                currentErrors.residentialAddress = "पत्ता अवैध आहे.";
+            }
+            else if(value && !isOnlyMarathi(value)){
+                currentErrors.residentialAddress = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
+            }
         }
 
 
@@ -344,7 +372,17 @@ function AddStudent() {
         // Clear specific error when user changes the value
         let currentErrors = { ...errors };
         delete currentErrors[id];
+        
+        if(id=== "nationality" || id === "religion" || id === "caste" || id === "subCast" || id === "motherTongue"){
+            if(value && !isOnlyMarathi(value)){
+
+                currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
+            }
+        }
         setErrors(currentErrors);
+
+        
+
 
         setFormData(prev => ({ ...prev, [id]: value }));
     };
@@ -370,7 +408,7 @@ function AddStudent() {
         const payload = { ...formData, school };
 
         const result = await Swal.fire({
-            title: 'जिल्हा जतन करायचे आहे का?',
+            title: 'विद्यार्थी माहिती जतन करायचे आहे का?',
             icon: 'question',
             showCancelButton: true,
             showDenyButton: true,
@@ -558,12 +596,14 @@ function AddStudent() {
                                             </div>
 
                                             {/* Combined Dropdowns */}
-                                            <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')} />
+                                            
+                                            <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')}  />
                                             <CombinedDropdownInput id="motherTongue" label="मातृभाषा " value={formData.motherTongue} onChange={handleCombinedChange} required={true} options={["हिंदी", "मराठी", "उर्दू"]} error={errors.motherTongue} validationClass={getValidationClass('motherTongue')} />
                                             <CombinedDropdownInput id="religion" label="धर्म " value={formData.religion} onChange={handleCombinedChange} required={true} options={["हिंदू", "मुस्लिम", "ख्रिश्चन", "बौद्ध", "जैन"]} error={errors.religion} validationClass={getValidationClass('religion')} />
                                             <div className="col-md-3 mb-2">
                                                 <label htmlFor="subCast" className="form-label fw-semibold small">उपजात</label>
-                                                <input type="text" className="form-control form-control-sm" id="subCast" value={formData.subCast} onChange={handleChange} placeholder="उपजात" />
+                                                <input type="text" className="form-control form-control-sm" id="subCast" value={formData.subCast} onChange={handleChange} placeholder="उपजात" aria-describedby="subCastError" />
+                                                {errors.subCast && <div id="subCastError" className="invalid-feedback">{errors.subCast}</div>}
                                             </div>
                                             <CombinedDropdownInput id="caste" label="प्रवर्ग " value={formData.caste} onChange={handleCombinedChange} required={true} options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]} error={errors.caste} validationClass={getValidationClass('caste')} />
                                         </div>
@@ -577,7 +617,8 @@ function AddStudent() {
                                         <div className="row g-3">
                                             <div className="col-md-6 mb-2">
                                                 <label htmlFor="birthPlace" className="form-label fw-semibold small">जन्म स्थळ</label>
-                                                <input type="text" className="form-control form-control-sm" id="birthPlace" value={formData.birthPlace} onChange={handleChange} placeholder="जन्म स्थळ" />
+                                                <input type="text" className="form-control form-control-sm" id="birthPlace" value={formData.birthPlace} onChange={handleChange} placeholder="जन्म स्थळ" aria-describedby="birthPlaceError" />
+                                                {errors.birthPlace && <div id="birthPlaceError" className="invalid-feedback">{errors.birthPlace}</div>}
                                             </div>
                                             <div className="col-md-6 mb-2">
                                                 <label htmlFor="stateOfBirth" className="form-label fw-semibold small">राज्य *</label>

@@ -1,7 +1,7 @@
 // CombinedDropdownInput.js
 import { useState, useRef, useEffect } from 'react';
 
-export default function CombinedDropdownInput({ label, id, value, onChange, required = false, options = [] }) {
+export default function CombinedDropdownInput({ label, id, value, onChange, required = false, options = [], error }) {
   const [inputValue, setInputValue] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -55,6 +55,11 @@ export default function CombinedDropdownInput({ label, id, value, onChange, requ
           className="form-control form-control-sm"
           placeholder={label}
         />
+        {error && (
+        <div id={`${id}`} className="invalid-feedback d-block"> {/* Ensure d-block if needed */}
+          {error}
+        </div>
+      )}
         {isOpen && (
           <div className="position-absolute w-100 bg-white border rounded shadow-sm mt-1 z-3" style={{ maxHeight: '150px', overflowY: 'auto' }}>
             {filteredOptions.length > 0 ? (

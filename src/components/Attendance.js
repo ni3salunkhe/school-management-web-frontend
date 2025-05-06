@@ -32,7 +32,7 @@ const Attendance = () => {
             setIsDataPresent(false);
           }
         } catch (error) {
-          console.error("Error fetching class teacher:", error);
+          console.error("Error fetching      teacher:", error);
           setTeacherName('Error fetching teacher');
           setSelectedClass(null);
         }

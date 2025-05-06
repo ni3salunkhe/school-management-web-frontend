@@ -6,13 +6,13 @@ import { CgProfile } from "react-icons/cg";
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import '../styling/NavBar.css';
+import { jwtDecode } from 'jwt-decode';
 
 function NavBarS({ role }) {
   const handleShowSidebar = () => setShowSidebar(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const handleCloseSidebar = () => setShowSidebar(false);
-  // const navigate = useNavigate();
-
+  const [username, setUsername] = useState(jwtDecode(sessionStorage.getItem('token'))?.username);  
   const handleLogout = () => {
     authService.logout()
   };
@@ -54,18 +54,21 @@ function NavBarS({ role }) {
                     </Dropdown.Menu>
 
                   </Dropdown>
-                  <Nav.Link className="bg-danger text-white rounded-pill py-1" as={Link} to={"/"}><FiLogOut className="me-2" /> लॉगआऊट  </Nav.Link>
-
                 </Nav>}
-                  <div className="d-flex align-items-center text-white ">
-                  <span className="d-none d-md-inline me-2 p-2">{`${role}`.toUpperCase()}</span>
-                  <div
-                    className="rounded-circle bg-light d-flex align-items-center justify-content-center"
-                    style={{ width: '32px', height: '32px' }}
-                  >
-                    <CgProfile style={{ width: '28px', height: '28px', color: '#0d6efd' }} />
-                  </div>
-                </div>
+                <Dropdown align="end">
+                   <Dropdown.Toggle
+                     className="btn-sm d-flex align-items-center"
+                     id="profile-dropdown"
+                   >
+                     <span className="d-none d-md-inline me-2">{`${username} | ${role}`.toUpperCase()}</span>
+                     <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                       <CgProfile style={{ width: '28px', height: '28px' }} />
+                     </div>
+                   </Dropdown.Toggle>
+                   <Dropdown.Menu className="dropdown-menu-end shadow">
+                     <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> Logout</Dropdown.Item>
+                   </Dropdown.Menu>
+                 </Dropdown>
               </>
             </Nav>
           </Navbar.Collapse>

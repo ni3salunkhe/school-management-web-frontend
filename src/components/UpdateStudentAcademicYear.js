@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 
 
 function UpdateStudentAcademicYear() {
+  const id  = jwtDecode(sessionStorage.getItem('token'))?.id;
   const [surName, setSurName] = useState('');
   const [studentName, setStudentName] = useState('');
   const [fatherName, setFatherName] = useState('');
@@ -16,7 +17,7 @@ function UpdateStudentAcademicYear() {
   const [listOfStudents, setListOfStudents] = useState([]);
   const [teacher, setTeacher] = useState({});
   const [error, setError] = useState(null); // New state for error handling
-
+  const [academicYearData, setAcademicYearData] = useState([]);
   const navigate = useNavigate();
   
   // Get token data
@@ -46,6 +47,7 @@ function UpdateStudentAcademicYear() {
       apiService.getdata(`staff/getbyudiseandusername/${udise}/${username}`)
         .then((response) => {
           setTeacher(response.data);
+          console.log(response.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -54,8 +56,28 @@ function UpdateStudentAcademicYear() {
           setLoading(false);
         });
     }
+    apiService.getdata(`academic/${udise}/${id}`)
+        .then((response) => {
+          setAcademicYearData(response.data);
+          console.log(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching teacher data:", error);
+          setError("Failed to load teacher data. Please try again.");
+          setLoading(false);
+        });
+    fetchStudents();
   }, [udise, username]);
 
+  function findAcademicYear(academicYearData, udiseNo, studentId) {
+    return academicYearData.find(
+      (entry) =>
+        entry.studentId.registerNumber === studentId &&
+        entry.schoolUdiseNo?.udiseNo === udiseNo
+    )?.academicYear;
+  }
+  
   // Fetch students after teacher data is available
   const fetchStudents = (searchParams = {}) => {
     if (!teacher.id) {
@@ -82,6 +104,7 @@ function UpdateStudentAcademicYear() {
       });
   };
 
+  
 
   const toggleStudentSelection = (id) => {
     if (listOfStudents.includes(id)) {
@@ -269,6 +292,7 @@ function UpdateStudentAcademicYear() {
                           <th width="15%">आडनाव</th>
                           <th width="20%">वडिलांचे नाव</th>
                           <th width="20%">आईचे नाव</th>
+                          <th width="15%">शैक्षणिक वर्ष</th>
                           <th width="15%">क्रिया</th>
                         </tr>
                       </thead>
@@ -287,6 +311,7 @@ function UpdateStudentAcademicYear() {
                             <td>{student.surName}</td>
                             <td>{student.fatherName}</td>
                             <td>{student.motherName}</td>
+                            <td>{findAcademicYear(academicYearData, student.school.udiseNo, student.registerNumber)}</td>
                             <td>
                               <button
                                 className="btn btn-sm btn-outline-primary"

@@ -21,6 +21,7 @@ import UpdateStudentAcademicYear from '../components/UpdateStudentAcademicYear';
 import UpdateStudentAcademicYearForm from '../components/UpdateStudentAcademicYearForm';
 import UpdateStudentAllAcademic from '../components/UpdateStudentAllAcademic';
 import StaffList from '../components/StaffList';
+import DailyAttendanceReport from '../components/DailyAttendanceReport';
 
 
 
@@ -61,6 +62,7 @@ function StudentManagement({ role }) {
             <Route path='Updateyear' element={<UpdateStudentAcademicYear/>}/>
             <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm/>}/>
             <Route path='updateacademicyearall' element={<UpdateStudentAllAcademic />} />
+            <Route path='dailyreport' element={<DailyAttendanceReport/>}/>
           </Routes>
         );
       default:

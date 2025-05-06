@@ -157,7 +157,7 @@ function StudentList() {
                                             <option value="">-- शिक्षक निवडा --</option>
                                             {teachers.map((teacher) => (
                                                 <option key={teacher.id} value={teacher.id}>
-                                                    {teacher.fname} {teacher.lname}
+                                                    {teacher.fname} {teacher.fathername} {teacher.lname}
                                                 </option>
                                             ))}
                                         </select>

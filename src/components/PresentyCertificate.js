@@ -2,16 +2,24 @@ import React, { useEffect, useRef, useState } from 'react'
 import apiService from '../services/api.service';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function PresentyCertificate() {
 
   const { id } = useParams();
   const [studentData, setStudentData] = useState();
-  const[academicData,setAcademicData]=useState();
-  const[lastAcademicData,setLastAcademicData]=useState();
-  const udise = 12345678093;
+  const [academicData, setAcademicData] = useState();
+  const [lastAcademicData, setLastAcademicData] = useState();
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
   const printContentRef = useRef(null);
   const navigate = useNavigate();
+  const now = new Date();
+  const monthsToAdd = 7;
+  const monthnyear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const endDate = new Date(now.getFullYear(), now.getMonth() + monthsToAdd, 1);
+const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
 
   const A4_WIDTH_PX = 794;
   const A4_HEIGHT_PX = 900;
@@ -21,7 +29,7 @@ function PresentyCertificate() {
       console.log('Student Data:', response.data);
       setStudentData(response.data);
     });
-  
+
     axios.get("http://localhost:8080/academic/student-school", {
       params: {
         studentId: id,
@@ -30,7 +38,7 @@ function PresentyCertificate() {
     }).then((response) => {
       console.log('Academic Data:', response.data);
       setAcademicData(response.data);
-  
+
       // Now that we have academicData, call the last year data API
       apiService.getbyid('academicold/lastyear/', response.data.id).then((lastYearResponse) => {
         console.log('Last Year Academic:', lastYearResponse.data);
@@ -39,8 +47,39 @@ function PresentyCertificate() {
     }).catch((error) => {
       console.error("Error fetching academic data:", error);
     });
+
+    const fetchAcademia = async () => {
+      try {
+        const response = await apiService.getdata(`api/attendance/by-udise-monthnyear/${id}/${udise}/2025-12/2025-01`)
+
+        console.log(monthnyearend,monthnyear);
+        
+        setAttendanceData(response.data);
+        
+      } catch (err) {
+        console.error("Error fetching academic data:", err);
+      }
+    }
+    function calculateYearlyAttendancePercentage(attendanceData) {
+      let totalPresent = 0;
+      let totalWorking = 0;
+      console.log(attendanceData);
+      attendanceData.forEach(month => {
+        totalPresent += month.totalp || 0;
+        totalWorking += month.workDays || 0;
+      });
+      console.log(totalPresent, totalWorking);
+      if (totalWorking === 0) return 0;
+    
+      return ((totalPresent / totalWorking) * 100).toFixed(2); // returns string like "95.37"
+    }
+    
+    fetchAcademia()
+    const yearlyPercentage = calculateYearlyAttendancePercentage(attendanceData);
+    console.log("Yearly Attendance %:", yearlyPercentage + "%");
+
   }, [id, udise]);
-  
+
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -215,7 +254,7 @@ function PresentyCertificate() {
             </div>
 
             <div>
-              <p>प्रमाणपत्र  देण्यात येते की ,कुमार/कुमारी <span>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> चालू वर्ष { academicData?.academicYear} मध्ये {academicData?.standard?.standard } मध्ये शिकत आहे.मागील शैक्षणिक {lastAcademicData?.academicYear} वर्ष मध्ये त्याची/तिची उपस्थिती ७५% पेक्षा जास्त होती. दाखला मागणीव न देणेत आला असे.</p>
+              <p>प्रमाणपत्र  देण्यात येते की ,कुमार/कुमारी <span>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> चालू वर्ष {academicData?.academicYear} मध्ये {academicData?.standard?.standard} मध्ये शिकत आहे.मागील शैक्षणिक {lastAcademicData?.academicYear} वर्ष मध्ये त्याची/तिची उपस्थिती ७५% पेक्षा जास्त होती. दाखला मागणीव न देणेत आला असे.</p>
             </div>
             <div className='row'>
               <div className='col-6'>

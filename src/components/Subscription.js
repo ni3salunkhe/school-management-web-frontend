@@ -137,7 +137,7 @@ const Subscription = () => {
            
 
             const result = await Swal.fire({
-                title: 'शाळेचे खाते तयार करायचे आहे का?',
+                title: 'नोंदण करायची आहे का?',
                 icon: 'question',
                 showCancelButton: true,
                 showDenyButton: true,
@@ -157,7 +157,7 @@ const Subscription = () => {
                         await apiService.post("api/subscription/renew", userData);
                         // alert("subscription नूतनीकरण यशस्वीरीत्या झाले आहे!" + formData);
                         await Swal.fire({
-                            title: "शाळेची माहिती यशस्वीरीत्या संपादित केली आहे ..!",
+                            title: "सदास्यता माहिती यशस्वीरीत्या संपादित केली आहे ..!",
                             icon: "success",
                             draggable: true
                         });

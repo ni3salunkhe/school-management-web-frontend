@@ -15,6 +15,10 @@ function DistrictForm() {
     const [allStates, setAllStates] = useState([]);
     const [districtData, setDistrictData] = useState([]);
     const navigate = useNavigate();
+    function isOnlyMarathi(input) {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    }
 
     useEffect(() => {
         apiService.getdata("state/").then((response) => {
@@ -48,6 +52,10 @@ function DistrictForm() {
         if (isDuplicate) {
             newError.districtName = "हे राज्य आधीच अस्तित्वात आहे.";
         }
+        if (!isOnlyMarathi(value)) {
+            newError.districtName = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+        }
+
         setErrors(newError)
     };
 

@@ -17,6 +17,7 @@ const NewSchool = () => {
     const [existingEmail, setExistingEmail] = useState([]);
     const [existingPhone, setExistingPhone] = useState([]);
     const navigate = useNavigate();
+    
 
     const [formData, setFormData] = useState({
         schoolUdise: '',
@@ -44,6 +45,10 @@ const NewSchool = () => {
         return /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(text);
     }
 
+    function isOnlyMarathi(input) {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    }
 
     const loadUsernames = async () => {
         try {
@@ -112,6 +117,7 @@ const NewSchool = () => {
 
             // --- Field-Specific Validations ---
 
+
             // School UDISE
             if (name === 'schoolUdise') {
                 if (!value) {
@@ -130,16 +136,22 @@ const NewSchool = () => {
             if (name === 'schoolName') {
                 if (!value) {
                     updatedErrors.schoolName = 'शाळेचे नाव प्रविष्ट करणे आवश्यक आहे';
-                 } // Removed English check - school names can be in Marathi
-                 else if (value && existingSchool.includes(value.trim().toLowerCase())) {
-                     updatedErrors.schoolName = 'हे शाळेचे नाव आधीच अस्तित्वात आहे';
-                 }
+                } // Removed English check - school names can be in Marathi
+                else if (value && existingSchool.includes(value.trim().toLowerCase())) {
+                    updatedErrors.schoolName = 'हे शाळेचे नाव आधीच अस्तित्वात आहे';
+                }
+                else if (!isOnlyMarathi(value)) {
+                    updatedErrors.schoolName = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+                }
             }
 
-             // Org Name
-             if (name === 'orgName') {
+            // Org Name
+            if (name === 'orgName') {
                 if (!value) {
                     updatedErrors.orgName = 'संस्थेचे नाव प्रविष्ट करणे आवश्यक आहे';
+                }
+                else if (!isOnlyMarathi(value)) {
+                    updatedErrors.orgName = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
                 }
                 // Removed English check - org names can be in Marathi
             }
@@ -152,35 +164,35 @@ const NewSchool = () => {
                 } else if (value.length < 3) {
                     updatedErrors.username = 'वापरकर्तानाव किमान ३ अक्षरे असावे लागते';
                 } else if (!isStrictlyEnglish(value)) {
-                     updatedErrors.username = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा (Please use only English characters/numbers/symbols)';
-                 } else if (existingUsers.includes(value.trim().toLowerCase())) {
+                    updatedErrors.username = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा (Please use only English characters/numbers/symbols)';
+                } else if (existingUsers.includes(value.trim().toLowerCase())) {
                     updatedErrors.username = 'हे वापरकर्ता नाव आधीच अस्तित्वात आहे';
                 }
             }
 
             // Email
             if (name === 'email') {
-                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!value) {
                     updatedErrors.email = 'ईमेल प्रविष्ट करणे आवश्यक आहे';
-                 } else if (!isStrictlyEnglish(value)) { // Email must be English chars
-                     updatedErrors.email = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
-                 } else if (!emailRegex.test(value)) {
-                     updatedErrors.email = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा';
-                 } else if (existingEmail.includes(value.trim().toLowerCase())) {
+                } else if (!isStrictlyEnglish(value)) { // Email must be English chars
+                    updatedErrors.email = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
+                } else if (!emailRegex.test(value)) {
+                    updatedErrors.email = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा आणि स्पेस नसल्याची खात्री करा.';
+                } else if (existingEmail.includes(value.trim().toLowerCase())) {
                     updatedErrors.email = 'हे ईमेल आधीच अस्तित्वात आहे';
                 }
             }
 
             // Phone
             if (name === 'phone') {
-                 if (!value) {
+                if (!value) {
                     updatedErrors.phone = 'फोन नंबर प्रविष्ट करणे आवश्यक आहे';
-                 } else if (!/^[0-9]+$/.test(value)) { // Should only contain digits
+                } else if (!/^[0-9]+$/.test(value)) { // Should only contain digits
                     updatedErrors.phone = 'कृपया केवळ इंग्रजी अंक प्रविष्ट करा';
-                 } else if (!/^[6-9]\d{9}$/.test(value)) {
+                } else if (!/^[6-9]\d{9}$/.test(value)) {
                     updatedErrors.phone = 'कृपया १० अंकी वैध भारतीय मोबाईल नंबर प्रविष्ट करा';
-                 } else if (existingPhone.includes(value)) { // Assuming existingPhone contains strings
+                } else if (existingPhone.includes(value)) { // Assuming existingPhone contains strings
                     updatedErrors.phone = 'हा फोन नंबर आधीच अस्तित्वात आहे';
                 }
             }
@@ -189,26 +201,26 @@ const NewSchool = () => {
             if (name === 'password') {
                 if (!value) {
                     updatedErrors.password = 'पासवर्ड प्रविष्ट करणे आवश्यक आहे';
-                 } else if (value.length < 8) {
-                     updatedErrors.password = 'पासवर्ड किमान ८ अक्षरे असावे लागते';
-                 } else if (!isStrictlyEnglish(value)) {
-                     updatedErrors.password = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
-                 }
-                 // Check confirm password if it has a value
-                 if (formData.confirmPassword && value !== formData.confirmPassword) {
-                     updatedErrors.confirmPassword = 'पासवर्ड जुळत नाहीत';
-                 } else if (formData.confirmPassword && value === formData.confirmPassword) {
-                     delete updatedErrors.confirmPassword; // Clear error if they now match
-                 }
+                } else if (value.length < 8) {
+                    updatedErrors.password = 'पासवर्ड किमान ८ अक्षरे असावे लागते';
+                } else if (!isStrictlyEnglish(value)) {
+                    updatedErrors.password = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
+                }
+                // Check confirm password if it has a value
+                if (formData.confirmPassword && value !== formData.confirmPassword) {
+                    updatedErrors.confirmPassword = 'पासवर्ड जुळत नाहीत';
+                } else if (formData.confirmPassword && value === formData.confirmPassword) {
+                    delete updatedErrors.confirmPassword; // Clear error if they now match
+                }
             }
 
             // Confirm Password
             if (name === 'confirmPassword') {
-                 if (!value) {
+                if (!value) {
                     updatedErrors.confirmPassword = 'पासवर्डची पुष्टी करणे आवश्यक आहे';
-                 } else if (formData.password !== value) {
+                } else if (formData.password !== value) {
                     updatedErrors.confirmPassword = 'पासवर्ड जुळत नाहीत';
-                 } else if (!isStrictlyEnglish(value)) { // Also check characters here
+                } else if (!isStrictlyEnglish(value)) { // Also check characters here
                     updatedErrors.confirmPassword = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
                 }
             }
@@ -260,13 +272,13 @@ const NewSchool = () => {
         if (data.phone && existingPhone.includes(data.phone)) currentErrors.phone = 'हा फोन नंबर आधीच अस्तित्वात आहे';
 
 
-         // Re-check English only fields
-         const englishOnlyFields = ['username', 'email', 'password', 'confirmPassword'];
-         englishOnlyFields.forEach(field => {
-             if (data[field] && !isStrictlyEnglish(data[field])) {
-                 currentErrors[field] = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
-             }
-         });
+        // Re-check English only fields
+        const englishOnlyFields = ['username', 'email', 'password', 'confirmPassword'];
+        englishOnlyFields.forEach(field => {
+            if (data[field] && !isStrictlyEnglish(data[field])) {
+                currentErrors[field] = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
+            }
+        });
 
 
         setErrors(currentErrors); // Update the errors state with the final check
@@ -284,9 +296,9 @@ const NewSchool = () => {
             // If validation passes, proceed with submission
             try {
                 // Prepare data for submission
-                 // IMPORTANT: Use FormData for potential file uploads (like logo in the future)
-                 const schoolPayload = new FormData()
-                 schoolPayload.append('schoolDto', JSON.stringify({
+                // IMPORTANT: Use FormData for potential file uploads (like logo in the future)
+                const schoolPayload = new FormData()
+                schoolPayload.append('schoolDto', JSON.stringify({
                     udiseNo: formData.schoolUdise,
                     schoolName: formData.schoolName,
                     sansthaName: formData.orgName,
@@ -317,15 +329,15 @@ const NewSchool = () => {
                     try {
                         // Send data to API
                         // If sending JSON:
-                         await apiService.post('school/', schoolPayload);
+                        await apiService.post('school/', schoolPayload);
 
-                         // If using FormData (e.g., for logo):
-                         // const dataToSend = new FormData();
-                         // dataToSend.append('schoolDto', JSON.stringify(schoolPayload));
-                         // if (formData.logo) { // Add this logic if you have a logo input
-                         //     dataToSend.append('logo', formData.logo);
-                         // }
-                         // await apiService.post('school/', dataToSend);
+                        // If using FormData (e.g., for logo):
+                        // const dataToSend = new FormData();
+                        // dataToSend.append('schoolDto', JSON.stringify(schoolPayload));
+                        // if (formData.logo) { // Add this logic if you have a logo input
+                        //     dataToSend.append('logo', formData.logo);
+                        // }
+                        // await apiService.post('school/', dataToSend);
 
 
                         setSubmitStatus({ type: 'success', message: 'शाळेचे खाते यशस्वीरीत्या तयार झाले!' });
@@ -355,15 +367,15 @@ const NewSchool = () => {
                         }
 
                     } catch (apiError) {
-                         console.error("API Error:", apiError);
-                         // Try to get specific error message from backend response
-                         const errorMessage = apiError.response?.data?.message || apiError.message || 'डेटा जतन करण्यात अडचण आली.';
+                        console.error("API Error:", apiError);
+                        // Try to get specific error message from backend response
+                        const errorMessage = apiError.response?.data?.message || apiError.message || 'डेटा जतन करण्यात अडचण आली.';
                         Swal.fire('त्रुटी!', errorMessage, 'error');
-                         setSubmitStatus({ type: 'danger', message: `खाते तयार करण्यात अयशस्वी: ${errorMessage}` });
+                        setSubmitStatus({ type: 'danger', message: `खाते तयार करण्यात अयशस्वी: ${errorMessage}` });
                     }
                 } else {
-                     console.log("Submission cancelled by user.");
-                 }
+                    console.log("Submission cancelled by user.");
+                }
 
             } catch (error) {
                 // Catch errors related to Swal or other pre-API issues
@@ -387,8 +399,8 @@ const NewSchool = () => {
             <Row className="justify-content-center"> {/* Center the column */}
                 <Col md={10} lg={8}> {/* Adjust column width */}
                     <Card className='shadow-sm border-0 rounded-3'> {/* Subtle shadow, no border, rounded corners */}
-                         {/* Removed the 'X' button for now, add back if needed */}
-                         {/* <div className="position-absolute top-0 end-0 m-2">
+                        {/* Removed the 'X' button for now, add back if needed */}
+                        {/* <div className="position-absolute top-0 end-0 m-2">
                             <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer'} placeholder={'X'}></Next>
                         </div> */}
                         <Card.Header as="h4" className="text-center p-3 bg-primary text-white rounded-top-3"> {/* Use h4 for slightly smaller header */}
@@ -504,7 +516,7 @@ const NewSchool = () => {
                                                         required
                                                         autoComplete="new-password" // Prevent browser autocomplete for username
                                                     />
-                                                     <Form.Text className="text-muted">
+                                                    <Form.Text className="text-muted">
                                                         (फक्त इंग्रजी अक्षरे, अंक, चिन्हे वापरा)
                                                     </Form.Text>
                                                     <Form.Control.Feedback type="invalid">
@@ -547,7 +559,7 @@ const NewSchool = () => {
                                                         autoComplete="new-password" // Important for password managers
                                                     />
                                                     <Form.Text className="text-muted">
-                                                       (फक्त इंग्रजी अक्षरे, अंक, चिन्हे वापरा)
+                                                        (फक्त इंग्रजी अक्षरे, अंक, चिन्हे वापरा)
                                                     </Form.Text>
                                                     <Form.Control.Feedback type="invalid">
                                                         {errors.password}
@@ -558,14 +570,13 @@ const NewSchool = () => {
                                                 <Form.Group className="mb-3" controlId="hmConfirmPasswordInput">
                                                     <Form.Label>पासवर्डची पुष्टी करा <span className="text-danger">*</span></Form.Label>
                                                     <Form.Control
-                                                        type="password"
+                                                        type="text"
                                                         name="confirmPassword"
                                                         value={formData.confirmPassword}
                                                         onChange={handleChange}
                                                         placeholder="पासवर्ड पुन्हा प्रविष्ट करा"
                                                         isInvalid={!!errors.confirmPassword}
                                                         required
-                                                        autoComplete="new-password"
                                                     />
                                                     <Form.Control.Feedback type="invalid">
                                                         {errors.confirmPassword}
@@ -578,34 +589,34 @@ const NewSchool = () => {
 
                                 {/* Other Info Section - Role */}
                                 <Card className="mb-4 border bg-light shadow-sm">
-                                     <Card.Body className="p-3">
-                                         <h5 className="card-title border-bottom pb-2 mb-3 fs-6 fw-bold text-primary">
-                                             <i className="bi bi-person-badge me-2"></i>भूमिका
-                                         </h5>
-                                         <Row>
-                                             <Col md={6}> {/* Keep it centered or full width if only one item */}
-                                                 <Form.Group className="mb-3" controlId="roleSelect">
-                                                     <Form.Label>भूमिका</Form.Label>
-                                                     <Form.Select
-                                                         name="role"
-                                                         value={formData.role}
-                                                         onChange={handleChange}
-                                                         // isInvalid={!!errors.role} // No validation needed if only one option
-                                                     >
-                                                         <option value={"HEADMASTER"}>Head Master (मुख्याध्यापक)</option>
-                                                         {/* Add other roles here if necessary in the future */}
-                                                         {/* Example: <option value={"TEACHER"}>Teacher (शिक्षक)</option> */}
-                                                     </Form.Select>
+                                    <Card.Body className="p-3">
+                                        <h5 className="card-title border-bottom pb-2 mb-3 fs-6 fw-bold text-primary">
+                                            <i className="bi bi-person-badge me-2"></i>भूमिका
+                                        </h5>
+                                        <Row>
+                                            <Col md={6}> {/* Keep it centered or full width if only one item */}
+                                                <Form.Group className="mb-3" controlId="roleSelect">
+                                                    <Form.Label>भूमिका</Form.Label>
+                                                    <Form.Select
+                                                        name="role"
+                                                        value={formData.role}
+                                                        onChange={handleChange}
+                                                    // isInvalid={!!errors.role} // No validation needed if only one option
+                                                    >
+                                                        <option value={"HEADMASTER"}>Head Master (मुख्याध्यापक)</option>
+                                                        {/* Add other roles here if necessary in the future */}
+                                                        {/* Example: <option value={"TEACHER"}>Teacher (शिक्षक)</option> */}
+                                                    </Form.Select>
                                                     {/* No need for feedback if only one fixed role */}
-                                                     {/* <Form.Control.Feedback type="invalid">
+                                                    {/* <Form.Control.Feedback type="invalid">
                                                         {errors.role}
                                                     </Form.Control.Feedback> */}
-                                                 </Form.Group>
-                                             </Col>
-                                             {/* Add other columns here if needed */}
-                                         </Row>
-                                     </Card.Body>
-                                 </Card>
+                                                </Form.Group>
+                                            </Col>
+                                            {/* Add other columns here if needed */}
+                                        </Row>
+                                    </Card.Body>
+                                </Card>
 
                                 {/* Submit Button */}
                                 <div className="d-grid gap-2 d-md-flex justify-content-md-center mt-4"> {/* Centered button(s) */}
@@ -614,8 +625,8 @@ const NewSchool = () => {
                                     </Button>
                                     {/* Optional Cancel/Back Button */}
                                     <Button variant="outline-secondary" type="button" onClick={() => navigate('/developer')} className="btn-lg px-4 shadow-sm rounded-pill"> {/* Example back button */}
-                                         <i className="bi bi-arrow-left-circle me-2"></i>मागे जा
-                                     </Button>
+                                        <i className="bi bi-arrow-left-circle me-2"></i>मागे जा
+                                    </Button>
                                 </div>
                             </Form>
                         </Card.Body>

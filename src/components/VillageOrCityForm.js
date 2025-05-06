@@ -15,6 +15,10 @@ function VillageOrCityForm() {
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    function isOnlyMarathi(input) {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    }
 
     useEffect(() => {
         apiService.getdata("tehsil/").then((response) => {
@@ -42,6 +46,13 @@ function VillageOrCityForm() {
                 }));
             }
         }
+        if (!isOnlyMarathi(value)) {
+            setErrors((prev) => ({
+                ...prev,
+                villageName: "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा"
+            }));
+        }
+
     }
 
     function validate() {

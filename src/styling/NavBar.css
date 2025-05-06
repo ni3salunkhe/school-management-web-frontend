@@ -14,10 +14,14 @@
   transition: background-color 0.3s ease;
   padding: 0.5rem 1rem;
   border-radius: 5px;
-    color: #ffffff !important;
+    color: #fff9f9 !important;
 }
 
 .dropdown-item:hover{
     background-color: #0b5ed7; /* Slightly darker blue */
     color: #ffffff !important;    
+}
+
+.dropdown-menu{
+    background-color: #000000;
 }
