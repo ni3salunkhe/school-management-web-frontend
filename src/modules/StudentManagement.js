@@ -59,18 +59,18 @@ function StudentManagement({ role }) {
             <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear/>}></Route>
             <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm/>}/>
             <Route path='editclassteacher/:id' element={<EditClassTeacher/>}/>
-            <Route path='attendancereport' element={<AttendanceReport/>}/>
-            <Route path='attendencecover' element={<AttendanceCoverPage/>}/>
           </Routes>
         );
-      case 'TEACHER':
-        return (
-          <Routes>
+        case 'TEACHER':
+          return (
+            <Routes>
             <Route path='attendance' element={<Attendance />} />
             <Route path='Updateyear' element={<UpdateStudentAcademicYear/>}/>
             <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm/>}/>
             <Route path='updateacademicyearall' element={<UpdateStudentAllAcademic />} />
-            <Route path='dailyreport' element={<DailyAttendanceReport/>}/>
+            <Route path='dailyattendancereport' element={<DailyAttendanceReport/>}/>
+            <Route path='monthlyattendancereport' element={<AttendanceReport/>}/>
+            <Route path='catlogcoverpage' element={<AttendanceCoverPage/>}/>
           </Routes>
         );
       default:

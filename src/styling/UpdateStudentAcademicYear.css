@@ -1,0 +1,75 @@
+/* Styles for when the component IS visible (optional, for contrast) */
+.component-visible {
+    padding: 20px;
+    background-color: #e6ffed; /* Light green */
+    border: 1px solid #b2f5ea;
+    border-radius: 8px;
+    text-align: center;
+    color: #2f855a;
+}
+
+/* Styles for the "Not Available" message container */
+.not-available-container {
+    margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px; /* Adjust as needed, or use 100vh for full page */
+    padding: 20px;
+    background-color: #f8f9fa; /* Light gray background */
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    color: #6c757d; /* Muted text color */
+    opacity: 0; /* Start hidden for fade-in */
+    animation: fadeInUnavailable 1s ease-out forwards;
+}
+
+.not-available-content {
+    /* Additional styling for the content block if needed */
+}
+
+.not-available-icon {
+    width: 60px;
+    height: 60px;
+    color: #dc3545; /* Reddish color for the icon */
+    margin-bottom: 15px;
+    animation: bounceIcon 2s infinite ease-in-out;
+}
+
+.not-available-container h2 {
+    margin-bottom: 10px;
+    color: #343a40;
+}
+
+.not-available-container p {
+    font-size: 0.9em;
+}
+
+/* Keyframe Animations */
+
+@keyframes fadeInUnavailable {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounceIcon {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-15px);
+    }
+    60% {
+        transform: translateY(-7px);
+    }
+}
+
+/* You can add more animations or change these */

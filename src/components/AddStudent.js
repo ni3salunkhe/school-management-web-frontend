@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
 import Next from './Next';
 import { useNavigate } from 'react-router-dom';
+import helper from '../services/helper.service'
 
 // --- Marathi Date Conversion Helpers ---
 const marathiDays = [
@@ -75,7 +76,6 @@ function AddStudent() {
     const [students, setStudents] = useState([]);
     const [errors, setErrors] = useState({}); // Combined state for immediate feedback and submit errors
     const navigate = useNavigate();
-    const navigate=useNavigate();
 
     const isOnlyMarathi = (input) => {
         const marathiRegex = /^[\u0900-\u097F\s]+$/;
@@ -268,11 +268,19 @@ function AddStudent() {
             val = value.trim();
         }
 
-        if(id === "studentName" || id === "fatherName" || id === "surName" || id === "motherName" || id === "residentialAddress" || id === "birthPlace" || id === "villageOfBirth" || id === "tehasilOfBirth" || id === "districtOfBirth" || id === "stateOfBirth" || id === "minorityInformation" || id === "casteCategory" || id === "ebcInformation" || id === "subCast" || id === "caste" || id === "religion" || id === "motherTongue" || id === "nationality" ){
+        if(id === "studentName" || id === "fatherName" || id === "surName" || id === "minorityInformation" || id === "casteCategory" || id === "ebcInformation" || id === "subCast" || id === "caste" || id === "religion" || id === "motherTongue" || id === "nationality" ){
             if(value && !isOnlyMarathi(value)){
                 currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
             }
         }
+
+        if( id === "motherName"){
+            const marathiRegex = /^[\u0900-\u097F\s-]+$/;
+            if(!marathiRegex.test(value)){
+                currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
+            }
+        }
+
         if (id === "dateOfBirth") {
             const marathiDate = getMarathiDateWords(value);
             setFormData(prev => ({
@@ -372,10 +380,11 @@ function AddStudent() {
         }
 
         if(id === "residentialAddress"){
+            const marathiRegex = /^[\u0900-\u097F\s-]+$/;
             if(value && value.length < 6){
                 currentErrors.residentialAddress = "पत्ता अवैध आहे.";
             }
-            else if(value && !isOnlyMarathi(value)){
+            else if(!marathiRegex.test(value)){
                 currentErrors.residentialAddress = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
             }
         }
@@ -561,6 +570,31 @@ function AddStudent() {
                                                     </div>
                                                 )}
                                             </div>
+                                            <div className="col-md-4 mb-2">
+                                                <label htmlFor="adhaarNumber" className="form-label fw-semibold small">आधार कार्ड नंबर</label>
+                                                <input
+                                                    type="text"
+                                                    inputMode='numeric'
+                                                    className={`form-control form-control-sm ${getValidationClass('adhaarNumber')}`}
+                                                    id="adhaarNumber"
+                                                    value={formData.adhaarNumber}
+                                                    onChange={handleChange}
+                                                    maxLength={12}
+                                                    placeholder="१२ अंकी आधार नंबर"
+                                                    aria-describedby="adhaarNumberError"
+                                                />
+                                                {errors.adhaarNumber && <div id="adhaarNumberError" className="invalid-feedback">{errors.adhaarNumber}</div>}
+                                            </div>
+                                            <div className="col-md-4 mb-2">
+                                                <label htmlFor="gender" className="form-label fw-semibold small">लिंग *</label>
+                                                <select className={`form-select form-select-sm ${getValidationClass('gender')}`} id="gender" value={formData.gender} onChange={handleChange} required aria-describedby="genderError">
+                                                    <option value="">-- निवडा --</option>
+                                                    <option value="पुरुष">पुरुष</option>
+                                                    <option value="स्त्री">स्त्री</option>
+                                                    <option value="इतर">इतर</option>
+                                                </select>
+                                                {errors.gender && <div id="genderError" className="invalid-feedback">{errors.gender}</div>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -591,31 +625,6 @@ function AddStudent() {
                                                 <input type="text" className={`form-control form-control-sm ${getValidationClass('motherName')}`} id="motherName" value={formData.motherName} onChange={handleChange} required placeholder="आईचे नाव" aria-describedby="motherNameError" />
                                                 {errors.motherName && <div id="motherNameError" className="invalid-feedback">{errors.motherName}</div>}
                                             </div>
-
-                                            {/* DOB, Gender */}
-                                            <div className="col-md-3 mb-2">
-                                                <label htmlFor="dateOfBirth" className="form-label fw-semibold small">जन्मतारीख *</label>
-                                                <input type="date" className={`form-control form-control-sm ${getValidationClass('dateOfBirth')}`} id="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required aria-describedby="dateOfBirthError" />
-                                                {errors.dateOfBirth && <div id="dateOfBirthError" className="invalid-feedback">{errors.dateOfBirth}</div>}
-                                            </div>
-                                            <div className="col-md-3 mb-2">
-                                                <label htmlFor="dateOfBirthInWord" className="form-label fw-semibold small">तारीख (शब्दात)</label>
-                                                <input type="text" className="form-control form-control-sm" id="dateOfBirthInWord" value={formData.dateOfBirthInWord} readOnly placeholder="उदा. बारा जानेवारी दोन हजार तीन" aria-describedby="dateOfBirthInWordError" />
-                                                {/* Readonly, so error display might not be needed unless validation changes */}
-                                            </div>
-                                            <div className="col-md-3 mb-2">
-                                                <label htmlFor="gender" className="form-label fw-semibold small">लिंग *</label>
-                                                <select className={`form-select form-select-sm ${getValidationClass('gender')}`} id="gender" value={formData.gender} onChange={handleChange} required aria-describedby="genderError">
-                                                    <option value="">-- निवडा --</option>
-                                                    <option value="पुरुष">पुरुष</option>
-                                                    <option value="स्त्री">स्त्री</option>
-                                                    <option value="इतर">इतर</option>
-                                                </select>
-                                                {errors.gender && <div id="genderError" className="invalid-feedback">{errors.gender}</div>}
-                                            </div>
-
-                                            {/* Combined Dropdowns */}
-                                            
                                             <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')}  />
                                             <CombinedDropdownInput id="motherTongue" label="मातृभाषा " value={formData.motherTongue} onChange={handleCombinedChange} required={true} options={["हिंदी", "मराठी", "उर्दू"]} error={errors.motherTongue} validationClass={getValidationClass('motherTongue')} />
                                             <CombinedDropdownInput id="religion" label="धर्म " value={formData.religion} onChange={handleCombinedChange} required={true} options={["हिंदू", "मुस्लिम", "ख्रिश्चन", "बौद्ध", "जैन"]} error={errors.religion} validationClass={getValidationClass('religion')} />
@@ -625,6 +634,8 @@ function AddStudent() {
                                                 {errors.subCast && <div id="subCastError" className="invalid-feedback">{errors.subCast}</div>}
                                             </div>
                                             <CombinedDropdownInput id="caste" label="प्रवर्ग " value={formData.caste} onChange={handleCombinedChange} required={true} options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]} error={errors.caste} validationClass={getValidationClass('caste')} />
+                                                                        
+
                                         </div>
                                     </div>
                                 </div>
@@ -671,11 +682,58 @@ function AddStudent() {
                                                 </select>
                                                 {errors.villageOfBirth && <div id="villageOfBirthError" className="invalid-feedback">{errors.villageOfBirth}</div>}
                                             </div>
+                                            <div className="col-md-6 mb-2">
+                                                <label htmlFor="dateOfBirth" className="form-label fw-semibold small">जन्मतारीख *</label>
+                                                <input type="date" className={`form-control form-control-sm ${getValidationClass('dateOfBirth')}`} id="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required aria-describedby="dateOfBirthError" />
+                                                {errors.dateOfBirth && <div id="dateOfBirthError" className="invalid-feedback">{errors.dateOfBirth}</div>}
+                                            </div>
+                                            <div className="col-md-6 mb-2">
+                                                <label htmlFor="dateOfBirthInWord" className="form-label fw-semibold small">तारीख (शब्दात)</label>
+                                                <input type="text" className="form-control form-control-sm" id="dateOfBirthInWord" value={formData.dateOfBirthInWord} readOnly placeholder="उदा. बारा जानेवारी दोन हजार तीन" aria-describedby="dateOfBirthInWordError" />
+                                                {/* Readonly, so error display might not be needed unless validation changes */}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-
+                                 {/* Section 5: Academic Information */}
+                                 <div className="card mb-4 border-0 bg-light">
+                                    <div className="card-body p-3">
+                                        <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold"><BiBook className="me-2" />शैक्षणिक माहिती</h5>
+                                        <div className="row g-3">
+                                            <div className="col-md-4 mb-2">
+                                                <label htmlFor="lastSchoolUdiseNo" className="form-label fw-semibold small">मागील शाळेचा UDISE नंबर</label>
+                                                <input type="text" className="form-control form-control-sm" id="lastSchoolUdiseNo" value={formData.lastSchoolUdiseNo} onChange={handleChange} placeholder="UDISE नंबर" />
+                                                {/* Add validation if UDISE has specific format/length */}
+                                                {/* {errors.lastSchoolUdiseNo && <div id="lastSchoolUdiseNoError" className="invalid-feedback">{errors.lastSchoolUdiseNo}</div>} */}
+                                            </div>
+                                            <div className="col-md-4 mb-2">
+                                                <label htmlFor="admissionDate" className="form-label fw-semibold small">प्रवेश तारीख *</label>
+                                                <input type="date" className={`form-control form-control-sm ${getValidationClass('admissionDate')}`} id="admissionDate" value={formData.admissionDate} onChange={handleChange} required aria-describedby="admissionDateError" />
+                                                {errors.admissionDate && <div id="admissionDateError" className="invalid-feedback">{errors.admissionDate}</div>}
+                                            </div>
+                                            <div className="col-md-4 mb-2">
+                                                <label htmlFor="whichStandardAdmitted" className="form-label fw-semibold small">प्रवेश इयत्ता *</label>
+                                                <select className={`form-select form-select-sm ${getValidationClass('whichStandardAdmitted')}`} id="whichStandardAdmitted" value={formData.whichStandardAdmitted} onChange={handleChange} required aria-describedby="whichStandardAdmittedError">
+                                                    <option value="">-- इयत्ता निवडा --</option>
+                                                    {standards.map(standard => (<option key={standard.id} value={standard.id}>{standard.standard}</option>))}
+                                                </select>
+                                                {errors.whichStandardAdmitted && <div id="whichStandardAdmittedError" className="invalid-feedback">{errors.whichStandardAdmitted}</div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Section 6: Additional Information */}
+                                <div className="card mb-5 border-0 bg-light"> {/* Added mb-5 for spacing before button */}
+                                    <div className="card-body p-3">
+                                        <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold"><BiInfoCircle className="me-2" />अतिरिक्त माहिती</h5>
+                                        <div className="row g-3">
+                                            {/* Combined dropdowns for optional fields */}
+                                            <CombinedDropdownInput id="ebcInformation" label="EBC माहिती" value={formData.ebcInformation} onChange={handleCombinedChange} required={false} options={["PAY", "BCF", "E.B.C.", "E.B.C.BC", "P.T.", "M.T."]} />
+                                            <CombinedDropdownInput id="casteCategory" label="जात प्रवर्ग" value={formData.casteCategory} onChange={handleCombinedChange} required={false} options={["GENERAL", "S.C.", "S.T.", "VJ(A)", "N.T.(B)", "N.T.(C)", "N.T.(D)", "O.B.C.", "S.B.C.", "ESBC"]} />
+                                            <CombinedDropdownInput id="minorityInformation" label="अल्पसंख्याक माहिती" value={formData.minorityInformation} onChange={handleCombinedChange} required={false} options={["Non Minority", "Jain Minority", "MinorityMuslim Minority", "Boudha Minority"]} />
+                                        </div>
+                                    </div>
+                                </div>
                                 {/* Section 4: Contact Information */}
                                 <div className="card mb-4 border-0 bg-light">
                                     <div className="card-body p-3">
@@ -708,63 +766,6 @@ function AddStudent() {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Section 5: Academic Information */}
-                                <div className="card mb-4 border-0 bg-light">
-                                    <div className="card-body p-3">
-                                        <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold"><BiBook className="me-2" />शैक्षणिक माहिती</h5>
-                                        <div className="row g-3">
-                                            <div className="col-md-4 mb-2">
-                                                <label htmlFor="lastSchoolUdiseNo" className="form-label fw-semibold small">मागील शाळेचा UDISE नंबर</label>
-                                                <input type="text" className="form-control form-control-sm" id="lastSchoolUdiseNo" value={formData.lastSchoolUdiseNo} onChange={handleChange} placeholder="UDISE नंबर" />
-                                                {/* Add validation if UDISE has specific format/length */}
-                                                {/* {errors.lastSchoolUdiseNo && <div id="lastSchoolUdiseNoError" className="invalid-feedback">{errors.lastSchoolUdiseNo}</div>} */}
-                                            </div>
-                                            <div className="col-md-4 mb-2">
-                                                <label htmlFor="admissionDate" className="form-label fw-semibold small">प्रवेश तारीख *</label>
-                                                <input type="date" className={`form-control form-control-sm ${getValidationClass('admissionDate')}`} id="admissionDate" value={formData.admissionDate} onChange={handleChange} required aria-describedby="admissionDateError" />
-                                                {errors.admissionDate && <div id="admissionDateError" className="invalid-feedback">{errors.admissionDate}</div>}
-                                            </div>
-                                            <div className="col-md-4 mb-2">
-                                                <label htmlFor="whichStandardAdmitted" className="form-label fw-semibold small">प्रवेश इयत्ता *</label>
-                                                <select className={`form-select form-select-sm ${getValidationClass('whichStandardAdmitted')}`} id="whichStandardAdmitted" value={formData.whichStandardAdmitted} onChange={handleChange} required aria-describedby="whichStandardAdmittedError">
-                                                    <option value="">-- इयत्ता निवडा --</option>
-                                                    {standards.map(standard => (<option key={standard.id} value={standard.id}>{standard.standard}</option>))}
-                                                </select>
-                                                {errors.whichStandardAdmitted && <div id="whichStandardAdmittedError" className="invalid-feedback">{errors.whichStandardAdmitted}</div>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Section 6: Additional Information */}
-                                <div className="card mb-5 border-0 bg-light"> {/* Added mb-5 for spacing before button */}
-                                    <div className="card-body p-3">
-                                        <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold"><BiInfoCircle className="me-2" />अतिरिक्त माहिती</h5>
-                                        <div className="row g-3">
-                                            <div className="col-md-3 mb-2">
-                                                <label htmlFor="adhaarNumber" className="form-label fw-semibold small">आधार कार्ड नंबर</label>
-                                                <input
-                                                    type="text"
-                                                    inputMode='numeric'
-                                                    className={`form-control form-control-sm ${getValidationClass('adhaarNumber')}`}
-                                                    id="adhaarNumber"
-                                                    value={formData.adhaarNumber}
-                                                    onChange={handleChange}
-                                                    maxLength={12}
-                                                    placeholder="१२ अंकी आधार नंबर"
-                                                    aria-describedby="adhaarNumberError"
-                                                />
-                                                {errors.adhaarNumber && <div id="adhaarNumberError" className="invalid-feedback">{errors.adhaarNumber}</div>}
-                                            </div>
-                                            {/* Combined dropdowns for optional fields */}
-                                            <CombinedDropdownInput id="ebcInformation" label="EBC माहिती" value={formData.ebcInformation} onChange={handleCombinedChange} required={false} options={["PAY", "BCF", "E.B.C.", "E.B.C.BC", "P.T.", "M.T."]} />
-                                            <CombinedDropdownInput id="casteCategory" label="जात प्रवर्ग" value={formData.casteCategory} onChange={handleCombinedChange} required={false} options={["GENERAL", "S.C.", "S.T.", "VJ(A)", "N.T.(B)", "N.T.(C)", "N.T.(D)", "O.B.C.", "S.B.C.", "ESBC"]} />
-                                            <CombinedDropdownInput id="minorityInformation" label="अल्पसंख्याक माहिती" value={formData.minorityInformation} onChange={handleCombinedChange} required={false} options={["Non Minority", "Jain Minority", "MinorityMuslim Minority", "Boudha Minority"]} />
-                                        </div>
-                                    </div>
-                                </div>
-
                                 {/* Submit Button */}
                                 <div className="d-flex justify-content-center mt-4 gap-5">
                                     <button type="submit" className="btn btn-primary btn-lg px-5 py-2 rounded-pill shadow-sm">

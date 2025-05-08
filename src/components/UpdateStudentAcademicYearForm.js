@@ -70,9 +70,10 @@ function UpdateStudentAcademicYearForm() {
     api.get("/academic/student-school", {
       params: { studentId, schoolUdiseNo }
     }).then((res) => setAcademicData(res.data));
+    
   }, [schoolUdiseNo, studentId]);
-
-
+ 
+  
   useEffect(() => {
     if (formData?.status === "Pass") {
       if (standards.length > 0 && academicdata?.standard) {

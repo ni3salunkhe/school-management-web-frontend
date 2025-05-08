@@ -30,6 +30,11 @@ function AddStaffMember() {
         return /^[A-Za-z0-9_.!@#$%^&*]*$/.test(text);
     };
 
+    function isOnlyMarathi(input) {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+      }
+
     const loadUsernames = async () => {
         const usernames = await fetchAllUsernames();
         setUsername(usernames);
@@ -59,6 +64,11 @@ function AddStaffMember() {
             }
             else if (currentStaff.some(staff => staff.email === value.trim())) {
                 newErrors.email = "हा ई-मेल आधीच वापरात आहे";
+            }
+        }else if(name === "fname" || name === "fathername" || name === "lname")
+        {
+            if(!isOnlyMarathi(value)){
+                newErrors.lname = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
             }
         }
 
@@ -140,7 +150,6 @@ function AddStaffMember() {
         if (username.some(staff => staff === formData.username.trim())) {
             newErrors.username = "हे वापरकर्तानाव आधीच वापरात आहे";
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }
@@ -196,8 +205,10 @@ function AddStaffMember() {
                     level: '',
                 })
             }
+            }else{
+                alert("कृपया फॉर्ममधील त्रुटी तपासा.");
             }
-        };
+        }
 
         return (
             <div className="container py-3">

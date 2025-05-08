@@ -52,14 +52,16 @@ function DistrictForm() {
         if (isDuplicate) {
             newError.districtName = "हे राज्य आधीच अस्तित्वात आहे.";
         }
-        if (!isOnlyMarathi(value)) {
-            newError.districtName = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+        if (name === "districtName") {
+            if (!isOnlyMarathi(value)) {
+                newError.districtName = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+            }
         }
 
         setErrors(newError)
     };
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const validationErrors = {};

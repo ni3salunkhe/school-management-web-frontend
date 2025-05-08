@@ -201,7 +201,10 @@ function AddSchoolInfo() {
     }
   }, [formData.tehsil, villages]); // Removed formData.village dependency here
 
-
+  function isOnlyMarathi(input) {
+    const marathiRegex = /^[\u0900-\u097F\s]+$/;
+    return marathiRegex.test(input);
+  }
   // --- Handle Form Input Change ---
   const handleChange = useCallback((e) => {
     const { id, value, type, files } = e.target;
@@ -234,6 +237,27 @@ function AddSchoolInfo() {
         fieldErrors.pincode = 'पिनकोड ६ अंकी असावा';
       }
     }
+    else if (id === 'schoolSlogan') {
+      if (!isOnlyMarathi(value)) {
+        fieldErrors.schoolSlogan = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+      }
+    }
+    else if (id === 'medium') {
+      if (!isOnlyMarathi(value)) {
+        fieldErrors.medium = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+      }
+    }
+    else if (id === 'board') {
+      if (!isOnlyMarathi(value)) {
+        fieldErrors.board = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+      }
+    }
+    else if (id === 'boardDivision') {
+      if (!isOnlyMarathi(value)) {
+        fieldErrors.boardDivision = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा";
+      }
+    }
+
 
     setErrors(fieldErrors); // Update errors immediately for feedback
 
@@ -315,7 +339,7 @@ function AddSchoolInfo() {
         schoolApprovalNo: formData.schoolApprovalNo,
         headMasterMobileNo: formData.headMasterMobileNo,
         headMasterPassword: formData.password,
-       
+
       };
       // Append the JSON string of schoolDto
       submissionData.append('schoolDto', JSON.stringify(schoolDto));
@@ -690,9 +714,9 @@ function AddSchoolInfo() {
         <div className='container-fluid py-4'>
           <div className="card shadow-lg border-0 rounded-lg overflow-hidden">
             {/* Header with gradient blue background */}
-             <div className="position-absolute top-0 end-0 m-2">
-                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/headmaster'} placeholder={'X'}></Next>
-                            </div>
+            <div className="position-absolute top-0 end-0 m-2">
+              <Next classname={'btn bg-danger text-white btn-sm'} path={'/headmaster'} placeholder={'X'}></Next>
+            </div>
             <div className="card-header text-white py-3" style={{ background: 'linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%)' }}>
               <div className="d-flex align-items-center">
                 {schoolData?.logo && (
@@ -807,10 +831,10 @@ function AddSchoolInfo() {
                   </div>
                 </div>
                 <div>
-                  <button className='btn btn-secondary' onClick={()=>{setIsShowsForm(true)}}>शाळेची माहिती बदला</button>
+                  <button className='btn btn-secondary' onClick={() => { setIsShowsForm(true) }}>शाळेची माहिती बदला</button>
+              <Next classname={'btn btn-primary float-end'} path={'/headmaster/class'} placeholder={'पुढे चला'}></Next>
                 </div>
               </div>
-              <Next classname={'btn btn-primary float-end'} path={'/headmaster/class'} placeholder={'पुढे चला'}></Next>
             </div>
           </div>
         </div>

@@ -26,12 +26,12 @@ function App() {
   ];
   const sidebarItemsClerk = [
     {
-      mainMenu: ['Student','Classes','AddAcademicNewStudents','ListOfStudents','ChangeClassTeacher'],
+      mainMenu: ['Student','Classes','Add Academic New Students','List Of Students','Change Class Teacher'],
     },
   ];
   const sidebarItemsTeacher = [
     {
-      mainMenu: ['Attendance','Updateyear'],
+      mainMenu: ['Attendance','Update year','Catlog Cover Page', 'Daily Attendance Report', 'Monthly Attendance Report'],
     },
   ];
 

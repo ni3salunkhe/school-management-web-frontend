@@ -190,15 +190,7 @@ const Subscription = () => {
             enddate: ''
         })
     }
-    const formatDateToString = (date) => {
-        if (!(date instanceof Date) || isNaN(date)) {
-            return ''; // Return empty string for invalid dates
-        }
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
+    
     return (
         <Container fluid
             className="d-flex justify-content-center align-items-center subuscription"

@@ -60,11 +60,11 @@ function TehsilForm() {
             if (isDuplicate) {
                 setErrors(prev => ({ ...prev, tehsilName: "हा तालुका आधीच अस्तित्वात आहे." }));
             }
+            if (!isOnlyMarathi(value)) {
+                setErrors(prev => ({ ...prev, tehsilName: "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा" }));
+            }
         }
 
-        if (!isOnlyMarathi(value)) {
-            setErrors(prev => ({ ...prev, tehsilName: "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा" }));
-        }
     }
 
     function validate() {

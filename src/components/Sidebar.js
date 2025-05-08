@@ -83,7 +83,7 @@ const Sidebar = ({sidebarItems, role}) => {
 
               {/* Render section links */}
               {section[Object.keys(section)[0]].map((item, itemIndex) => {
-                const path = `/${role}/${item.toLowerCase()}`;
+                const path = `/${role}/${item.trim().toLowerCase().replace(/\s+/g, '')}`;
                 const iconProps = { size: 18, className: 'me-2' };
 
                 // Determine the icon based on the item name

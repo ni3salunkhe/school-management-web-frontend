@@ -4,10 +4,11 @@ import { BiSearch } from 'react-icons/bi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import UpdateYearCss from '../styling/UpdateStudentAcademicYear.css'
 
 
 function UpdateStudentAcademicYear() {
-  const id  = jwtDecode(sessionStorage.getItem('token'))?.id;
+  const id = jwtDecode(sessionStorage.getItem('token'))?.id;
   const [surName, setSurName] = useState('');
   const [studentName, setStudentName] = useState('');
   const [fatherName, setFatherName] = useState('');
@@ -19,11 +20,11 @@ function UpdateStudentAcademicYear() {
   const [error, setError] = useState(null); // New state for error handling
   const [academicYearData, setAcademicYearData] = useState([]);
   const navigate = useNavigate();
-  
+
   // Get token data
   const token = sessionStorage.getItem('token');
   let udise, username;
-  
+
   try {
     const decoded = jwtDecode(token);
     udise = decoded?.udiseNo;
@@ -57,18 +58,20 @@ function UpdateStudentAcademicYear() {
         });
     }
     apiService.getdata(`academic/${udise}/${id}`)
-        .then((response) => {
-          setAcademicYearData(response.data);
-          console.log(response.data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching teacher data:", error);
-          setError("Failed to load teacher data. Please try again.");
-          setLoading(false);
-        });
+      .then((response) => {
+        setAcademicYearData(response.data);
+        console.log(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching teacher data:", error);
+        setError("Failed to load teacher data. Please try again.");
+        setLoading(false);
+      });
     fetchStudents();
   }, [udise, username]);
+
+
 
   function findAcademicYear(academicYearData, udiseNo, studentId) {
     return academicYearData.find(
@@ -77,14 +80,14 @@ function UpdateStudentAcademicYear() {
         entry.schoolUdiseNo?.udiseNo === udiseNo
     )?.academicYear;
   }
-  
+
   // Fetch students after teacher data is available
   const fetchStudents = (searchParams = {}) => {
     if (!teacher.id) {
       // console.log("Teacher ID not available yet");
       return;
     }
-    
+
     setLoading(true);
     const params = { udise, ...searchParams };
 
@@ -94,7 +97,7 @@ function UpdateStudentAcademicYear() {
         // console.log("Student data received:", response.data);
         setResults(response.data);
         console.log(response.data);
-        
+
         setLoading(false);
       })
       .catch((error) => {
@@ -104,7 +107,7 @@ function UpdateStudentAcademicYear() {
       });
   };
 
-  
+
 
   const toggleStudentSelection = (id) => {
     if (listOfStudents.includes(id)) {
@@ -172,6 +175,33 @@ function UpdateStudentAcademicYear() {
 
 
   }, [surName, studentName, fatherName, motherName]);
+
+
+  const today = new Date();
+
+  // Define start and end dates
+  const start = new Date(today.getFullYear(), 4, 1);  // May 1 (Month is 0-indexed)
+  const end = new Date(today.getFullYear(), 6, 31);   // July 31
+
+  // Check if today is between May 1 and July 31
+  const isWithinRange = today >= start && today <= end;
+
+  if (!isWithinRange) {
+    return (<>
+    <div className="not-available-container">
+      <div className="not-available-content">
+        <svg className="not-available-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+          <path d="M0 0h24v24H0z" fill="none" />
+        </svg>
+        <h2>Content Currently Unavailable</h2>
+        <p>This section is only visible between May 1st and July 31st.</p>
+      </div>
+    </div></>
+    ) 
+  }
+
+
   return (
     <div className="container py-4">
       <div className="row justify-content-center">

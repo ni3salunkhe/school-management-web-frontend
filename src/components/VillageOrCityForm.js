@@ -45,12 +45,12 @@ function VillageOrCityForm() {
                     villageName: "हे गाव/शहर आधीच अस्तित्वात आहे."
                 }));
             }
-        }
-        if (!isOnlyMarathi(value)) {
-            setErrors((prev) => ({
-                ...prev,
-                villageName: "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा"
-            }));
+            if (!isOnlyMarathi(value)) {
+                setErrors((prev) => ({
+                    ...prev,
+                    villageName: "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दबा"
+                }));
+            }
         }
 
     }
