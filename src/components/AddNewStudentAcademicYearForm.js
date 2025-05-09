@@ -3,6 +3,7 @@ import apiService from '../services/api.service';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Next from './Next';
+import Swal from 'sweetalert2';
 
 function AddNewStudentAcademicYearForm() {
     const { id } = useParams();
@@ -146,13 +147,20 @@ function AddNewStudentAcademicYearForm() {
                 academicYear: ''
             });
 
-            setTimeout(() => {
-                navigate(`/clerk/AddAcademicNewStudents`);
-                setSubmitted(false);
-            }, 2000);
+            Swal.fire({
+                title: "विद्यार्थ्याची शैक्षणिक माहिती यशस्वीरित्या जतन झाली!",
+                icon: "success",
+                draggable: true
+              });
+              navigate(`/clerk/AddAcademicNewStudents`);
+            // setTimeout(() => {
+                
+            //     setSubmitted(false);
+            // }, 1000);
         }).catch(error => {
             console.error("Error saving data:", error);
             setErrors({ submit: "डेटा जतन करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा." });
+            Swal.fire('त्रुटी!', "डेटा जतन करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.", 'error');
         });
     }
 
