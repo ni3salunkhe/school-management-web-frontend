@@ -1,12 +1,12 @@
-/* Base Styles */
+Base Styles
 .attendance-component-wrapper {
     width: 100%;
 }
 
-.attendance-sheet {
+/* .attendance-sheet {
     /* font-size: 9pt; */ /* Base font size controlled by table */
-    width: 100%;
-}
+    /* width: 100%; 
+} */
 
 .custom-table {
     width: 100%;

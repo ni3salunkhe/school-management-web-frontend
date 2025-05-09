@@ -28,6 +28,7 @@ function UpdateStudentAcademicYearForm() {
   const [academicdata, setAcademicData] = useState('');
   const [statusForFormLoad, setStatusForFormLoad] = useState();
   const [promotedStandard, setPromotedStandard] = useState();
+  const [showPassAndLeftButton, setShowPassAndLeftButton] = useState(false);
 
   const [warning, setWarning] = useState(false);
   const [errors, setErrors] = useState({});
@@ -39,7 +40,6 @@ function UpdateStudentAcademicYearForm() {
     }
   });
 
-
   const calculateAcademicYear = () => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
@@ -49,10 +49,8 @@ function UpdateStudentAcademicYearForm() {
     if (currentMonth >= 4) {
       return `${currentYear}-${String(currentYear + 1).slice(-2)}`;
     }
-    // For January (0) to May (4), academic year is previousYear-currentYear
     return `${currentYear - 1}-${String(currentYear).slice(-2)}`;
   };
-
 
   useEffect(() => {
     setFormData(prev => ({
@@ -70,10 +68,8 @@ function UpdateStudentAcademicYearForm() {
     api.get("/academic/student-school", {
       params: { studentId, schoolUdiseNo }
     }).then((res) => setAcademicData(res.data));
-    
   }, [schoolUdiseNo, studentId]);
- 
-  
+
   useEffect(() => {
     if (formData?.status === "Pass") {
       if (standards.length > 0 && academicdata?.standard) {
@@ -83,7 +79,7 @@ function UpdateStudentAcademicYearForm() {
           setFormData(prev => ({ ...prev, standardId: nextStandard.id }));
         }
       }
-    } else if (formData.status === "fail") {
+    } else if (formData.status === "Fail") {
       setFormData(prev => ({ ...prev, standardId: academicdata?.standard?.id }));
     }
   }, [standards, academicdata, formData.status]);
@@ -103,8 +99,14 @@ function UpdateStudentAcademicYearForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const newValue = name === 'status' ? value.toLowerCase() : value;
+    const newValue = name === 'status' ? value : value;
     setFormData(prev => ({ ...prev, [name]: newValue }));
+
+    if (name === 'status') {
+      setStatusForFormLoad(value);
+      setShowPassAndLeftButton(value === "PassAndLeft");
+    }
+
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -112,8 +114,12 @@ function UpdateStudentAcademicYearForm() {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.division) newErrors.division = "कृपया तुकडी निवडा";
-    if (statusForFormLoad === 'Pass' && !formData.standardId) newErrors.standardId = "कृपया इयत्ता निवडा";
+    if (!formData.division && formData.status !== "Pass") {
+      newErrors.division = "कृपया तुकडी निवडा";
+    }
+    if (statusForFormLoad === 'Pass' && !formData.standardId) {
+      newErrors.standardId = "कृपया इयत्ता निवडा";
+    }
     if (!formData.academicYear) {
       newErrors.academicYear = "कृपया शैक्षणिक वर्ष प्रविष्ट करा";
     } else if (!/^\d{4}-\d{2}$/.test(formData.academicYear)) {
@@ -121,8 +127,6 @@ function UpdateStudentAcademicYearForm() {
     }
     if (!formData.status) {
       newErrors.status = "कृपया status निवडा";
-    } else if (!['pass', 'fail', 'promoted', 'demoted'].includes(formData.status.toLowerCase())) {
-      newErrors.status = "valid status निवडा (pass, fail, promoted, demoted)";
     }
     return newErrors;
   };
@@ -178,88 +182,94 @@ function UpdateStudentAcademicYearForm() {
             <div className="card-body p-4">
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label className="form-label ">विद्यार्थी पास आहे का नापास ? </label>
+                  <label className="form-label">विद्यार्थी पास आहे का नापास ? </label>
                   <select
                     className={`form-select ${errors.status ? 'is-invalid' : ''}`}
                     name='status'
                     value={formData.status}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setStatusForFormLoad(value);
-                      setFormData(prev => ({ ...prev, status: value }));
-                      if (errors.status) setErrors(prev => ({ ...prev, status: '' }));
-                    }}
+                    onChange={handleChange}
                   >
-                    <option value="">-- Status निवडा --</option>
-                    <option value="Pass">Pass</option>
-                    <option value="fail">Fail</option>
+                    <option value="">-- निकाल निवडा --</option>
+                    <option value="Pass">Pass (उत्तीर्ण)</option>
+                    <option value="Fail">Fail (अनुत्तीर्ण)</option>
+                    <option value="PassAndLeft">Pass & Left (उत्तीर्ण आणि शाळा सोडली)</option>
                   </select>
                   {errors.status && <div className="invalid-feedback">{errors.status}</div>}
                 </div>
 
-                {statusForFormLoad === 'Pass' && (
+                {(statusForFormLoad === 'Pass' || statusForFormLoad === 'Fail') && (
                   <>
+                    {statusForFormLoad === 'Pass' && (
+                      <div className="mb-3">
+                        <label className="form-label">इयत्ता</label>
+                        <input
+                          className='form-control'
+                          value={promotedStandard?.standard || ''}
+                          readOnly
+                        />
+                        {errors.standardId && <div className="invalid-feedback">{errors.standardId}</div>}
+                      </div>
+                    )}
+
                     <div className="mb-3">
-                      <label className="form-label">इयत्ता</label>
+                      <label className="form-label">तुकडी</label>
+                      <select
+                        className={`form-control ${errors.division ? 'is-invalid' : ''}`}
+                        name="division"
+                        value={formData.division}
+                        onChange={handleChange}
+                      >
+                        <option value="">-- तुकडी निवडा --</option>
+                        {divisions.map(div => (
+                          <option key={div.id} value={div.id}>{div.name}</option>
+                        ))}
+                      </select>
+                      {errors.division && <div className="invalid-feedback">{errors.division}</div>}
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label">शिक्षक</label>
+                      <div className="form-control">
+                        {singleTeacher ? `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 'शिक्षक निवडले नाहीत'}
+                      </div>
+                      {warning && (
+                        <div className='mt-2 text-danger'>
+                          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                          या वर्गासाठी शिक्षक नियुक्त नाही
+                        </div>
+                      )}
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">शैक्षणिक वर्ष</label>
                       <input
-                        className='form-control'
-                        value={promotedStandard?.standard || ''}
+                        className={`form-control ${errors.academicYear ? 'is-invalid' : ''}`}
+                        name='academicYear'
+                        placeholder='उदा. 2024-25'
+                        value={formData.academicYear}
                         readOnly
                       />
-                      {errors.standardId && <div className="invalid-feedback">{errors.standardId}</div>}
+                      {errors.academicYear && <div className="invalid-feedback">{errors.academicYear}</div>}
                     </div>
                   </>
                 )}
 
-                <div className="mb-3">
-                  <label className="form-label">तुकडी</label>
-                  <select
-                    className={`form-control ${errors.division ? 'is-invalid' : ''}`}
-                    name="division"
-                    value={formData.division}
-                    onChange={handleChange}
-                  >
-                    <option value="">-- तुकडी निवडा --</option>
-                    {divisions.map(div => (
-                      <option key={div.id} value={div.id}>{div.name}</option>
-                    ))}
-                  </select>
-                  {errors.division && <div className="invalid-feedback">{errors.division}</div>}
-                </div>
 
-                <div className="mb-3">
-                  <label className="form-label">शिक्षक</label>
-                  <div className="form-control">
-                    {singleTeacher ? `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 'शिक्षक निवडले नाहीत'}
-                  </div>
-                  {warning && (
-                    <div className='mt-2 text-danger'>
-                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                      या वर्गासाठी शिक्षक नियुक्त नाही
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">शैक्षणिक वर्ष</label>
-                  <input
-                    className={`form-control ${errors.academicYear ? 'is-invalid' : ''}`}
-                    name='academicYear'
-                    placeholder='उदा. 2024-25'
-                    value={formData.academicYear}
-                    readOnly
-                  />
-                  {errors.academicYear && <div className="invalid-feedback">{errors.academicYear}</div>}
-                </div>
 
                 <div className="text-center">
-                  <button type="submit" className="btn btn-success w-100 fw-bold">
-                    अपडेट करा
-                  </button>
+                  {showPassAndLeftButton ? (
+                    <button type="submit" className="btn btn-info w-100 fw-bold">
+                      Pass & Left म्हणून अपडेट करा
+                    </button>
+                  ) : (
+                    (statusForFormLoad === 'Pass' || statusForFormLoad === 'Fail') && (
+                      <button type="submit" className="btn btn-success w-100 fw-bold">
+                        अपडेट करा
+                      </button>
+                    )
+                  )}
                 </div>
               </form>
             </div>
-
           </div>
         </div>
       </div>

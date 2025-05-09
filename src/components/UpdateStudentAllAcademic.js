@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 function UpdateStudentAllAcademic() {
     const { id } = useParams();
 
-    console.log(id);
+    // console.log(id);
 
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -37,8 +37,8 @@ function UpdateStudentAllAcademic() {
 
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const studentId = selectedStudents[0];
-    console.log(studentId);
-    
+    // console.log(studentId);
+
     const api = axios.create({
         baseURL: 'http://localhost:8080',
         headers: {
@@ -103,7 +103,7 @@ function UpdateStudentAllAcademic() {
                     setFormData(prev => ({ ...prev, standardId: nextStandard.id }));
                 }
             }
-        } else if (formData.status === "fail") {
+        } else if (formData.status === "Fail") {
             setFormData(prev => ({ ...prev, standardId: academicdata?.standard?.id }));
         }
     }, [standards, academicdata, formData.status]);
@@ -150,8 +150,8 @@ function UpdateStudentAllAcademic() {
         }
         if (!formData.status) {
             newErrors.status = "कृपया status निवडा";
-        } else if (!['pass', 'fail', 'promoted', 'demoted'].includes(formData.status.toLowerCase())) {
-            newErrors.status = "कृपया valid status निवडा (pass, fail, promoted, demoted)";
+        } else if (!['Pass', 'Fail', "PassAndLeft"].includes(formData.status)) {
+            newErrors.status = "कृपया valid status निवडा (pass, fail, PassAndLeft)";
         }
 
         return newErrors;
@@ -161,11 +161,14 @@ function UpdateStudentAllAcademic() {
     function handleSubmit(event) {
         event.preventDefault();
 
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            return;
-        }
+console.log("HELLO");
+
+
+        // const validationErrors = validateForm();
+        // if (Object.keys(validationErrors).length > 0) {
+        //     setErrors(validationErrors);
+        //     return;
+        // }
 
         if (statusForFormLoad === 'Pass' &&
             academicdata?.standard?.id &&
@@ -176,7 +179,7 @@ function UpdateStudentAllAcademic() {
 
         const payload = {
             ...formData,
-            studentIds:selectedStudents,
+            studentIds: selectedStudents,
             schoolUdiseNo,
             classTeacher: singleTeacher?.id
         };
@@ -233,80 +236,87 @@ function UpdateStudentAllAcademic() {
                                     >
                                         <option value="">-- Status निवडा --</option>
                                         <option value="Pass">Pass</option>
-                                        <option value="fail">Fail</option>
+                                        <option value="Fail">Fail</option>
+                                        <option value="PassAndLeft">Pass & Left (उत्तीर्ण आणि शाळा सोडली)</option>
                                     </select>
                                     {errors.status && <div className="invalid-feedback">{errors.status}</div>}
                                 </div>
 
-                                {/* Standard Select */}
-                                {statusForFormLoad === 'Pass' && (
+                                {(statusForFormLoad === "Pass" || statusForFormLoad === "Fail") && (
                                     <>
+                                        {/* Standard Select */}
+                                        {statusForFormLoad === 'Pass' && (
+                                            <>
+                                                <div className="mb-3">
+                                                    <label className="form-label">इयत्ता</label>
+                                                    <input
+                                                        className='form-control'
+                                                        value={promotedStandard?.standard || ''}
+                                                        readOnly
+                                                    />
+                                                    {errors.standardId && <div className="invalid-feedback">{errors.standardId}</div>}
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Division Select */}
                                         <div className="mb-3">
-                                            <label className="form-label">इयत्ता</label>
+                                            <label className="form-label fw-semibold">तुकडी</label>
+                                            <select
+                                                className={`form-control ${errors.division ? 'is-invalid' : ''}`}
+                                                name="division"
+                                                value={formData.division}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="">-- तुकडी निवडा --</option>
+                                                {divisions.map(division => (
+                                                    <option key={division.id} value={division.id}>
+                                                        {division.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {errors.division && (
+                                                <div className="invalid-feedback">{errors.division}</div>
+                                            )}
+                                        </div>
+
+
+                                        {/* Staff Select */}
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold">शिक्षक</label>
+                                            <div className="form-control form-control-sm">
+                                                {singleTeacher ? `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 'शिक्षक निवडले नाहीत'}
+                                            </div>
+                                            {warning == true && <div className='mt-3 text-danger'>
+                                                <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                                या वर्गासाठी कोणताही शिक्षक नियुक्त केला नाही</div>}
+                                        </div>
+
+                                        {/* Academic Year Input */}
+                                        <div className="mb-3">
+                                            <label className="form-label fw-semibold">शैक्षणिक वर्ष</label>
                                             <input
-                                                className='form-control'
-                                                value={promotedStandard?.standard || ''}
+                                                className={`form-control ${errors.academicYear ? 'is-invalid' : ''}`}
+                                                name='academicYear'
+                                                value={formData.academicYear}
+                                                placeholder='उदा. 2024-25'
                                                 readOnly
                                             />
-                                            {errors.standardId && <div className="invalid-feedback">{errors.standardId}</div>}
+                                            {errors.academicYear && (
+                                                <div className="invalid-feedback">{errors.academicYear}</div>
+                                            )}
                                         </div>
                                     </>
                                 )}
 
-                                {/* Division Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">तुकडी</label>
-                                    <select
-                                        className={`form-control ${errors.division ? 'is-invalid' : ''}`}
-                                        name="division"
-                                        value={formData.division}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- तुकडी निवडा --</option>
-                                        {divisions.map(division => (
-                                            <option key={division.id} value={division.id}>
-                                                {division.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.division && (
-                                        <div className="invalid-feedback">{errors.division}</div>
-                                    )}
-                                </div>
-
-
-                                {/* Staff Select */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">शिक्षक</label>
-                                    <div className="form-control form-control-sm">
-                                        {singleTeacher ? `${singleTeacher.staff.fname} ${singleTeacher.staff.lname}` : 'शिक्षक निवडले नाहीत'}
-                                    </div>
-                                    {warning == true && <div className='mt-3 text-danger'>
-                                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                                        या वर्गासाठी कोणताही शिक्षक नियुक्त केला नाही</div>}
-                                </div>
-
-                                {/* Academic Year Input */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">शैक्षणिक वर्ष</label>
-                                    <input
-                                        className={`form-control ${errors.academicYear ? 'is-invalid' : ''}`}
-                                        name='academicYear'
-                                        value={formData.academicYear}
-                                        placeholder='उदा. 2024-25'
-                                        readOnly
-                                    />
-                                    {errors.academicYear && (
-                                        <div className="invalid-feedback">{errors.academicYear}</div>
-                                    )}
-                                </div>
-
-
-
                                 <div className="text-center mt-4">
-                                    <button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
-                                        जतन करा
-                                    </button>
+                                    {
+                                        statusForFormLoad === "PassAndLeft" ? (<button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                                            Pass & Left म्हणून अपडेट करा
+                                        </button>) : (<button type="submit" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                                            जतन करा
+                                        </button>)
+                                    }
                                 </div>
                             </form>
                         </div>
