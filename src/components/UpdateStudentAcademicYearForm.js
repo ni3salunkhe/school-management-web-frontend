@@ -46,7 +46,7 @@ function UpdateStudentAcademicYearForm() {
     const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
 
     // If current month is June (5) or later, academic year is currentYear-nextYear
-    if (currentMonth >= 5) {
+    if (currentMonth >= 4) {
       return `${currentYear}-${String(currentYear + 1).slice(-2)}`;
     }
     // For January (0) to May (4), academic year is previousYear-currentYear

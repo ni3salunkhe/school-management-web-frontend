@@ -16,10 +16,10 @@ function PresentyCertificate() {
   const printContentRef = useRef(null);
   const navigate = useNavigate();
   const now = new Date();
-  const monthsToAdd = 7;
+  const monthsToAdd = 11;
   const monthnyear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const endDate = new Date(now.getFullYear(), now.getMonth() + monthsToAdd, 1);
-const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
+  const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
 
   const A4_WIDTH_PX = 794;
   const A4_HEIGHT_PX = 900;
@@ -35,6 +35,11 @@ const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1)
         studentId: id,
         schoolUdiseNo: udise
       }
+      ,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+      }
     }).then((response) => {
       console.log('Academic Data:', response.data);
       setAcademicData(response.data);
@@ -43,6 +48,8 @@ const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1)
       apiService.getbyid('academicold/lastyear/', response.data.id).then((lastYearResponse) => {
         console.log('Last Year Academic:', lastYearResponse.data);
         setLastAcademicData(lastYearResponse.data);
+      }).catch((error) => {
+        setLastAcademicData("No data found");
       });
     }).catch((error) => {
       console.error("Error fetching academic data:", error);
@@ -50,12 +57,12 @@ const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1)
 
     const fetchAcademia = async () => {
       try {
-        const response = await apiService.getdata(`api/attendance/by-udise-monthnyear/${id}/${udise}/2025-12/2025-01`)
+        const response = await apiService.getdata(`api/attendance/by-udise-monthnyear/${id}/${udise}/${monthnyearend}/${monthnyear}`)
 
-        console.log(monthnyearend,monthnyear);
-        
+        console.log(monthnyearend, monthnyear);
+
         setAttendanceData(response.data);
-        
+
       } catch (err) {
         console.error("Error fetching academic data:", err);
       }
@@ -70,10 +77,10 @@ const monthnyearend = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1)
       });
       console.log(totalPresent, totalWorking);
       if (totalWorking === 0) return 0;
-    
+
       return ((totalPresent / totalWorking) * 100).toFixed(2); // returns string like "95.37"
     }
-    
+
     fetchAcademia()
     const yearlyPercentage = calculateYearlyAttendancePercentage(attendanceData);
     console.log("Yearly Attendance %:", yearlyPercentage + "%");

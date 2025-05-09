@@ -66,7 +66,7 @@ function NavBarS({ role }) {
                      </div>
                    </Dropdown.Toggle>
                    <Dropdown.Menu className="dropdown-menu-end shadow">
-                     <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> Logout</Dropdown.Item>
+                     <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> बाहेर पडा</Dropdown.Item>
                    </Dropdown.Menu>
                  </Dropdown>
               </>

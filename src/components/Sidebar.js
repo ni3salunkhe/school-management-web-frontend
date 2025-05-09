@@ -1,11 +1,11 @@
 import React from "react";
 import { Nav, Button, Form, Offcanvas } from 'react-bootstrap';
-import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2 ,FiBell ,FiFilePlus, FiUserPlus} from 'react-icons/fi';
+import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp } from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useContext, useEffect } from "react";
 import { authService } from "../services/authService";
 
-const Sidebar = ({sidebarItems, role}) => {
+const Sidebar = ({ sidebarItems, role }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const handleCloseSidebar = () => setShowSidebar(false);
   const handleShowSidebar = () => setShowSidebar(true);
@@ -57,6 +57,10 @@ const Sidebar = ({sidebarItems, role}) => {
     };
   };
 
+  if (location.pathname === '/teacher/monthlyattendancereport') {
+    return null;
+  }
+
   return (
     <>
       {/* Sidebar for desktop */}
@@ -88,37 +92,67 @@ const Sidebar = ({sidebarItems, role}) => {
 
                 // Determine the icon based on the item name
                 let Icon;
+                let name = "";
                 switch (item) {
-                  case 'Dashboard':
-                    Icon = FiHome;
-                    break;
-                  case 'Circular':
-                    Icon = FiFileText;
-                    break;
-                  case 'Departments':
+                  case 'School':
                     Icon = FiUsers;
+                    name = "शाळा माहिती"
                     break;
-                  case 'Workflows':
+                  case 'Class':
+                    Icon = FiGrid;
+                    name = "वर्ग माहिती"
+                    break;
+                  case 'Staff':
+                    Icon = FiUsers;
+                    name = "शिक्षकवृंद माहिती"
+                    break;
+                  case 'Student':
+                    Icon = FiHome;
+                    name = "विद्यार्थी जनरल रजिस्टर माहिती नोंद"
+                    break;
+                  case 'Classes':
+                    Icon = FiFileText;
+                    name = "वर्गांची माहिती"
+                    break;
+                  case 'Add Academic New Students':
+                    Icon = FiUserPlus;
+                    name = "नवीन विद्यार्थी प्रवेश नोंद"
+                    break;
+                  case 'List Of Students':
                     Icon = FiBarChart2;
+                    name = "विद्यार्थी यादी आथवा रिपोर्ट"
                     break;
-                  case 'Categories':
+                  case 'Change Class Teacher':
                     Icon = FiFilter;
+                    name = "वर्गशिक्षक बदला"
                     break;
-                  case 'Setting':
-                    Icon = FiSettings;
+                  case 'Mark Holiday':
+                    Icon = FiCalendar;
+                    name = "सुट्टीची नोंद करा"
                     break;
-                  case 'Notification':
-                    Icon = FiBell;
+                  case 'Attendance':
+                    Icon = FiClipboard;
+                    name = "उपस्थिती माहिती नोंद"
                     break;
-                  case 'NewCircular':
-                    Icon = FiFilePlus;
+                  case 'Update year':
+                    Icon = FiTrendingUp;
+                    name = "पास नापास नोंदी"
                     break;
-                    case 'NewUser':
-                      Icon = FiUserPlus;
-                      break;
+                  case 'Catlog Cover Page':
+                    Icon = FiUserPlus;
+                    name = "कॅटलॉग कवर पेज"
+                    break;
+                  case 'Daily Attendance Report':
+                    Icon = FiFileText;
+                    name = "दैनंदिन उपस्थिती अहवाल"
+                    break;
+                  case 'Monthly Attendance Report':
+                    Icon = FiBarChart2;
+                    name = "मासिक उपस्थिती अहवाल"
+                    break;
                   default:
                     Icon = FiHome;
-                } 
+                }
 
                 return (
                   <Nav.Link
@@ -128,23 +162,23 @@ const Sidebar = ({sidebarItems, role}) => {
                     style={getLinkStyle(path)}
                     className="d-flex align-items-center px-3 py-2 mb-1 mx-2"
                   >
-                    <Icon {...iconProps} /> {item}
+                    <Icon {...iconProps} /> {name}
                   </Nav.Link>
                 );
               })}
             </React.Fragment>
           ))}
 
-          <div className="mt-3 px-3">
+          {/* <div className="mt-3 px-3">
             <Button
               variant="outline-danger"
               size="sm"
               onClick={handleLogout}
               className="w-100 d-flex align-items-center justify-content-center"
             >
-              <FiLogOut size={16} className="me-2" /> Logout
+              <FiLogOut size={16} className="me-2" /> बाहेर पडा
             </Button>
-          </div>
+          </div> */}
         </Nav>
       </div>
 
@@ -183,71 +217,71 @@ const Sidebar = ({sidebarItems, role}) => {
           </div>
 
           <Nav className="flex-column py-3">
-          {sidebarItems.map((section, index) => (
-            <React.Fragment key={index}>
-              {/* Render section title */}
-              <div className="px-3 mb-3">
-                <small className="text-muted text-uppercase fw-bold">
-                  {Object.keys(section)[0]}
-                </small>
-              </div>
+            {sidebarItems.map((section, index) => (
+              <React.Fragment key={index}>
+                {/* Render section title */}
+                <div className="px-3 mb-3">
+                  <small className="text-muted text-uppercase fw-bold">
+                    {Object.keys(section)[0]}
+                  </small>
+                </div>
 
-              {/* Render section links */}
-              {section[Object.keys(section)[0]].map((item, itemIndex) => {
-                const path = `/${role}/${item.toLowerCase()}`;
-                const iconProps = { size: 18, className: 'me-2' };
+                {/* Render section links */}
+                {section[Object.keys(section)[0]].map((item, itemIndex) => {
+                  const path = `/${role}/${item.toLowerCase()}`;
+                  const iconProps = { size: 18, className: 'me-2' };
 
-                // Determine the icon based on the item name
-                let Icon;
-                switch (item) {
-                  case 'Dashboard':
-                    Icon = FiHome;
-                    break;
-                  case 'Circular':
-                    Icon = FiFileText;
-                    break;
-                  case 'Departments':
-                    Icon = FiUsers;
-                    break;
-                  case 'Workflows':
-                    Icon = FiBarChart2;
-                    break;
-                  case 'Categories':
-                    Icon = FiFilter;
-                    break;
-                  case 'Settings':
-                    Icon = FiSettings;
-                    break;
-                  default:
-                    Icon = FiHome;
-                }
+                  // Determine the icon based on the item name
+                  let Icon;
+                  switch (item) {
+                    case 'Dashboard':
+                      Icon = FiHome;
+                      break;
+                    case 'Circular':
+                      Icon = FiFileText;
+                      break;
+                    case 'Departments':
+                      Icon = FiUsers;
+                      break;
+                    case 'Workflows':
+                      Icon = FiBarChart2;
+                      break;
+                    case 'Categories':
+                      Icon = FiFilter;
+                      break;
+                    case 'Settings':
+                      Icon = FiSettings;
+                      break;
+                    default:
+                      Icon = FiHome;
+                  }
 
-                return (
-                  <Nav.Link
-                    key={itemIndex}
-                    as={Link}
-                    to={path}
-                    style={getLinkStyle(path)}
-                    className="d-flex align-items-center px-3 py-2 mb-1 mx-2"
-                  >
-                    <Icon {...iconProps} /> {item}
-                  </Nav.Link>
-                );
-              })}
-            </React.Fragment>
-          ))}
+                  return (
+                    <Nav.Link
+                      key={itemIndex}
+                      as={Link}
+                      to={path}
+                      style={getLinkStyle(path)}
+                      className="d-flex align-items-center px-3 py-2 mb-1 mx-2"
+                    >
+                      <Icon {...iconProps} /> {item}
+                    </Nav.Link>
+                  );
+                })}
+              </React.Fragment>
+            ))}
 
-          <div className="mt-3 px-3">
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={handleLogout}
-              className="w-100 d-flex align-items-center justify-content-center"
-            >
-              <FiLogOut size={16} className="me-2" /> Logout
-            </Button>
-          </div>
-        </Nav>
+            <div className="mt-3 px-3">
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={handleLogout}
+                className="w-100 d-flex align-items-center justify-content-center"
+              >
+                <FiLogOut size={16} className="me-2" /> बाहेर पडा
+              </Button>
+            </div>
+          </Nav>
         </Offcanvas.Body>
       </Offcanvas>
     </>

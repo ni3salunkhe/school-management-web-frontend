@@ -26,6 +26,7 @@ import EditClassTeacher from '../components/EditClassTeacher';
 import AttendanceReport from '../components/AttendanceReport';
 import AttendanceCoverPage from '../components/AttendanceCoverPage';
 import DailyAttendanceReport from '../components/DailyAttendanceReport';
+import Holiday from '../components/Holiday';
 
 
 
@@ -59,6 +60,7 @@ function StudentManagement({ role }) {
             <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear/>}></Route>
             <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm/>}/>
             <Route path='editclassteacher/:id' element={<EditClassTeacher/>}/>
+            <Route path='markholiday' element={<Holiday />} />
           </Routes>
         );
         case 'TEACHER':

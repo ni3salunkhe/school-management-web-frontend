@@ -123,7 +123,7 @@ function StudentList() {
                             </div>
                             <h2 className="fw-bold text-dark mb-0" style={{ fontSize: '2rem' }}>
                                 <FaUserGraduate className="me-2 text-primary" />
-                                सर्व विद्यार्थ्याची यादी
+                                सर्व विद्यार्थ्याची यादी / रिपोर्ट
                             </h2>
                         </div>
                     </div>
