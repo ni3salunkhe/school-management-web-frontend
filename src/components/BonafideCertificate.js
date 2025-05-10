@@ -367,6 +367,7 @@ function BonafideCertificate() {
                                 onChange={handleReasonInputChange}
                                 required={true}
                                 options={reasonOptions}
+                                className="col-lg-12"
                             />
                             <div className="text-center mt-3">
                                 <button

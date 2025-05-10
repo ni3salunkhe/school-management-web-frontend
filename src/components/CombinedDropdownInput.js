@@ -9,7 +9,8 @@ export default function CombinedDropdownInput({
   required = false,
   options = [],
   error,
-  validationClass // Added this prop from your parent component's usage
+  validationClass
+  ,className // Added this prop from your parent component's usage
 }) {
   // Internal state for the input field's current text
   const [inputValue, setInputValue] = useState(value || ''); // Initialize with prop
@@ -77,7 +78,7 @@ export default function CombinedDropdownInput({
 
 
   return (
-    <div className="col-md-3 mb-2" ref={dropdownRef}>
+    <div className={className} ref={dropdownRef}>
       <label htmlFor={id} className="form-label fw-semibold small">
         {label} {required && <span className="text-danger">*</span>}
       </label>

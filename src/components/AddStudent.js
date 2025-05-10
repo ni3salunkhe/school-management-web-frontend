@@ -752,15 +752,15 @@ function AddStudent() {
                                                 <input type="text" className={`form-control form-control-sm ${getValidationClass('motherName')}`} id="motherName" value={formData.motherName} onChange={handleChange} required placeholder="आईचे नाव" aria-describedby="motherNameError" />
                                                 {errors.motherName && <div id="motherNameError" className="invalid-feedback">{errors.motherName}</div>}
                                             </div>
-                                            <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')} />
-                                            <CombinedDropdownInput id="motherTongue" label="मातृभाषा " value={formData.motherTongue} onChange={handleCombinedChange} required={true} options={["हिंदी", "मराठी", "उर्दू"]} error={errors.motherTongue} validationClass={getValidationClass('motherTongue')} />
-                                            <CombinedDropdownInput id="religion" label="धर्म " value={formData.religion} onChange={handleCombinedChange} required={true} options={["हिंदू", "मुस्लिम", "ख्रिश्चन", "बौद्ध", "जैन"]} error={errors.religion} validationClass={getValidationClass('religion')} />
+                                            <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')}  className="col-md-3" />
+                                            <CombinedDropdownInput id="motherTongue" label="मातृभाषा " value={formData.motherTongue} onChange={handleCombinedChange} required={true} options={["हिंदी", "मराठी", "उर्दू"]} error={errors.motherTongue} validationClass={getValidationClass('motherTongue')}  className="col-md-3" />
+                                            <CombinedDropdownInput id="religion" label="धर्म " value={formData.religion} onChange={handleCombinedChange} required={true} options={["हिंदू", "मुस्लिम", "ख्रिश्चन", "बौद्ध", "जैन"]} error={errors.religion} validationClass={getValidationClass('religion')}  className="col-md-3" />
                                             <div className="col-md-3 mb-2">
                                                 <label htmlFor="subCast" className="form-label fw-semibold small">उपजात</label>
                                                 <input type="text" className="form-control form-control-sm" id="subCast" value={formData.subCast} onChange={handleChange} placeholder="उपजात" aria-describedby="subCastError" />
                                                 {errors.subCast && <div id="subCastError" className="invalid-feedback">{errors.subCast}</div>}
                                             </div>
-                                            <CombinedDropdownInput id="caste" label="प्रवर्ग " value={formData.caste} onChange={handleCombinedChange} required={true} options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]} error={errors.caste} validationClass={getValidationClass('caste')} />
+                                            <CombinedDropdownInput id="caste" label="प्रवर्ग " value={formData.caste} onChange={handleCombinedChange} required={true} options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]} error={errors.caste} validationClass={getValidationClass('caste')}  className="col-md-3" />
 
 
                                         </div>
