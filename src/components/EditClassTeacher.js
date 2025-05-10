@@ -22,54 +22,58 @@ function EditClassTeacher() {
 
     const fetchData = async () => {
         try {
-            await apiService.getbyid("classteacher/", id).then((response) => {
-                console.log(response.data);
-                setClassTeacherData(response.data);
-            })
-        }
-        catch {
+            const response = await apiService.getbyid("classteacher/", id);
+            setClassTeacherData(response.data);
+        } catch {
             console.log("data is not available");
-            setApiError("Failed to load Data")
+            setApiError("Failed to load Data");
         }
-    }
+    };
 
     const getAllClassTeacherData = async () => {
         try {
-           await apiService.getbyid("classteacher/getbyudise/", school).then((response) => {
-                console.log(response.data);
-                setAllClassTeacherData(response.data);
-            })
-        }
-        catch {
+            const response = await apiService.getbyid("classteacher/getbyudise/", school);
+            setAllClassTeacherData(response.data);
+            return response.data; // Return the data for use in getAllTeacher
+        } catch {
             setApiError("Failed to load data");
+            return []; // Return empty array if error occurs
         }
-    }
+    };
 
     const getAllTeacher = async () => {
         try {
-            await apiService.getbyid("staff/getbyudise/", school).then((response) => {
-                const activeTeachers = response.data.filter(teacher => teacher.role.toLowerCase() === "teacher" && teacher.status.toLowerCase() === "working");
+            // First get all class teacher data
+            const classTeachers = await getAllClassTeacherData();
 
-                const unassignedTeachers = activeTeachers.filter(teacher => {
-                    return !allClassTeacherData.some(
-                        classTeacher => classTeacher.staff?.id === teacher.id
-                    );
-                });
-                setTeachers(unassignedTeachers);
-            
-                // setTeachers(activeTeachers);
-            })
-        }
-        catch {
+            // Then get all staff
+            const response = await apiService.getbyid("staff/getbyudise/", school);
+
+            // Filter available teachers
+            const availableTeachers = response.data
+                .filter(staff =>
+                    staff.role?.toLowerCase() === 'teacher' &&
+                    staff.status?.toLowerCase() === 'working'
+                )
+                .filter(staff =>
+                    !classTeachers.some(ct => ct.staff?.id === staff.id) ||
+                    staff.id === classTeacherData?.staff?.id // Include current teacher
+                );
+
+            setTeachers(availableTeachers);
+        } catch {
             setApiError("Failed to load Teachers Data please load Again !");
         }
-    }
+    };
 
     useEffect(() => {
-        fetchData();
-        getAllTeacher();
-        getAllClassTeacherData();
-    }, [id, school])
+        const loadAllData = async () => {
+            await fetchData();
+            await getAllTeacher(); // This will call getAllClassTeacherData internally
+        };
+        loadAllData();
+    }, [id, school]);
+
 
     const handleChange = (event) => {
         const { name, value } = event.target;

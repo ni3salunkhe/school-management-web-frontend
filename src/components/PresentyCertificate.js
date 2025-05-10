@@ -42,7 +42,7 @@ function PresentyCertificate() {
       }
     }).then((response) => {
       console.log('Academic Data:', response.data);
-      setAcademicData(response.data);
+      setAcademicData("academic data"+response.data);
 
       // Now that we have academicData, call the last year data API
       apiService.getbyid('academicold/lastyear/', response.data.id).then((lastYearResponse) => {
@@ -50,6 +50,8 @@ function PresentyCertificate() {
         setLastAcademicData(lastYearResponse.data);
       }).catch((error) => {
         setLastAcademicData("No data found");
+        alert("मागील वर्षाची माहिती उपलब्द नाही !");
+        navigate(`/clerk/reports/${id}`)
       });
     }).catch((error) => {
       console.error("Error fetching academic data:", error);
@@ -147,7 +149,7 @@ function PresentyCertificate() {
 `);
 
     printWindow.document.close();
-    navigate(`/reports/${id}`);
+    navigate(`/clerk/reports/prsenty/${id}`);
   }
 
   return (
@@ -261,11 +263,11 @@ function PresentyCertificate() {
             </div>
 
             <div>
-              <p>प्रमाणपत्र  देण्यात येते की ,कुमार/कुमारी <span>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> चालू वर्ष {academicData?.academicYear} मध्ये {academicData?.standard?.standard} मध्ये शिकत आहे.मागील शैक्षणिक {lastAcademicData?.academicYear} वर्ष मध्ये त्याची/तिची उपस्थिती ७५% पेक्षा जास्त होती. दाखला मागणीव न देणेत आला असे.</p>
+              <p>प्रमाणपत्र  देण्यात येते की , {studentData?.gender==="पुरुष" ?("कुमार"):("कुमारी")}  <span>{studentData?.studentName} {studentData?.fatherName} {studentData?.surName} </span> चालू वर्ष {academicData?.academicYear} मध्ये {academicData?.standard?.standard} मध्ये शिकत आहे.मागील शैक्षणिक {lastAcademicData?.academicYear} वर्ष मध्ये {studentData?.gender==="पुरुष" ?("त्याची"):("तिची")} उपस्थिती ७५% पेक्षा जास्त होती. दाखला मागणीवरुन देणेत आला असे.</p>
             </div>
             <div className='row'>
               <div className='col-6'>
-                <p>स्थळ :- </p>
+                <p>स्थळ :- {studentData?.school?.village?.villageName}</p>
                 <p>दिनांक :- {now.getFullYear()}-{now.getMonth()}-{now.getDate()}</p>
               </div>
               <div className='col-6'>

@@ -182,7 +182,7 @@ function AddNewStudentAcademicYear() {
                                                         <td>{student.surName}</td>
                                                         <td>{student.fatherName}</td>
                                                         <td>{student.motherName}</td>
-                                                        <td>{student.whichStandardAdmitted.id}</td>
+                                                        <td>{student.whichStandardAdmitted.standard}</td>
                                                         <td>
                                                             <button
                                                                 className="btn btn-sm btn-outline-primary"

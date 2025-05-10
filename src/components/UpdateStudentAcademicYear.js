@@ -48,7 +48,7 @@ function UpdateStudentAcademicYear() {
       apiService.getdata(`staff/getbyudiseandusername/${udise}/${username}`)
         .then((response) => {
           setTeacher(response.data);
-          console.log(response.data);
+          // console.log(response.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -60,7 +60,8 @@ function UpdateStudentAcademicYear() {
     apiService.getdata(`academic/${udise}/${id}`)
       .then((response) => {
         setAcademicYearData(response.data);
-        console.log(response.data);
+        // console.log("Hello"+response);
+        // console.log(response);
         setLoading(false);
       })
       .catch((error) => {
@@ -74,6 +75,11 @@ function UpdateStudentAcademicYear() {
 
 
   function findAcademicYear(academicYearData, udiseNo, studentId) {
+    // console.log(academicYearData)
+    // console.log(udiseNo)
+
+    // console.log(udiseNo)
+
     return academicYearData.find(
       (entry) =>
         entry.studentId.registerNumber === studentId &&

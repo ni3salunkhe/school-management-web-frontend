@@ -426,7 +426,7 @@ function LCdownload() {
                             <div className="col-12">
                                 <div className="d-flex">
                                     <p className="fw-bold me-2 p-0 m-0">११)कोणत्या इयत्तेत व कधीपासून शिकत होता :</p>
-                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{leavingInfo?.studentId?.whichStandardAdmitted}</p>
+                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{leavingInfo?.studentId?.whichStandardAdmitted?.standard}</p>
                                 </div>
                             </div>
                         </div>
