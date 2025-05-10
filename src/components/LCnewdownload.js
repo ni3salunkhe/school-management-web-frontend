@@ -483,7 +483,7 @@ function LCnewdownload() {
                                     <div className="col-6 border-bottom p-0">
                                         <div className="d-flex">
                                             <div className="fw-bold Cpadding border-end" style={{ width: '50%' }}>इयत्ता :</div>
-                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.whichStandardAdmitted}</div>
+                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.whichStandardAdmitted?.standard}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -519,7 +519,7 @@ function LCnewdownload() {
                                     <div className="col-12 border-bottom p-0">
                                         <div className="d-flex">
                                             <div className="fw-bold Cpadding border-end" style={{ width: '40%' }}>कोणत्या इयत्तेत व कधीपासून शिकत होता :</div>
-                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.whichStandardAdmitted}</div>
+                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.whichStandardAdmitted?.standard}</div>
                                         </div>
                                     </div>
                                 </div>

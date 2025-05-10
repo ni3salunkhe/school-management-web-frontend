@@ -165,7 +165,17 @@ function AttendanceReport() {
     return (
         <>
             {attendanceData.length === 0 && !isLoading && (
-                <p className="text-center p-5">No attendance data available for this class and month.</p>
+                <div className="position-relative mt-5 p-4 bg-light rounded-3 border shadow-sm">
+                    <button className="btn btn-danger text-white btn-sm position-absolute top-0 end-0 m-3" onClick={() => window.location.href = '/teacher/'}>
+                        <i className="bi bi-x-lg"></i>
+                    </button>
+
+                    <div className="text-center py-5">
+                        <i className="bi bi-calendar-x text-danger" style={{ fontSize: '3rem' }}></i>
+                        <h4 className="mt-3 text-secondary">No Attendance Data Available</h4>
+                        <p className="text-muted mb-0">There is no attendance information for this class and month.</p>
+                    </div>
+                </div>
             )}
 
             {attendanceData.length > 0 && (

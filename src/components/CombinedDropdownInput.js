@@ -1,7 +1,7 @@
 // CombinedDropdownInput.js
 import { useState, useRef, useEffect } from 'react';
 
-export default function CombinedDropdownInput({ label, id, value, onChange, required = false, options = [], error }) {
+export default function CombinedDropdownInput({ label, id, value, onChange, required = false, options = [], error ,className}) {
   const [inputValue, setInputValue] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -9,8 +9,13 @@ export default function CombinedDropdownInput({ label, id, value, onChange, requ
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const filtered = options.filter(option =>
-      option.toLowerCase().includes(inputValue.toLowerCase())
+    
+    const filtered = options.filter(option =>  
+      {if (typeof option === 'string') {
+            return option.toLowerCase().includes(inputValue.toLowerCase());
+        }
+      return
+      }
     );
     setFilteredOptions(filtered);
   }, [inputValue, options]);
@@ -41,7 +46,7 @@ export default function CombinedDropdownInput({ label, id, value, onChange, requ
   };
 
   return (
-    <div className="col-md-3 mb-2" ref={dropdownRef}>
+    <div className={className}  ref={dropdownRef}>
       <label htmlFor={id} className="form-label fw-semibold small">{label} {required && '*'}</label>
       <div className="position-relative">
         <input
