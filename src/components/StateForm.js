@@ -3,12 +3,14 @@ import apiService from '../services/api.service';
 import Next from './Next';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function StateForm() {
     const [stateName, setStateName] = useState('');
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [allStates, setAllStates] = useState([]);
+    const role=jwtDecode(sessionStorage.getItem('token'))?.role
     const navigate=useNavigate();
     function isOnlyMarathi(input) {
         const marathiRegex = /^[\u0900-\u097F\s]+$/;
@@ -111,7 +113,7 @@ function StateForm() {
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center position-relative">
                             <div className="position-absolute top-0 end-0 m-2">
-                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer'} placeholder={'X'}></Next>
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={`/${role}`} placeholder={'X'}></Next>
                             </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">राज्य प्रविष्ट करा</h3>
                         </div>

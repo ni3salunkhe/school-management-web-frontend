@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import HeadmasterDashboard from './pages/HeadmasterDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
@@ -11,10 +11,14 @@ import Developer from './pages/Developer';
 import { authService } from './services/authService';
 
 function App() {
-
+  const navigate=useNavigate()
   useEffect(()=>{
     const authenticated=authService.isAuthenticated();
-  })
+    
+    if(!authenticated){
+      navigate('/')
+    }
+  },[])
 
   const location = useLocation();
   const isLoginPage = location.pathname === '/';
@@ -26,7 +30,7 @@ function App() {
   ];
   const sidebarItemsClerk = [
     {
-      mainMenu: ['Student','Classes','Add Academic New Students','List Of Students','Change Class Teacher','Mark Holiday'],
+      mainMenu: ['Student','Classes','Add Academic New Students','List Of Students','Change Class Teacher','Mark Holiday','State','District','Tehsil','Village'],
     },
   ];
   const sidebarItemsTeacher = [

@@ -39,7 +39,7 @@ function NavBarS({ role }) {
               <>
                 {role == "DEVELOPER" && <Nav className="ms-auto align-items-center">
                   <Nav.Link className="" as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
-                  <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता</Nav.Link>
+                  <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता नविनीकरण किंवा नूतनीकरण करा</Nav.Link>
                   <Nav.Link as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
                   <Dropdown as={Nav.Item} className="me-2">
                     <Dropdown.Toggle as={Nav.Link} >

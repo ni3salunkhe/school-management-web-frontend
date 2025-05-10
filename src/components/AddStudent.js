@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { BiMap, BiInfoCircle, BiUserCircle, BiBook, BiHome, BiUserPlus } from 'react-icons/bi';
+import { BiMap, BiInfoCircle, BiUserCircle, BiBook, BiHome, BiUserPlus, BiReset, BiSearch } from 'react-icons/bi';
 import apiService from '../services/api.service';
 import CombinedDropdownInput from './CombinedDropdownInput'; // Assuming this component can handle error/validationClass props
 import { jwtDecode } from 'jwt-decode';
@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import Next from './Next';
 import { useNavigate } from 'react-router-dom';
 import helper from '../services/helper.service'
+
 
 // --- Marathi Date Conversion Helpers ---
 const marathiDays = [
@@ -47,7 +48,8 @@ function getMarathiDateWords(dateStr) {
         const monthText = marathiMonths[month];
         const yearText = marathiYearWordsLookup[year] || year.toString(); // Use the lookup
 
-    
+
+
 
         if (!dayText || !monthText || yearText === year.toString()) {
             console.warn("Could not convert date parts to Marathi", { day, month, year });
@@ -76,6 +78,10 @@ function AddStudent() {
     const [students, setStudents] = useState([]);
     const [errors, setErrors] = useState({}); // Combined state for immediate feedback and submit errors
     const navigate = useNavigate();
+    const [buttonRole, setButtonRole] = useState('')
+    const [studentId, setStudentId] = useState(null)
+    const [submitButtonText, setSubmitButtonText] = useState("नोंदणी सबमिट करा")
+    const STORAGE_KEY = 'addStudentFormData';
 
     const isOnlyMarathi = (input) => {
         const marathiRegex = /^[\u0900-\u097F\s]+$/;
@@ -123,7 +129,10 @@ function AddStudent() {
         casteCategory: ''
     };
 
-    const [formData, setFormData] = useState(initialFormData);
+    const [formData, setFormData] = useState(() => {
+        const savedData = sessionStorage.getItem(STORAGE_KEY); // Or localStorage
+        return savedData ? JSON.parse(savedData) : initialFormData;
+    });
 
     // --- Data Fetching useEffect ---
     useEffect(() => {
@@ -173,6 +182,18 @@ function AddStudent() {
         } else { setFilteredVillages([]); }
     }, [formData.tehasilOfBirth, villages, formData.villageOfBirth]);
 
+    useEffect(() => {
+        console.log("ATTEMPTING TO SAVE TO SESSION STORAGE. Current formData:", formData); // DEBUG LINE 1
+        try {
+            const stringifiedData = JSON.stringify(formData);
+            console.log("Stringified data to save:", stringifiedData); // DEBUG LINE 2
+            sessionStorage.setItem(STORAGE_KEY, stringifiedData);
+            console.log("Successfully called sessionStorage.setItem. Check dev tools now."); // DEBUG LINE 3
+        } catch (error) {
+            console.error("Error saving form data to session storage:", error);
+        }
+    }, [formData]); // This effect runs every time formData changes
+
     const isDateValid = (dateString) => {
         const inputDate = new Date(dateString);
         const today = new Date();
@@ -194,7 +215,7 @@ function AddStudent() {
 
         // Helper for uniqueness check
         const isTaken = (field, value) => {
-            if (!value) return false; 
+            if (!value) return false;
             return students.some(
                 (item) => item[field]?.toString().trim() === value.toString().trim() && item.school?.udiseNo === school
             );
@@ -219,8 +240,8 @@ function AddStudent() {
         else if (!nameRegex.test(formData.studentName)) newErrors.studentName = 'नावात फक्त अक्षरे/स्पेस/मराठी/नुक्ते असू शकतात.';
         if (!formData.fatherName.trim()) newErrors.fatherName = 'वडिलांचे नाव आवश्यक आहे.';
         else if (!nameRegex.test(formData.fatherName)) newErrors.fatherName = 'नावात फक्त अक्षरे/स्पेस/मराठी/नुक्ते असू शकतात.';
-        if (!formData.motherName.trim()) newErrors.motherName = 'आईचे नाव आवश्यक आहे.';
-        else if (!nameRegex.test(formData.motherName)) newErrors.motherName = 'नावात फक्त अक्षरे/स्पेस/मराठी/नुक्ते असू शकतात.';
+        if (!formData.motherName.trim()) newErrors.motherName = 'आईचे नाव आवश्यक आहे. आईचे नाव उपलब्ध नसल्यास "-" हे अक्षर टाइप करा';
+
         if (!formData.nationality.trim()) newErrors.nationality = 'राष्ट्रीयत्व आवश्यक आहे.';
         if (!formData.motherTongue.trim()) newErrors.motherTongue = 'मातृभाषा आवश्यक आहे.';
         if (!formData.religion.trim()) newErrors.religion = 'धर्म आवश्यक आहे.';
@@ -229,7 +250,7 @@ function AddStudent() {
         // dateOfBirthInWord is auto-generated or read-only
 
         // ** Contact Info **
-        if (!formData.residentialAddress.trim()) newErrors.residentialAddress = 'निवासी पत्ता आवश्यक आहे.';
+        if (!formData.residentialAddress.trim()) newErrors.residentialAddress = 'निवासी पत्ता आवश्यक आहे. पत्ता उपलब्ध नसल्यास "-" हे अक्षर टाइप करा '
         if (!formData.mobileNo.trim()) newErrors.mobileNo = 'मोबाईल नंबर आवश्यक आहे.';
         else if (!mobileRegex.test(formData.mobileNo)) newErrors.mobileNo = 'मोबाईल नंबर १० अंकी असावा.';
 
@@ -248,7 +269,7 @@ function AddStudent() {
 
         // ** Additional Info **
         if (formData.adhaarNumber && !adhaarRegex.test(formData.adhaarNumber)) newErrors.adhaarNumber = 'आधार कार्ड नंबर १२ अंकी असावा.';
-        else if ( formData.adhaarNumber && isTaken('adhaarNumber', formData.adhaarNumber)) newErrors.adhaarNumber = 'हा आधार कार्ड नंबर आधीच अस्तित्वात आहे.';
+        else if (formData.adhaarNumber && isTaken('adhaarNumber', formData.adhaarNumber)) newErrors.adhaarNumber = 'हा आधार कार्ड नंबर आधीच अस्तित्वात आहे.';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -264,19 +285,19 @@ function AddStudent() {
 
         // --- Update Form Data State ---
         // Special handling for date
-        if (["studentName", "fatherName", "surName", "motherName"].includes(id)) {
+        if (["studentName", "fatherName", "surName"].includes(id)) {
             val = value.trim();
         }
 
-        if(id === "studentName" || id === "fatherName" || id === "surName" || id === "minorityInformation" || id === "casteCategory" || id === "ebcInformation" || id === "subCast" || id === "caste" || id === "religion" || id === "motherTongue" || id === "nationality" ){
-            if(value && !isOnlyMarathi(value)){
+        if (id === "studentName" || id === "fatherName" || id === "surName" || id === "minorityInformation" || id === "casteCategory" || id === "ebcInformation" || id === "subCast" || id === "caste" || id === "religion" || id === "motherTongue" || id === "nationality") {
+            if (value && !isOnlyMarathi(value)) {
                 currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
             }
         }
 
-        if( id === "motherName"){
+        if (id === "motherName") {
             const marathiRegex = /^[\u0900-\u097F\s-]+$/;
-            if(!marathiRegex.test(value)){
+            if (!marathiRegex.test(value)) {
                 currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
             }
         }
@@ -358,7 +379,7 @@ function AddStudent() {
             // }
         }
 
-        if (value) {
+        if (id === 'dateOfBirth') {
             const birthDate = new Date(value);
             const today = new Date();
             const minBirthDate = new Date(today.getFullYear() - 6, today.getMonth(), today.getDate());
@@ -379,12 +400,12 @@ function AddStudent() {
             }
         }
 
-        if(id === "residentialAddress"){
+        if (id === "residentialAddress") {
             const marathiRegex = /^[\u0900-\u097F\s-]+$/;
-            if(value && value.length < 6){
+            if (value && value.length < 6) {
                 currentErrors.residentialAddress = "पत्ता अवैध आहे.";
             }
-            else if(!marathiRegex.test(value)){
+            else if (!marathiRegex.test(value)) {
                 currentErrors.residentialAddress = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
             }
         }
@@ -400,16 +421,16 @@ function AddStudent() {
         // Clear specific error when user changes the value
         let currentErrors = { ...errors };
         delete currentErrors[id];
-        
-        if(id=== "nationality" || id === "religion" || id === "caste" || id === "subCast" || id === "motherTongue"){
-            if(value && !isOnlyMarathi(value)){
+
+        if (id === "nationality" || id === "religion" || id === "caste" || id === "subCast" || id === "motherTongue") {
+            if (value && !isOnlyMarathi(value)) {
 
                 currentErrors[id] = "कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा";
             }
         }
         setErrors(currentErrors);
 
-        
+
 
 
         setFormData(prev => ({ ...prev, [id]: value }));
@@ -419,6 +440,109 @@ function AddStudent() {
     // --- Handle Submit ---
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (buttonRole === 'search') { // Check the attribute from the button
+            const currentRegisterNumber = formData.registerNumber ? formData.registerNumber.toString().trim() : "";
+            console.log(students)
+            if (!currentRegisterNumber) {
+                Swal.fire('त्रुटी!', "माहिती शोधण्यासाठी कृपया जनरल रजिस्टर नंबर प्रविष्ट करा.", 'error');
+                setErrors(prev => ({ ...prev, registerNumber: "माहिती शोधण्यासाठी आवश्यक" }));
+                document.getElementById('registerNumber')?.focus();
+                return;
+            }
+
+            setErrors({}); // Clear previous errors
+
+            const selectedStudent = students.find(
+                student => student.registerNumber?.toString().trim() === currentRegisterNumber
+            );
+
+            if (selectedStudent) {
+                console.log("Found student raw data:", JSON.parse(JSON.stringify(selectedStudent))); // Deep copy for logging
+
+                // Create a mutable copy to transform for the form
+                const studentDataForForm = { ...selectedStudent };
+                setStudentId(selectedStudent.id)
+                // Extract IDs from nested objects and ensure they are strings
+                studentDataForForm.stateOfBirth = selectedStudent.stateOfBirth?.id ? String(selectedStudent.stateOfBirth.id) : '';
+                studentDataForForm.districtOfBirth = selectedStudent.districtOfBirth?.id ? String(selectedStudent.districtOfBirth.id) : '';
+                studentDataForForm.tehasilOfBirth = selectedStudent.tehasilOfBirth?.id ? String(selectedStudent.tehasilOfBirth.id) : '';
+                studentDataForForm.villageOfBirth = selectedStudent.villageOfBirth?.id ? String(selectedStudent.villageOfBirth.id) : '';
+
+                // Handle whichStandardAdmitted - if it's an object with an id, or just a direct id or null
+                if (selectedStudent.whichStandardAdmitted && typeof selectedStudent.whichStandardAdmitted === 'object' && selectedStudent.whichStandardAdmitted.id) {
+                    studentDataForForm.whichStandardAdmitted = String(selectedStudent.whichStandardAdmitted.id);
+                } else if (selectedStudent.whichStandardAdmitted && typeof selectedStudent.whichStandardAdmitted !== 'object') { // If it's a primitive (ID)
+                    studentDataForForm.whichStandardAdmitted = String(selectedStudent.whichStandardAdmitted);
+                } else {
+                    studentDataForForm.whichStandardAdmitted = ''; // If null, undefined, or an object without an id
+                }
+
+
+                // Ensure other direct string values are correctly assigned (they should be fine with spread)
+                // Example: gender, nationality, etc.
+                // studentDataForForm.gender = selectedStudent.gender || ''; // Ensure empty string if null/undefined
+
+                // Remove the school object if it's nested and not part of flat formData structure
+                if (studentDataForForm.school && typeof studentDataForForm.school === 'object') {
+                    delete studentDataForForm.school;
+                }
+                // Remove other complex objects not directly mappable to simple form fields if necessary
+                // delete studentDataForForm.districtOfBirth; // We've extracted the ID
+                // delete studentDataForForm.tehasilOfBirth;
+                // delete studentDataForForm.villageOfBirth;
+                // No, keep the transformed ones: studentDataForForm.districtOfBirth will now hold the ID string.
+
+
+                console.log("Populating form with (transformed data):", studentDataForForm);
+
+                setFormData(prev => ({
+                    ...initialFormData, // Reset all fields first
+                    registerNumber: currentRegisterNumber, // Keep the searched register number
+                    ...studentDataForForm // Spread the (now flattened for IDs) student data
+                }));
+
+                Swal.fire('माहिती मिळाली!', 'विद्यार्थ्याची माहिती फॉर्ममध्ये भरली आहे.', 'success');
+                // The useEffects for dependent dropdowns will trigger after this state update.
+            } else {
+                Swal.fire('त्रुटी!', 'दिलेला जनरल रजिस्टर नंबर असलेला विद्यार्थी सापडला नाही.', 'error');
+                setFormData(prev => ({ ...initialFormData, registerNumber: currentRegisterNumber }));
+                setErrors(prev => ({ ...prev, registerNumber: "विद्यार्थी सापडला नाही" }));
+            }
+            setButtonRole('')
+            setButtonRole('update'); // No need to reset here, as it's set from button click
+            setSubmitButtonText("बदल केलेली माहिती जतन करा")
+            return;
+        }
+        if (buttonRole === 'update') {
+            try {
+                const payload = { ...formData, school };
+                await apiService.put(`student/${studentId}`, payload)
+                await apiService.getbyid('student/byudise/', school).then((response) => setStudents(response.data));
+                await Swal.fire('यशस्वी!', 'विद्यार्थी माहिती अपडेट झाली.', 'success');
+                setButtonRole('');
+                setSubmitButtonText("नोंदणी सबमिट करा")
+
+                sessionStorage.removeItem(STORAGE_KEY);
+                setFormData(prev => ({ ...initialFormData }))
+                return;
+            } catch (error) {
+                console.error("Error:", error);
+                let errorMsg = "माहिती सबमिट करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.";
+                if (error.response && error.response.data) {
+                    // Try to extract backend error message
+                    const backendError = error.response.data.message || error.response.data.error || JSON.stringify(error.response.data);
+                    errorMsg = `त्रुटी: ${backendError}`;
+                    // Map specific backend errors to form fields if possible
+                    if (typeof error.response.data === 'object' && error.response.data.field) {
+                        setErrors(prev => ({ ...prev, [error.response.data.field]: backendError }));
+                    } else if (error.response.data?.registerNumber) { // Example check
+                        setErrors(prev => ({ ...prev, registerNumber: error.response.data.registerNumber }));
+                    }
+                }
+                Swal.fire('त्रुटी!', errorMsg, 'error');
+
+            }
+        }
 
         if (!validateForm()) {
             // Find the first error and scroll to it
@@ -429,6 +553,7 @@ function AddStudent() {
             }
             console.log('Validation Failed:', errors);
             alert("कृपया फॉर्ममधील सर्व आवश्यक (*) माहिती भरा आणि त्रुटी तपासा.");
+            setButtonRole('')
             return;
         }
 
@@ -454,6 +579,7 @@ function AddStudent() {
                 if (school) {
                     apiService.getbyid('student/byudise/', school).then((res) => setStudents(res.data));
                 }
+                sessionStorage.removeItem(STORAGE_KEY);
                 setFormData(initialFormData); // Reset form
                 setErrors({}); // Clear errors
 
@@ -485,6 +611,7 @@ function AddStudent() {
     const getValidationClass = (fieldName) => {
         return errors[fieldName] ? 'is-invalid' : '';
     }
+
 
 
     // --- Render ---
@@ -621,11 +748,11 @@ function AddStudent() {
                                                 {errors.surName && <div id="surNameError" className="invalid-feedback">{errors.surName}</div>}
                                             </div>
                                             <div className="col-md-3 mb-2">
-                                                <label htmlFor="motherName" className="form-label fw-semibold small">आईचे नाव *</label>
+                                                <label htmlFor="motherName" className="form-label fw-semibold small">आईचे नाव *<span style={{ fontSize: '7px' }}>(नसल्यास "-" हे अक्षर टाका)</span></label>
                                                 <input type="text" className={`form-control form-control-sm ${getValidationClass('motherName')}`} id="motherName" value={formData.motherName} onChange={handleChange} required placeholder="आईचे नाव" aria-describedby="motherNameError" />
                                                 {errors.motherName && <div id="motherNameError" className="invalid-feedback">{errors.motherName}</div>}
                                             </div>
-                                            <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')}  />
+                                            <CombinedDropdownInput id="nationality" label="राष्ट्रीयत्व " value={formData.nationality} onChange={handleCombinedChange} required={true} options={["भारतीय"]} error={errors.nationality} validationClass={getValidationClass('nationality')} />
                                             <CombinedDropdownInput id="motherTongue" label="मातृभाषा " value={formData.motherTongue} onChange={handleCombinedChange} required={true} options={["हिंदी", "मराठी", "उर्दू"]} error={errors.motherTongue} validationClass={getValidationClass('motherTongue')} />
                                             <CombinedDropdownInput id="religion" label="धर्म " value={formData.religion} onChange={handleCombinedChange} required={true} options={["हिंदू", "मुस्लिम", "ख्रिश्चन", "बौद्ध", "जैन"]} error={errors.religion} validationClass={getValidationClass('religion')} />
                                             <div className="col-md-3 mb-2">
@@ -634,7 +761,7 @@ function AddStudent() {
                                                 {errors.subCast && <div id="subCastError" className="invalid-feedback">{errors.subCast}</div>}
                                             </div>
                                             <CombinedDropdownInput id="caste" label="प्रवर्ग " value={formData.caste} onChange={handleCombinedChange} required={true} options={["अनुसूचित जाती", "अनुसूचित जमाती", "इतर मागास वर्ग", "खुला"]} error={errors.caste} validationClass={getValidationClass('caste')} />
-                                                                        
+
 
                                         </div>
                                     </div>
@@ -695,8 +822,8 @@ function AddStudent() {
                                         </div>
                                     </div>
                                 </div>
-                                 {/* Section 5: Academic Information */}
-                                 <div className="card mb-4 border-0 bg-light">
+                                {/* Section 5: Academic Information */}
+                                <div className="card mb-4 border-0 bg-light">
                                     <div className="card-body p-3">
                                         <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold"><BiBook className="me-2" />शैक्षणिक माहिती</h5>
                                         <div className="row g-3">
@@ -740,7 +867,7 @@ function AddStudent() {
                                         <h5 className="card-title border-bottom pb-2 mb-3 fs-5 fw-bold"><BiHome className="me-2" />संपर्क माहिती</h5>
                                         <div className="row g-3">
                                             <div className="col-md-6 mb-2">
-                                                <label htmlFor="residentialAddress" className="form-label fw-semibold small">निवासी पत्ता *</label>
+                                                <label htmlFor="residentialAddress" className="form-label fw-semibold small">निवासी पत्ता *<span style={{ fontSize: '7px' }}>(नसल्यास "-" हे अक्षर टाका)</span></label>
                                                 <textarea className={`form-control form-control-sm ${getValidationClass('residentialAddress')}`} id="residentialAddress" value={formData.residentialAddress} onChange={handleChange} required rows={3} placeholder="पूर्ण पत्ता" aria-describedby="residentialAddressError" />
                                                 {errors.residentialAddress && <div id="residentialAddressError" className="invalid-feedback">{errors.residentialAddress}</div>}
                                             </div>
@@ -770,9 +897,16 @@ function AddStudent() {
                                 <div className="d-flex justify-content-center mt-4 gap-5">
                                     <button type="submit" className="btn btn-primary btn-lg px-5 py-2 rounded-pill shadow-sm">
                                         <i className="bi bi-check-circle me-2"></i>
-                                        नोंदणी सबमिट करा
+                                        {submitButtonText}
                                     </button>
+                                    <button type='submit' className="btn btn-secondary btn-lg px-5 py-2 rounded-pill shadow-sm" onClick={() => { setButtonRole("search") }} ><BiSearch />शोधा व बदल करा</button>
                                     {/* <Next classname={'btn btn-success btn-lg px-5 py-2 rounded-pill shadow-sm'} path={'/clerk/classteacher'} placeholder={'पुढे चला'}></Next> */}
+                                    <span className="btn btn-danger btn-lg px-5 py-2 rounded-pill shadow-sm" onClick={
+                                        () => {
+                                            sessionStorage.removeItem(STORAGE_KEY);
+                                            setFormData(prev => ({ ...initialFormData }))
+                                        }
+                                    } ><BiReset /></span>
                                 </div>
                             </form>
                         </div>

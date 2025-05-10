@@ -1,6 +1,6 @@
 import React from "react";
 import { Nav, Button, Form, Offcanvas } from 'react-bootstrap';
-import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp } from 'react-icons/fi';
+import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget } from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useContext, useEffect } from "react";
 import { authService } from "../services/authService";
@@ -120,7 +120,7 @@ const Sidebar = ({ sidebarItems, role }) => {
                     break;
                   case 'List Of Students':
                     Icon = FiBarChart2;
-                    name = "विद्यार्थी यादी आथवा रिपोर्ट"
+                    name = "विद्यार्थी यादी आणि रिपोर्ट"
                     break;
                   case 'Change Class Teacher':
                     Icon = FiFilter;
@@ -150,6 +150,24 @@ const Sidebar = ({ sidebarItems, role }) => {
                     Icon = FiBarChart2;
                     name = "मासिक उपस्थिती अहवाल"
                     break;
+                  case 'State':
+                    Icon = FiMapPin;
+                    name = "राज्य"
+                    break;
+                  case 'District':
+                    Icon = FiMap;
+                    name = "जिल्हा"
+                    break;
+
+                  case 'Tehsil':
+                    Icon = FiLayout;
+                    name = "तहसील"
+                    break;
+                  case 'Village':
+                    Icon = FiTarget;
+                    name = "गाव/शहर"
+                    break;
+
                   default:
                     Icon = FiHome;
                 }
@@ -233,25 +251,82 @@ const Sidebar = ({ sidebarItems, role }) => {
 
                   // Determine the icon based on the item name
                   let Icon;
+                  let name = "";
                   switch (item) {
-                    case 'Dashboard':
-                      Icon = FiHome;
-                      break;
-                    case 'Circular':
-                      Icon = FiFileText;
-                      break;
-                    case 'Departments':
+                    case 'School':
                       Icon = FiUsers;
+                      name = "शाळा माहिती"
                       break;
-                    case 'Workflows':
+                    case 'Class':
+                      Icon = FiGrid;
+                      name = "वर्ग माहिती"
+                      break;
+                    case 'Staff':
+                      Icon = FiUsers;
+                      name = "शिक्षकवृंद/कर्मचारी माहिती"
+                      break;
+                    case 'Student':
+                      Icon = FiHome;
+                      name = "विद्यार्थी जनरल रजिस्टर माहिती नोंद"
+                      break;
+                    case 'Classes':
+                      Icon = FiFileText;
+                      name = "वर्गांची माहिती"
+                      break;
+                    case 'Add Academic New Students':
+                      Icon = FiUserPlus;
+                      name = "नवीन विद्यार्थी प्रवेश नोंद"
+                      break;
+                    case 'List Of Students':
                       Icon = FiBarChart2;
+                      name = "विद्यार्थी यादी आणि रिपोर्ट"
                       break;
-                    case 'Categories':
+                    case 'Change Class Teacher':
                       Icon = FiFilter;
+                      name = "वर्गशिक्षक बदला"
                       break;
-                    case 'Settings':
-                      Icon = FiSettings;
+                    case 'Mark Holiday':
+                      Icon = FiCalendar;
+                      name = "सुट्टीची नोंद करा"
                       break;
+                    case 'Attendance':
+                      Icon = FiClipboard;
+                      name = "उपस्थिती माहिती नोंद"
+                      break;
+                    case 'Update year':
+                      Icon = FiTrendingUp;
+                      name = "पास नापास नोंदी"
+                      break;
+                    case 'Catlog Cover Page':
+                      Icon = FiUserPlus;
+                      name = "कॅटलॉग कवर पेज"
+                      break;
+                    case 'Daily Attendance Report':
+                      Icon = FiFileText;
+                      name = "दैनंदिन उपस्थिती अहवाल"
+                      break;
+                    case 'Monthly Attendance Report':
+                      Icon = FiBarChart2;
+                      name = "मासिक उपस्थिती अहवाल"
+                      break;
+                    case 'State':
+                      Icon = FiMapPin;
+                      name = "राज्य"
+                      break;
+                    case 'District':
+                      Icon = FiMap;
+                      name = "जिल्हा"
+                      break;
+
+                    case 'Tehsil':
+                      Icon = FiLayout;
+                      name = "तहसील"
+                      break;
+                    case 'Village':
+                      Icon = FiTarget;
+                      name = "गाव/शहर"
+                      break;
+
                     default:
                       Icon = FiHome;
                   }
@@ -264,7 +339,7 @@ const Sidebar = ({ sidebarItems, role }) => {
                       style={getLinkStyle(path)}
                       className="d-flex align-items-center px-3 py-2 mb-1 mx-2"
                     >
-                      <Icon {...iconProps} /> {item}
+                      <Icon {...iconProps} /> {name}
                     </Nav.Link>
                   );
                 })}

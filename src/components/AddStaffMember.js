@@ -51,7 +51,7 @@ function AddStaffMember() {
         
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value.trim() });
+        setFormData({ ...formData, [name]: value });
 
         const newErrors = {};
         if (name === "email") {
@@ -217,7 +217,7 @@ function AddStaffMember() {
                         <div className="card shadow-sm border-0 rounded-3">
                             {/* Header */}
                             <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
-                                <h3 className="mb-0 fw-bold fs-4 heading-font">कर्मचारी नोंदणी</h3>
+                                <h3 className="mb-0 fw-bold fs-4 heading-font">शिक्षकवृंद/कर्मचारी नोंदणी</h3>
                             </div>
 
                             {/* Form Body */}
@@ -333,6 +333,7 @@ function AddStaffMember() {
                                                 <select name="level" className={`form-select ${errors.level ? 'is-invalid' : ''}`} value={formData.level} onChange={handleChange}>
                                                     <option value="">-- निवडा --</option>
                                                     <option value="PRIMARY">प्राथमिक</option>
+                                                    <option value="PRIMARY">उच्च प्राथमिक</option>
                                                     <option value="SECONDARY">माध्यमिक</option>
                                                     <option value="HigherSecondary">उच्च माध्यमिक</option>
                                                 </select>

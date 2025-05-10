@@ -1,88 +1,164 @@
-import React, { useEffect, useState } from 'react'
-import apiService from '../services/api.service'
-import { FiSearch } from 'react-icons/fi'
-import { Form, Container, Row, Col, Card, InputGroup } from 'react-bootstrap'
-import '../styling/ViewSchools.css' // Custom styles file for the UI
-import { useNavigateService } from '../services/useNavigateService'
+import React, { useEffect, useState } from 'react';
+import apiService from '../services/api.service';
+import { FiSearch } from 'react-icons/fi';
+import { Form, Container, Row, Col, Card, InputGroup } from 'react-bootstrap';
+import '../styling/ViewSchools.css'; // Custom styles
+import '../styling/SchoolDetailsOverlay.css'; // Assuming you created this or have it globally
+// import { useNavigateService } from '../services/useNavigateService'; // Keep if used elsewhere, not directly for overlay
+import SchoolDetailsOverlay from '../components/SchoolDetailsOverlay'; // Import the overlay component
 
 const ViewSchools = () => {
-    const [filteredData, setFilteredData] = useState([]) // This will hold the filtered list
-    const [data, setData] = useState([])  // This will hold all fetched data
-    const [searchTerm, setSearchTerm] = useState('')  // Track the search input
-    const {navigateTo} = useNavigateService();
+    const [allSchools, setAllSchools] = useState([]);          // Holds all fetched school data
+    const [filteredSchools, setFilteredSchools] = useState([]); // Holds the list to display (after search)
+    const [searchTerm, setSearchTerm] = useState('');
+    // const { navigateTo } = useNavigateService(); // Keep if used for other navigation
+    
+    // State for the overlay
+    const [selectedSchool, setSelectedSchool] = useState(null); // School object for the overlay
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
-    // Fetch the school data when the component is mounted
     useEffect(() => {
-        const fetchHm = async () => {
+        const fetchSchools = async () => {
             try {
                 const response = await apiService.getdata("school/");
-                const school = response.data || []
-                console.log(response.data)
-                setData(school)
-                setFilteredData(school) // Initialize the filteredData with the full data
+                const schools = response.data || [];
+                console.log("Fetched Schools:", schools);
+                setAllSchools(schools);
+                setFilteredSchools(schools); // Initialize filtered list with all schools
             } catch (error) {
-                console.log(error)
+                console.error("Error fetching schools:", error);
+                setAllSchools([]); // Set to empty array on error
+                setFilteredSchools([]);
+            }
+        };
+        fetchSchools();
+    }, []);
+
+    // This useEffect will add/remove the 'blurred' class from the main page content wrapper
+    // Ensure the 'pageContentWrapper' ID exists on a parent element in your app structure
+    useEffect(() => {
+        const pageContentWrapper = document.getElementById('pageContentWrapper');
+        if (pageContentWrapper) {
+            if (isOverlayOpen) {
+                pageContentWrapper.classList.add('blurred');
+            } else {
+                pageContentWrapper.classList.remove('blurred');
             }
         }
-        fetchHm()
-    }, [])
+        // Cleanup on component unmount or if isOverlayOpen changes before unmount
+        return () => {
+            if (pageContentWrapper) {
+                pageContentWrapper.classList.remove('blurred');
+            }
+        };
+    }, [isOverlayOpen]);
 
-    // Handle the search input change
+
     const handleSearchChange = (e) => {
-        const value = e.target.value
-        setSearchTerm(value)
+        const value = e.target.value.toLowerCase();
+        setSearchTerm(value);
 
-        // Filter data based on the search term (match school names starting with the search term)
-        const filtered = data.filter(element =>
-            // Check if schoolName exists and is a valid string
-            element.schoolName && element.schoolName.toLowerCase().includes(value.toLowerCase())
-        )
+        if (value === '') {
+            setFilteredSchools(allSchools); // If search is cleared, show all schools
+        } else {
+            const filtered = allSchools.filter(school =>
+                school.schoolName && school.schoolName.toLowerCase().includes(value)
+            );
+            setFilteredSchools(filtered);
+        }
+    };
 
-        setFilteredData(filtered) // Update the filtered data
-    }
+    // Function to handle clicking on a school name
+    const handleSchoolNameClick = (school) => {
+        console.log("School clicked:", school);
+        // Ensure school object has all necessary fields for SchoolDetailsOverlay
+        // (name, address, principal, established, contact, description)
+        // You might need to map your API response fields to these expected fields
+        // For now, assuming your 'school' object from API has these directly
+        // or that SchoolDetailsOverlay can handle missing fields gracefully.
+
+        // Example mapping if your API fields are different:
+        // const schoolDetailsForOverlay = {
+        //     name: school.schoolName,
+        //     address: school.fullAddress || 'N/A',
+        //     principal: school.principalName || 'N/A',
+        //     established: school.yearEstablished || 'N/A',
+        //     contact: school.contactInfo || 'N/A',
+        //     description: school.aboutSchool || ''
+        // };
+        // setSelectedSchool(schoolDetailsForOverlay);
+
+        setSelectedSchool(school); // Directly pass the school object
+        setIsOverlayOpen(true);
+    };
+
+    const handleCloseOverlay = () => {
+        setIsOverlayOpen(false);
+        setSelectedSchool(null); // Clear selected school when closing
+    };
 
     return (
-        <Container className="mt-5">
-            
-                    <div className="search-bar">
-                        <Form className="position-relative">
-                            <InputGroup>
-                                <Form.Control
-                                    type="search"
-                                    placeholder="Search for schools..."
-                                    className="form-control-sm rounded-pill search-input"
-                                    value={searchTerm}  // Bind the search input value
-                                    onChange={handleSearchChange}  // Update search term on input change
-                                />
-                                <InputGroup.Text className="search-icon">
-                                    <FiSearch />
-                                </InputGroup.Text>
-                            </InputGroup>
-                        </Form>
-                    </div>
+        // IMPORTANT: For the blur effect to work, the parent of this ViewSchools component
+        // (or a higher ancestor like in App.js) should have a div with id="pageContentWrapper"
+        // that wraps the main content area of your application.
+        <Container className="mt-4 view-schools-container">
+            <div className="search-bar-wrapper mb-4 p-3 bg-light rounded shadow-sm">
+                <Form className="position-relative">
+                    <InputGroup>
+                        <Form.Control
+                            type="search"
+                            placeholder=" शाळेचे नाव शोधा..."
+                            className="form-control-sm rounded-pill search-input"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                        />
+                        <InputGroup.Text className="search-icon-wrapper bg-transparent border-0">
+                            <FiSearch className="search-icon-svg"/>
+                        </InputGroup.Text>
+                    </InputGroup>
+                </Form>
+            </div>
 
-                    <h2 className="text-center mt-4">List of Schools</h2>
-                    <Row className="mt-4">
-                        {filteredData.length > 0 ? (
-                            filteredData.map((element, index) => (
-                                <Col lg={4} md={6} sm={12} key={index} className="mb-4">
-                                    <Card className="school-card">
-                                        <Card.Body>
-                                            <Card.Header className='school-udise'>{element.udiseNo}</Card.Header>
-                                            <Card.Title style={{cursor:'pointer'}} onClick={()=>navigateTo('/developer/subscription')} className="school-name">{element.schoolName}</Card.Title>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            ))
-                        ) : (
-                            <Col className="text-center">
-                                <p>No schools found</p>
-                            </Col>
-                        )}
-                    </Row>
-                
+            <h2 className="text-center mb-4 section-title">शाळांची यादी</h2>
+            <Row className="g-4"> {/* g-4 for gutter spacing */}
+                {filteredSchools.length > 0 ? (
+                    filteredSchools.map((school) => ( // Changed element to school for clarity
+                        <Col lg={4} md={6} sm={12} key={school.udiseNo || school.id} className="d-flex"> {/* Use a unique key like udiseNo or id */}
+                            <Card className="school-card w-100 h-100 shadow-hover"> {/* w-100, h-100 for consistent card heights if desired, d-flex on Col helps */}
+                                <Card.Header className='school-udise bg-primary text-white'>
+                                    UDISE: {school.udiseNo}
+                                </Card.Header>
+                                <Card.Body className="d-flex flex-column">
+                                    <Card.Title
+                                        className="school-name mb-2"
+                                        onClick={() => handleSchoolNameClick(school)} // Call handler
+                                        title={`View details for ${school.schoolName}`}
+                                    >
+                                        {school.schoolName}
+                                    </Card.Title>
+                                    {/* You can add more brief info here if needed */}
+                                   
+                                    {/* <Button variant="outline-primary" size="sm" className="mt-auto" onClick={() => handleSchoolNameClick(school)}>
+                                        View Details
+                                    </Button> */}
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))
+                ) : (
+                    <Col className="text-center mt-5">
+                        {searchTerm ? <p>"'${searchTerm}' नावाची शाळा आढळली नाही.</p> : <p>शाळा लोड होत आहेत किंवा कोणतीही शाळा उपलब्ध नाही.</p>}
+                    </Col>
+                )}
+            </Row>
+
+            <SchoolDetailsOverlay
+                isOpen={isOverlayOpen}
+                school={selectedSchool}
+                onClose={handleCloseOverlay}
+            />
         </Container>
-    )
-}
+    );
+};
 
-export default ViewSchools
+export default ViewSchools;

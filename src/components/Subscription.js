@@ -13,7 +13,7 @@ const Subscription = () => {
     const [errors, setErrors] = useState({})
     const [isExpired, setIsExpired] = useState(false)
     const [flag, setFlag] = useState("")
-    const [buttonText, setButtonText] = useState("मंजूर कर")
+    const [buttonText, setButtonText] = useState("मंजूर करा")
     const navigate = useNavigate();
 
     const fetchSchools = async () => {
@@ -93,7 +93,7 @@ const Subscription = () => {
                 setIsExpired(false)
                 setErrors({
                     ...errors,
-                    udiseNumber: 'Already subscribed ! subsription not expired yet for this school School'
+                    udiseNumber: 'आपण आधीच सदस्यता घेतली आहे! या शाळेसाठी सदस्यता अद्याप संपलेली नाही.'
                 })
             } else {
                 setIsExpired(true)
@@ -161,7 +161,7 @@ const Subscription = () => {
                             icon: "success",
                             draggable: true
                         });
-                        setButtonText("मंजूर कर");
+                        setButtonText("मंजूर करा");
                         setFlag("");
                     } else {
                         await apiService.post("api/subscription/create", formData);
@@ -199,7 +199,7 @@ const Subscription = () => {
             <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer/school'} placeholder={'X'}></Next>
                             </div>
-                <Card.Header as="h3" className="text-center p-3 bg-primary">सदस्यता नूतनीकरण करा</Card.Header>
+                <Card.Header as="h3" className="text-center p-3 bg-primary">सदस्यता नविनीकरण किंवा नूतनीकरण करा</Card.Header>
                 <Card.Body>
                     <Form onSubmit={handleSubmit}>
                         <div className="card mb-3 border-0 bg-light">

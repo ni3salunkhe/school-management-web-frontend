@@ -27,6 +27,10 @@ import AttendanceReport from '../components/AttendanceReport';
 import AttendanceCoverPage from '../components/AttendanceCoverPage';
 import DailyAttendanceReport from '../components/DailyAttendanceReport';
 import Holiday from '../components/Holiday';
+import StateForm from '../components/StateForm';
+import DistrictForm from '../components/DistrictForm';
+import TehsilForm from '../components/TehsilForm';
+import VillageOrCityForm from '../components/VillageOrCityForm';
 
 
 
@@ -39,7 +43,7 @@ function StudentManagement({ role }) {
             <Route path='school' element={<AddSchoolInfo />} />
             <Route path='staff' element={<StaffList />} />
             <Route path='class' element={<AddClass />} />
-            <Route path='staffAdd' element={<AddStaffMember/>} />
+            <Route path='staffAdd' element={<AddStaffMember />} />
           </Routes>
         );
       case 'CLERK':
@@ -55,24 +59,28 @@ function StudentManagement({ role }) {
             <Route path='reports/bonfide/:id' element={<BonafideCertificate />}></Route>
             <Route path='reports/prsenty/:id' element={<PresentyCertificate />}></Route>
             <Route path='singlestudentinfo/:id' element={<SingleStudentInfo />}></Route>
-            <Route path='classes/' element={<AddClassTeacher/>}></Route>
-            <Route path='changeclassteacher/' element={<ListOfClass/>}/>
-            <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear/>}></Route>
-            <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm/>}/>
-            <Route path='editclassteacher/:id' element={<EditClassTeacher/>}/>
+            <Route path='classes/' element={<AddClassTeacher />}></Route>
+            <Route path='changeclassteacher/' element={<ListOfClass />} />
+            <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear />}></Route>
+            <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm />} />
+            <Route path='editclassteacher/:id' element={<EditClassTeacher />} />
             <Route path='markholiday' element={<Holiday />} />
+            <Route path='state' element={<StateForm />} />
+            <Route path='district' element={<DistrictForm />} />
+            <Route path='tehsil' element={<TehsilForm />} />
+            <Route path='village' element={<VillageOrCityForm />} />
           </Routes>
         );
-        case 'TEACHER':
-          return (
-            <Routes>
+      case 'TEACHER':
+        return (
+          <Routes>
             <Route path='attendance' element={<Attendance />} />
-            <Route path='Updateyear' element={<UpdateStudentAcademicYear/>}/>
-            <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm/>}/>
+            <Route path='Updateyear' element={<UpdateStudentAcademicYear />} />
+            <Route path='updateacademicyearform/:id' element={<UpdateStudentAcademicYearForm />} />
             <Route path='updateacademicyearall' element={<UpdateStudentAllAcademic />} />
-            <Route path='dailyattendancereport' element={<DailyAttendanceReport/>}/>
-            <Route path='monthlyattendancereport' element={<AttendanceReport/>}/>
-            <Route path='catlogcoverpage' element={<AttendanceCoverPage/>}/>
+            <Route path='dailyattendancereport' element={<DailyAttendanceReport />} />
+            <Route path='monthlyattendancereport' element={<AttendanceReport />} />
+            <Route path='catlogcoverpage' element={<AttendanceCoverPage />} />
           </Routes>
         );
       default:

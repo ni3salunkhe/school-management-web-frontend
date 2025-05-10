@@ -3,8 +3,11 @@ import apiService from '../services/api.service';
 import Next from './Next';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
 
 function DistrictForm() {
+    const role=jwtDecode(sessionStorage.getItem('token'))?.role
     const [formData, setFormData] = useState({
         districtName: '',
         stateid: ''
@@ -135,7 +138,7 @@ function DistrictForm() {
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center position-relative">
                             <div className="position-absolute top-0 end-0 m-2">
-                                <Next classname={'btn bg-danger text-white btn-sm'} path={'/developer/state'} placeholder={'X'}></Next>
+                                <Next classname={'btn bg-danger text-white btn-sm'} path={`/${role}/state`} placeholder={'X'}></Next>
                             </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">जिल्हा प्रविष्ट करा</h3>
                         </div>
