@@ -212,7 +212,7 @@ function UpdateStudentAllAcademic() {
                 <div className="col-lg-6">
                     <div className="card shadow-sm border-0 rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
-                            <h3 className="mb-0 fw-bold fs-4 heading-font">वर्गशिक्षक नियुक्ती</h3>
+                            <h3 className="mb-0 fw-bold fs-4 heading-font">विद्यार्थी शैक्षणिक माहिती अपडेट करा</h3>
                         </div>
 
                         <div className="card-body p-4">
