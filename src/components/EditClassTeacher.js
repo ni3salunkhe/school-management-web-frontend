@@ -126,15 +126,22 @@ function EditClassTeacher() {
 
     return (
         <div className="container py-3">
-            <div className="row justify-content-center">
+            <div className="row justify-content-center ">
                 <div className="col-lg-6">
-                    <div className="card shadow-sm border-0 rounded-3">
+                    <div className="card shadow-sm border-0  rounded-3">
                         <div className="card-header bg-primary bg-gradient text-white p-3 text-center">
                             <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
                             </div>
                             <h3 className="mb-0 fw-bold fs-4 heading-font">वर्गशिक्षक बदलणे फॉर्म </h3>
-                            <p className='mb-0 small'>सध्याचे वर्ग शिक्षक: {classTeacherData?.staff?.fname || '...'} {classTeacherData?.staff?.fathername || '...'} {classTeacherData?.staff?.lname || '...'}</p>
+                            <div className="d-flex align-items-center justify-content-center mt-2">
+                                <div className="px-3 py-1 rounded-pill bg-white bg-opacity-25 d-flex align-items-center">
+                                    <i className="bi bi-person-check me-2"></i>
+                                    <p className='mb-0 small'>
+                                        सध्याचे वर्ग शिक्षक: <span className="fw-bold">{classTeacherData?.staff?.fname || '...'} {classTeacherData?.staff?.fathername || '...'} {classTeacherData?.staff?.lname || '...'}</span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="card-body p-4">
@@ -265,8 +272,8 @@ function EditClassTeacher() {
                                     {allClassTeacherData.map((classdata, index) => (
                                         <tr key={classdata.id || index}>
                                             <td className="text-center">{index + 1}</td>
-                                            <td>{classdata?.standardMaster?.standard || '-'}</td>
-                                            <td>{classdata?.division?.name || '-'}</td>
+                                            <td><span className="badge bg-info text-dark">{classdata?.standardMaster?.standard || '-'}</span></td>
+                                            <td><span className="badge bg-secondary">{classdata?.division?.name || '-'}</span></td>
                                             <td>{classdata?.staff?.fname || '-'} {classdata?.staff?.fathername || '_'} {classdata?.staff?.lname}</td>
                                             {/* <td>{classdata?.staff?.lname || '-'}</td> */}
                                             {/* <td><span className={`badge ${classdata.status === 'left' ? 'bg-danger' : 'bg-success'}`}>
@@ -301,7 +308,7 @@ function EditClassTeacher() {
                             } */}
                         </div>
                     )}
-                </div>
+                </div>  
             </div>
         </div>
     )
