@@ -1,8 +1,10 @@
 import React from 'react';
 import StudentManagement from '../modules/StudentManagement';
+import Account from '../modules/Account';
 
 const availableComponents = {
   'StudentManagement': StudentManagement,
+  'Account':Account
 }
 
 function HeadmasterDashboard({ componentMap = [], role}) {

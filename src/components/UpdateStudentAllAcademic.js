@@ -161,8 +161,6 @@ function UpdateStudentAllAcademic() {
     function handleSubmit(event) {
         event.preventDefault();
 
-console.log("HELLO");
-
 
         // const validationErrors = validateForm();
         // if (Object.keys(validationErrors).length > 0) {

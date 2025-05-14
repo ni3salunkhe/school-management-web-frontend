@@ -8,7 +8,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Layout from './components/Layout';
 import Developer from './pages/Developer';
+import Account from './modules/Account'
 import { authService } from './services/authService';
+import { jwtDecode } from 'jwt-decode';
+import {getSidebarItems } from './utils/SidebarConfig'
 
 function App() {
   const navigate=useNavigate()
@@ -22,23 +25,8 @@ function App() {
 
   const location = useLocation();
   const isLoginPage = location.pathname === '/';
-  const componentMap = ['StudentManagement']
-  const sidebarItemsHm = [
-    {
-      mainMenu: ['School','Class', 'Staff'],
-    },
-  ];
-  const sidebarItemsClerk = [
-    {
-      mainMenu: ['Student','Classes','Add Academic New Students','List Of Students','Change Class Teacher','Mark Holiday','State','District','Tehsil','Village'],
-    },
-  ];
-  const sidebarItemsTeacher = [
-    {
-      mainMenu: ['Attendance','Update year','Catlog Cover Page', 'Daily Attendance Report', 'Monthly Attendance Report'],
-    },
-  ];
-
+    const componentMap = ['StudentManagement']; // dynamically from backend
+  const { sidebarItemsHm, sidebarItemsClerk, sidebarItemsTeacher } = getSidebarItems(componentMap);
   return (
     <div>
       {!isLoginPage && <div style={{ minHeight: "45px" }}></div>}
@@ -87,23 +75,6 @@ function App() {
           }
         />
       </Routes> 
-    {/*
-      <Routes>
-        <Route path='' element={<StudentList />}></Route>
-        <Route path='studentlist' element={<StudentList />} ></Route>
-        <Route path='reports/:id' element={<ReportsShows />}></Route>
-        <Route path='reports/lc-old/:id' element={<LColdForm />}></Route>
-        <Route path='reports/download/:id' element={<LCdownload />}></Route>
-        <Route path='reports/lc-new/:id' element={<LColdForm />}></Route>
-        <Route path='reports/lcnewdownload/:id' element={<LCnewdownload />}></Route>
-        <Route path='reports/bonfide/:id'element={<BonafideCertificate/>}></Route>
-        <Route path='reports/prsenty/:id' element={<PresentyCertificate/>}></Route>
-        <Route path='singlestudentinfo/:id' element={<SingleStudentInfo/>}></Route>
-      </Routes>
-
-      {/* <UpdateStudentAcademicYear /> */}
-      {/* <UpdateStudentAcademicYearForm/> */}
-      {/* <Login /> */}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Nav, Button, Form, Offcanvas } from 'react-bootstrap';
-import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget } from 'react-icons/fi';
+import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget, FiCreditCard } from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useContext, useEffect } from "react";
 import { authService } from "../services/authService";
@@ -167,7 +167,9 @@ const Sidebar = ({ sidebarItems, role }) => {
                     Icon = FiTarget;
                     name = "गाव/शहर"
                     break;
-
+                  case 'Credit':
+                    Icon = FiCreditCard;
+                    name = 'खाता बुक'
                   default:
                     Icon = FiHome;
                 }

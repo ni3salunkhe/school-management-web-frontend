@@ -41,7 +41,6 @@ const SchoolDetailsOverlay = ({ school, onClose, isOpen }) => {
         }
     };
 
-    console.log(school)
     return (
         <div className="details-overlay-react" onClick={handleBackdropClick}>
             <div className="details-content-box-react">
@@ -50,69 +49,6 @@ const SchoolDetailsOverlay = ({ school, onClose, isOpen }) => {
                 </button>
                 <h2>{school.name}</h2>
                 <div>
-                    {/* board
-: 
-"कोल्हापूर बोर्ड"
-boardDivision
-: 
-"कोल्हापूर"
-boardIndexNo
-: 
-"676767"
-createdAt
-: 
-null
-district
-: 
-{id: 1, districtName: 'वाराणसी ', state: {…}}
-headMasterMobileNo
-: 
-"9234567890"
-headMasterPassword
-: 
-"shantaram"
-headMasterUserName
-: 
-"rupeshmane"
-logo
-: 
-"/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEA
-medium
-: 
-"इंग्लिश "
-pinCode
-: 
-"416003"
-role
-: 
-null
-
-: 
-"कासेगऑन संस्था"
-schoolApprovalNo
-: 
-"9999"
-schoolEmailId
-: 
-"rupeshmane@gmail.com"
-schoolName
-: 
-"आदर्श बालक मंदिर "
-schoolPlace
-: 
-null
-schoolSlogan
-: 
-"मुलगी शिकली प्रगती झाली"
-state
-: 
-{id: 1, stateName: 'बिहार'}
-tehsil
-: 
-{id: 1, tehsilName: 'करवीर', district: {…}}
-udiseNo
-: 
-1111 */}
                     <p><strong>संस्थेचे नाव:</strong> {school.sansthaName}</p>
                     <p><strong>मुख्याध्यापक:</strong> {school.headMasterUserName}</p>
                     <p><strong>संपर्क:</strong> {school.schoolEmailId} || {school.headMasterMobileNo}</p>
