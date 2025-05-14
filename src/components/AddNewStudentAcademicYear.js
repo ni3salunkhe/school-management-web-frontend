@@ -12,10 +12,12 @@ function AddNewStudentAcademicYear() {
     const [motherName, setMotherName] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [listOfStudents, setListOfStudents] = useState([]);
+    const [selectedStandard, setSelectedStandard] = useState();
 
     const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
-    
+
     const navigate = useNavigate();
 
     const api = axios.create({
@@ -72,6 +74,47 @@ function AddNewStudentAcademicYear() {
         return () => clearTimeout(timeout);
     }, [surName, studentName, fatherName, motherName]);
 
+
+    const toggleStudentSelection = (id) => {
+
+        const student = results.find(student => student.id === id);
+
+        if (!selectedStandard && student) {
+            setSelectedStandard(student.whichStandardAdmitted.standard);
+        }
+
+        if (selectedStandard && student) {
+            if (student && student.whichStandardAdmitted.standard !== selectedStandard) {
+                alert(`तुम्ही फक्त एका इयत्तेतील विद्यार्थी निवडू शकता.`);
+                return;
+            }
+        }
+
+        if (listOfStudents.includes(id)) {
+            const updatedList = listOfStudents.filter((item) => item !== id);
+            setListOfStudents(updatedList);
+            if (updatedList.length === 0) {
+                setSelectedStandard(undefined);
+            }
+        } else {
+            setListOfStudents([...listOfStudents, id]);
+        }
+
+    }
+    console.log(listOfStudents);
+
+    function alldataset() {
+        if (listOfStudents.length > 0) {
+
+            navigate('/clerk/addacademicyearall', { state: { selectedStudents: listOfStudents } })
+        }
+        else {
+            alert("कृपया विद्यार्थी निवडा तुम्ही विद्यार्थी निवडलेले नाहीत ");
+        }
+
+    }
+
+
     return (
         <div className="container py-4">
             <div className="row justify-content-center">
@@ -79,7 +122,7 @@ function AddNewStudentAcademicYear() {
                     {/* Header with official-looking design */}
                     <div className="text-center mb-4">
                         <div className="p-3 bg-white rounded shadow-sm position-relative">
-                        <div className="position-absolute top-0 end-0 m-2">
+                            <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/list'} placeholder={'X'}></Next>
                             </div>
                             <h2 className="fw-bold text-dark mb-1" style={{ fontSize: '1.8rem' }}>
@@ -156,10 +199,18 @@ function AddNewStudentAcademicYear() {
                         </div>
                     ) : (
                         <div className="card border-0 rounded-0" style={{ boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
-                            <div className="card-header bg-primary text-white p-2">
+                            <div className="card-header d-flex justify-content-between bg-primary text-white p-2">
                                 <h3 className="mb-0 fw-bold fs-6 text-center">
                                     विद्यार्थ्यांची यादी
                                 </h3>
+
+                                <button
+                                    onClick={alldataset}
+                                    className="btn btn-sm btn-outline-light  d-flex align-items-center"
+                                    style={{ fontSize: '0.8rem', fontWeight: '500' }}
+                                >
+                                    सर्वांची माहिती संपादित करा
+                                </button>
                             </div>
                             <div className="card-body p-0">
                                 {results.length > 0 ? (
@@ -167,6 +218,7 @@ function AddNewStudentAcademicYear() {
                                         <table className="table table-bordered mb-0">
                                             <thead className="bg-light">
                                                 <tr>
+                                                    <th>निवडा</th>
                                                     <th width="20%">विद्यार्थ्याचे नाव</th>
                                                     <th width="15%">आडनाव</th>
                                                     <th width="20%">वडिलांचे नाव</th>
@@ -178,6 +230,9 @@ function AddNewStudentAcademicYear() {
                                             <tbody>
                                                 {results.map(student => (
                                                     <tr key={student.id}>
+                                                        <td><input type="checkbox"
+                                                            checked={listOfStudents.includes(student.id)}
+                                                            onChange={() => toggleStudentSelection(student.id)} /></td>
                                                         <td>{student.studentName}</td>
                                                         <td>{student.surName}</td>
                                                         <td>{student.fatherName}</td>

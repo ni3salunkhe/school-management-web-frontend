@@ -16,14 +16,16 @@ const NewSchool = () => {
     const [existingSchool, setExistingSchool] = useState([]);
     const [existingEmail, setExistingEmail] = useState([]);
     const [existingPhone, setExistingPhone] = useState([]);
+    const [existingHeadMasetEmail, setExistingHeadMasterEmail] = useState();
     const navigate = useNavigate();
-    
+
 
     const [formData, setFormData] = useState({
         schoolUdise: '',
         schoolName: '',
         username: '',
         email: '',
+        headMasterEmail: '',
         orgName: '', // Corrected: was listed twice before
         phone: '',
         role: 'HEADMASTER', // Default role
@@ -54,7 +56,7 @@ const NewSchool = () => {
         try {
             const usernames = await fetchAllUsernames();
             // Ensure usernames are trimmed and lowercased for consistent comparison
-            setExistingUsers(usernames.map(u => u.trim().toLowerCase()));
+            setExistingUsers(usernames.map(u => u?.trim().toLowerCase()));
         } catch (error) {
             console.error("Error loading usernames:", error);
             // Handle error appropriately, maybe show a toast/alert
@@ -78,11 +80,13 @@ const NewSchool = () => {
                 const udisenos = schools.map(s => s.udiseNo).filter(Boolean); // Filter out null/undefined
                 const schoolNames = schools.map(s => s.schoolName?.trim().toLowerCase()).filter(Boolean);
                 const emails = schools.map(s => s.schoolEmailId?.trim().toLowerCase()).filter(Boolean);
+                const headMasterEmails = schools.map(s => s.headMasterEmailId?.trim().toLowerCase()).filter(Boolean);
                 const phones = schools.map(s => s.headMasterMobileNo).filter(Boolean);
 
                 setExistingUdiseno(udisenos);
                 setExistingSchool(schoolNames);
                 setExistingEmail(emails);
+                setExistingHeadMasterEmail(headMasterEmails);
                 setExistingPhone(phones);
             }
 
@@ -184,6 +188,19 @@ const NewSchool = () => {
                 }
             }
 
+            if (name === "headMasterEmail") {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!value) {
+                    updatedErrors.headMasterEmail = 'ईमेल प्रविष्ट करणे आवश्यक आहे';
+                } else if (!isStrictlyEnglish(value)) { // Email must be English chars
+                    updatedErrors.headMasterEmail = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
+                } else if (!emailRegex.test(value)) {
+                    updatedErrors.headMasterEmail = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा आणि स्पेस नसल्याची खात्री करा.';
+                } else if (existingHeadMasetEmail.includes(value.trim().toLowerCase())) {
+                    updatedErrors.headMasterEmail = 'हे ईमेल आधीच अस्तित्वात आहे';
+                }
+            }
+
             // Phone
             if (name === 'phone') {
                 if (!value) {
@@ -247,6 +264,7 @@ const NewSchool = () => {
         if (!data.orgName) currentErrors.orgName = 'संस्थेचे नाव प्रविष्ट करणे आवश्यक आहे';
         if (!data.username) currentErrors.username = 'वापरकर्तानाव प्रविष्ट करणे आवश्यक आहे';
         if (!data.email) currentErrors.email = 'ईमेल प्रविष्ट करणे आवश्यक आहे';
+        if (!data.headMasterEmail) currentErrors.headMasterEmail = 'मुख्याध्यापकांचा ईमेल प्रविष्ट करणे आवश्यक आहे';
         if (!data.phone) currentErrors.phone = 'फोन नंबर प्रविष्ट करणे आवश्यक आहे';
         if (!data.password) currentErrors.password = 'पासवर्ड प्रविष्ट करणे आवश्यक आहे';
         if (!data.confirmPassword) currentErrors.confirmPassword = 'पासवर्डची पुष्टी करणे आवश्यक आहे';
@@ -261,12 +279,14 @@ const NewSchool = () => {
         if (data.password && data.password.length < 8) currentErrors.password = 'पासवर्ड किमान ८ अक्षरे असावे लागते';
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (data.email && !emailRegex.test(data.email)) currentErrors.email = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा';
+        if (data.headMasterEmail && !emailRegex.test(data.headMasterEmail)) currentErrors.headMasterEmail = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा'
         if (data.phone && !/^[6-9]\d{9}$/.test(data.phone)) currentErrors.phone = 'कृपया १० अंकी वैध भारतीय मोबाईल नंबर प्रविष्ट करा';
 
 
         // Re-check uniqueness (important if data was loaded after initial input)
         if (data.username && existingUsers.includes(data.username.trim().toLowerCase())) currentErrors.username = 'हे वापरकर्ता नाव आधीच अस्तित्वात आहे';
         if (data.email && existingEmail.includes(data.email.trim().toLowerCase())) currentErrors.email = 'हे ईमेल आधीच अस्तित्वात आहे';
+        if (data.headMasterEmail && existingHeadMasetEmail.includes(data.headMasterEmail.trim().toLocaleLowerCase())) currentErrors.headMasterEmail = 'हे ईमेल आधीच अस्तित्वात आहे';
         if (data.schoolName && existingSchool.includes(data.schoolName.trim().toLowerCase())) currentErrors.schoolName = 'हे शाळेचे नाव आधीच अस्तित्वात आहे';
         if (data.schoolUdise && existingUdiseno.includes(Number(data.schoolUdise))) currentErrors.schoolUdise = 'हे शाळेचे UDISE संख्या आधीच अस्तित्वात आहे';
         if (data.phone && existingPhone.includes(data.phone)) currentErrors.phone = 'हा फोन नंबर आधीच अस्तित्वात आहे';
@@ -304,6 +324,7 @@ const NewSchool = () => {
                     sansthaName: formData.orgName,
                     headMasterUserName: formData.username,
                     schoolEmailId: formData.email,
+                    headMasterEmailId: formData.headMasterEmail,
                     headMasterMobileNo: formData.phone,
                     headMasterPassword: formData.password,
                     role: formData.role || 'HEADMASTER' // Ensure role is set
@@ -503,7 +524,7 @@ const NewSchool = () => {
                                             <i className="bi bi-person-fill me-2"></i>मुख्याध्यापकांची माहिती
                                         </h5>
                                         <Row>
-                                            <Col md={6}>
+                                            <Col md={4}>
                                                 <Form.Group className="mb-3" controlId="hmUsernameInput">
                                                     <Form.Label>मुख्याध्यापक वापरकर्तानाव <span className="text-danger">*</span></Form.Label>
                                                     <Form.Control
@@ -524,7 +545,24 @@ const NewSchool = () => {
                                                     </Form.Control.Feedback>
                                                 </Form.Group>
                                             </Col>
-                                            <Col md={6}>
+                                            <Col md={4}>
+                                                <Form.Group className="mb-3" controlId="headMasterEmailInput">
+                                                    <Form.Label>मुख्याध्यापकांचा ईमेल <span className="text-danger">*</span></Form.Label>
+                                                    <Form.Control
+                                                        type="email"
+                                                        name="headMasterEmail"
+                                                        value={formData.headMasterEmail}
+                                                        onChange={handleChange}
+                                                        placeholder="उदा. school@example.com"
+                                                        isInvalid={!!errors.headMasterEmail}
+                                                        required
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">
+                                                        {errors.headMasterEmail}
+                                                    </Form.Control.Feedback>
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={4}>
                                                 <Form.Group className="mb-3" controlId="hmPhoneInput">
                                                     <Form.Label>मुख्याध्यापकांचा फोन नंबर <span className="text-danger">*</span></Form.Label>
                                                     <Form.Control

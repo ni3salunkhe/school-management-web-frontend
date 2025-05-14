@@ -31,6 +31,7 @@ import StateForm from '../components/StateForm';
 import DistrictForm from '../components/DistrictForm';
 import TehsilForm from '../components/TehsilForm';
 import VillageOrCityForm from '../components/VillageOrCityForm';
+import AddNewAllStudentAcademicYear from '../components/AddNewAllStudentAcademicYear';
 
 
 
@@ -63,6 +64,7 @@ function StudentManagement({ role }) {
             <Route path='changeclassteacher/' element={<ListOfClass />} />
             <Route path='AddAcademicNewStudents/' element={<AddNewStudentAcademicYear />}></Route>
             <Route path='academicyearform/:id' element={<AddNewStudentAcademicYearForm />} />
+            <Route path='addacademicyearall' element={<AddNewAllStudentAcademicYear/>}></Route>
             <Route path='editclassteacher/:id' element={<EditClassTeacher />} />
             <Route path='markholiday' element={<Holiday />} />
             <Route path='state' element={<StateForm />} />
