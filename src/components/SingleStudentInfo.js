@@ -208,7 +208,7 @@ function SingleStudentInfo() {
         { label: "संस्थेचे नाव", value: student.school?.sansthaName },
         { label: "शाळेचा घोषवाक्य", value: student.school?.schoolSlogan },
         { label: "प्रवेश तारीख", value: student.admissionDate },
-        { label: "प्रवेश घेतलेला वर्ग", value: student.whichStandardAdmitted },
+        { label: "प्रवेश घेतलेला वर्ग", value: student.whichStandardAdmitted.standard},
         { label: "मागील शाळेचा UDISE क्र", value: student.lastSchoolUdiseNo || "उपलब्ध नाही" },
     ];
 

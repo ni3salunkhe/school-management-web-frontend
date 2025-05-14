@@ -12,7 +12,7 @@ const ViewSchools = () => {
     const [filteredSchools, setFilteredSchools] = useState([]); // Holds the list to display (after search)
     const [searchTerm, setSearchTerm] = useState('');
     // const { navigateTo } = useNavigateService(); // Keep if used for other navigation
-    
+
     // State for the overlay
     const [selectedSchool, setSelectedSchool] = useState(null); // School object for the overlay
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -113,7 +113,7 @@ const ViewSchools = () => {
                             onChange={handleSearchChange}
                         />
                         <InputGroup.Text className="search-icon-wrapper bg-transparent border-0">
-                            <FiSearch className="search-icon-svg"/>
+                            <FiSearch className="search-icon-svg" />
                         </InputGroup.Text>
                     </InputGroup>
                 </Form>
@@ -130,6 +130,7 @@ const ViewSchools = () => {
                                 </Card.Header>
                                 <Card.Body className="d-flex flex-column">
                                     <Card.Title
+                                        style={{ cursor: 'pointer' }}
                                         className="school-name mb-2"
                                         onClick={() => handleSchoolNameClick(school)} // Call handler
                                         title={`View details for ${school.schoolName}`}
@@ -137,7 +138,7 @@ const ViewSchools = () => {
                                         {school.schoolName}
                                     </Card.Title>
                                     {/* You can add more brief info here if needed */}
-                                   
+
                                     {/* <Button variant="outline-primary" size="sm" className="mt-auto" onClick={() => handleSchoolNameClick(school)}>
                                         View Details
                                     </Button> */}
