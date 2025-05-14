@@ -7,7 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 
 
 function DistrictForm() {
-    const role=jwtDecode(sessionStorage.getItem('token'))?.role
+    const role=jwtDecode(sessionStorage.getItem('token'))?.role.toLowerCase()
     const [formData, setFormData] = useState({
         districtName: '',
         stateid: ''

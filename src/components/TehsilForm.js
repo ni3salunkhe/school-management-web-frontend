@@ -7,7 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 
 
 function TehsilForm() {
-    const role=jwtDecode(sessionStorage.getItem('token'))?.role
+    const role=jwtDecode(sessionStorage.getItem('token'))?.role.toLowerCase()
     const [allDistricts, setAllDistricts] = useState([]);
     const [formData, setFormData] = useState({
         tehsilName: '',

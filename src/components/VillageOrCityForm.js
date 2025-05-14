@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 function VillageOrCityForm() {
-    const role=jwtDecode(sessionStorage.getItem('token'))?.role
+    const role=jwtDecode(sessionStorage.getItem('token'))?.role.toLowerCase()
     const [formData, setFormData] = useState({
         villageName: '',
         tehsilid: ''

@@ -1,0 +1,357 @@
+/* Enhanced Login Page Styles */
+
+/* Base styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+}
+
+.login-wrapper {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(-45deg, #2c3e50, #4680ff, #3498db, #2980b9);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Particles container */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: linear-gradient(135deg, #1a2a6c, #2d5db5, #4680ff);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+/* Login container */
+.login-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Card styling */
+.login-card {
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.95);
+  border: none;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Card header styling */
+.card-header-gradient {
+  background: linear-gradient(135deg, #4680ff, #2c3e50);
+  position: relative;
+  overflow: hidden;
+}
+
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-shape {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 0;
+}
+
+.floating-icon {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4680ff, #2c3e50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Logo styling */
+.logo-container {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.app-title {
+  font-weight: bold;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.app-title.glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 
+               0 0 20px rgba(255, 255, 255, 0.8), 
+               0 0 30px rgba(255, 255, 255, 0.6);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #ffffff, #a1c4fd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Form controls styling */
+.input-group-custom {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.input-group-custom:focus-within {
+  box-shadow: 0 5px 15px rgba(70, 128, 255, 0.1);
+}
+
+.form-control-elevated {
+  border-radius: 0;
+  height: 50px;
+  font-size: 15px;
+  background-color: #f9fafb;
+  transition: all 0.3s ease;
+}
+
+.form-control-elevated:focus {
+  background-color: #ffffff;
+  box-shadow: none;
+  border-color: #4680ff;
+}
+
+/* Floating label effect */
+.floating-label-group {
+  position: relative;
+}
+
+.floating-label {
+  position: absolute;
+  top: -12px;
+  left: 48px;
+  font-size: 12px;
+  padding: 0 5px;
+  color: #4680ff;
+  opacity: 1;
+  background: white;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+/* Button styling */
+.btn-gradient {
+  background: linear-gradient(to right, #4680ff, #2d5db5);
+  border: none;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(70, 128, 255, 0.4);
+}
+
+.btn-gradient:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.btn-gradient:hover:before {
+  left: 100%;
+}
+
+/* Password visibility toggle */
+.password-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  z-index: 10;
+  border: none;
+  background: transparent;
+}
+
+/* Forgot password link */
+.forgot-password-link {
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.forgot-password-link:hover {
+  opacity: 1;
+  transform: translateX(-3px);
+  text-decoration: underline !important;
+}
+
+/* Animation effects */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.fade-in-fast {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal styling */
+.custom-modal .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.custom-modal .modal-header {
+  border-bottom: none;
+  padding: 20px 25px;
+}
+
+.custom-modal .modal-footer {
+  padding: 15px 25px 25px;
+}
+
+/* Notice box styling */
+.notice-box {
+  background-color: #fffbea;
+  border-left: 4px solid #f7b924;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+/* Error message styling */
+.error-message {
+  padding: 5px 0 0 15px;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+/* Success alert styling */
+.success-alert {
+  border-left: 4px solid #10b981;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  background-color: #ecfdf5;
+}
+
+/* Password info styling */
+.password-info {
+  background-color: #f0f7ff;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Cancel button styling */
+.btn-cancel {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background-color: #f1f3f5;
+  color: #495057;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .floating-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    top: -10px;
+  }
+  
+  .card-header-gradient {
+    padding: 15px !important;
+  }
+  
+  .login-card {
+    margin: 0 15px;
+  }
+}

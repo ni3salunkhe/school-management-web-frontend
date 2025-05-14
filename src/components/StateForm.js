@@ -10,7 +10,7 @@ function StateForm() {
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [allStates, setAllStates] = useState([]);
-    const role=jwtDecode(sessionStorage.getItem('token'))?.role
+    const role=jwtDecode(sessionStorage.getItem('token'))?.role.toLowerCase()
     const navigate=useNavigate();
     function isOnlyMarathi(input) {
         const marathiRegex = /^[\u0900-\u097F\s]+$/;
