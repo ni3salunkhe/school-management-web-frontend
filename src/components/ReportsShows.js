@@ -66,55 +66,56 @@ function ReportsShows() {
 
     const handleReportClick = async (reportType) => {
         if (reportType === "lc-old") {
-            const lcDataResponse= await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise);
-                // console.log(response.data);
-                if (lcDataResponse.data?.newlcprinted === false) {
-                    apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
-                        .then((response) => {
-                            if (response.data === true) {
-                                navigate(`/clerk/reports/download/${id}`);
-                            } else {
-                                navigate(`/clerk/reports/${reportType}/${id}`);
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Error while checking data presence:", error);
-                            navigate(`/clerk/reports/${reportType}/${id}`);
-                        });
-                }
-                else{
+            try {
+                const lcDataResponse = await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise);
+
+                // Check if the response data exists and has the newlcprinted property
+                if (lcDataResponse.data && lcDataResponse.data.newlcprinted === true) {
                     alert("तुम्ही नवीन फॉरमॅट मध्ये शाळा सोडलेला दाखल घेतलेला आहे !");
+                    return; // Exit the function early
                 }
+
+                // Check if data exists in leavinginfo
+                const dataCheckResponse = await apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise);
+
+                if (dataCheckResponse.data === true) {
+                    navigate(`/clerk/reports/download/${id}`);
+                } else {
+                    navigate(`/clerk/reports/${reportType}/${id}`);
+                }
+            } catch (error) {
+                console.error("Error while checking LC data:", error);
+                navigate(`/clerk/reports/${reportType}/${id}`);
+            }
         }
         else if (reportType === "lc-new") {
+            try {
+                const lcDataResponse = await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise);
 
-            const lcDataResponse= await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise);
+                // Check if the response data exists and has the printed property
+                if (lcDataResponse.data && lcDataResponse.data.printed === true) {
+                    alert("तुम्ही जुन्या फॉरमॅट मध्ये शाळा सोडलेला दाखल घेतलेला आहे !");
+                    return; // Exit the function early
+                }
 
-            if(lcDataResponse.data?.printed===false)
-            {
-                apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise)
-                .then((response) => {
-                    if (response.data === true) {
-                        navigate(`/clerk/reports/lcnewdownload/${id}`);
-                    } else {
-                        navigate(`/clerk/reports/${reportType}/${id}`);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error while checking data presence:", error);
+                // Check if data exists in leavinginfo
+                const dataCheckResponse = await apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise);
+
+                if (dataCheckResponse.data === true) {
+                    navigate(`/clerk/reports/lcnewdownload/${id}`);
+                } else {
                     navigate(`/clerk/reports/${reportType}/${id}`);
-                });
+                }
+            } catch (error) {
+                console.error("Error while checking LC data:", error);
+                navigate(`/clerk/reports/${reportType}/${id}`);
             }
-            else{
-                alert("तुम्ही जुन्या फॉरमॅट मध्ये शाळा सोडलेला दाखल घेतलेला आहे !");
-            }
-            
         }
         else if (reportType === "bonafide") {
-            navigate(`/clerk/reports/bonfide/${id}`)
+            navigate(`/clerk/reports/bonfide/${id}`);
         }
         else if (reportType === "attendance") {
-            navigate(`/clerk/reports/prsenty/${id}`)
+            navigate(`/clerk/reports/prsenty/${id}`);
         }
         else {
             navigate(`/clerk/reports/${reportType}/${id}`);
