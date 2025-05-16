@@ -12,7 +12,7 @@ function NavBarS({ role }) {
   const handleShowSidebar = () => setShowSidebar(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const handleCloseSidebar = () => setShowSidebar(false);
-  const [username, setUsername] = useState(jwtDecode(sessionStorage.getItem('token'))?.username);  
+  const [username, setUsername] = useState(jwtDecode(sessionStorage.getItem('token'))?.username);
   const handleLogout = () => {
     authService.logout()
   };
@@ -40,7 +40,18 @@ function NavBarS({ role }) {
                 {role == "DEVELOPER" && <Nav className="ms-auto align-items-center">
                   <Nav.Link className="" as={Link} to={"/developer/school"}>शाळा नोंदणी करा</Nav.Link>
                   <Nav.Link as={Link} to={"/developer/subscription"}>सदस्यता नविनीकरण किंवा नूतनीकरण करा</Nav.Link>
-                  <Nav.Link as={Link} to={"/developer/view"}>शाळांची माहिती पहा</Nav.Link>
+                  <Dropdown as={Nav.Item} className="me-2">
+                    <Dropdown.Toggle as={Nav.Link} >
+                      माहिती पहा
+                      {/* शाळेची व वपरकर्त्यांची  */}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu style={{ color: "white", backgroundColor: "black", padding: '0.5rem' }}>
+                      <Dropdown.Item as={Link} to={"/developer/view"}>शाळेची माहिती पहा</Dropdown.Item>
+                      <Dropdown.Item as={Link} to={"/developer/view-users"}>वपरकर्त्यांची माहिती पहा</Dropdown.Item>
+
+                    </Dropdown.Menu>
+
+                  </Dropdown>
                   <Dropdown as={Nav.Item} className="me-2">
                     <Dropdown.Toggle as={Nav.Link} >
                       स्थान माहिती प्रविष्ट करणे
@@ -56,19 +67,19 @@ function NavBarS({ role }) {
                   </Dropdown>
                 </Nav>}
                 <Dropdown align="end">
-                   <Dropdown.Toggle
-                     className="btn-sm d-flex align-items-center"
-                     id="profile-dropdown"
-                   >
-                     <span className="d-none d-md-inline me-2">{`${username} | ${role}`.toUpperCase()}</span>
-                     <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                       <CgProfile style={{ width: '28px', height: '28px' }} />
-                     </div>
-                   </Dropdown.Toggle>
-                   <Dropdown.Menu className="dropdown-menu-end shadow">
-                     <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> बाहेर पडा</Dropdown.Item>
-                   </Dropdown.Menu>
-                 </Dropdown>
+                  <Dropdown.Toggle
+                    className="btn-sm d-flex align-items-center"
+                    id="profile-dropdown"
+                  >
+                    <span className="d-none d-md-inline me-2">{`${username} | ${role}`.toUpperCase()}</span>
+                    <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                      <CgProfile style={{ width: '28px', height: '28px' }} />
+                    </div>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu className="dropdown-menu-end shadow">
+                    <Dropdown.Item onClick={handleLogout} ><FiLogOut className="me-2" /> बाहेर पडा</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
               </>
             </Nav>
           </Navbar.Collapse>

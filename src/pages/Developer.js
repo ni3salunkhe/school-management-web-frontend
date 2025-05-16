@@ -8,6 +8,7 @@ import StateForm from '../components/StateForm'
 import DistrictForm from '../components/DistrictForm'
 import TehsilForm from '../components/TehsilForm'
 import VillageOrCityForm from '../components/VillageOrCityForm'
+import ViewUsers from '../components/ViewUsers'
 
 function Developer() {
   return (
@@ -20,6 +21,7 @@ function Developer() {
         <Route path='district' element={<DistrictForm />} />
         <Route path='tehsil' element={<TehsilForm />} />
         <Route path='village' element={<VillageOrCityForm />} />
+        <Route path='view-users' element={<ViewUsers />} />
       </Routes>
     </Container>
   )
