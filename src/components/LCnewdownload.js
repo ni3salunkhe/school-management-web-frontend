@@ -548,7 +548,7 @@ function LCnewdownload() {
                             <div className="mt-3">
                                 <p>वरील माहिती शालेय दैनिक मुल्यांकनानुसार आहे.</p>
                                 <div className="d-flex justify-content-between mt-3">
-                                    <p>दिनांक:{date.getFullYear()}-{date.getMonth()}-{date.getDate()}</p>
+                                    <p>दिनांक:{date.getDate()}-{date.getMonth()}-{date.getFullYear()}</p>
                                     <p>वर्गशिक्षक</p>
                                     <p>शिक्षक</p>
                                     <p>मुख्याध्यापक</p>
