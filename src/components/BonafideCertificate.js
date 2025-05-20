@@ -18,8 +18,13 @@ function BonafideCertificate() {
     const [reasonOptions, setReasonOptions] = useState([]); // For CombinedDropdownInput options
     const [isLoading, setIsLoading] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false); // Tracks if student/academic data is loaded
+    const [error, setError] = useState();
     const date = new Date();
 
+    const isOnlyMarathi = (input) => {
+        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        return marathiRegex.test(input);
+    };
 
     const A4_WIDTH_PX = 794;  // Standard A4 width in pixels at 96dpi
     const A4_HEIGHT_PX = 1000; // Adjusted A4 height for your template
@@ -94,6 +99,19 @@ function BonafideCertificate() {
     }, [studentId, udise, token]);
 
     const handleReasonInputChange = (id, value) => {
+
+
+        console.log(value);
+
+        if (!isOnlyMarathi(value)) {
+            // console.log(value);
+
+            console.log(!/^[\u0900-\u097F\s]+$/.test(value));
+
+            setError(true);
+        } else {
+            setError(false); // Clear error if input is valid
+        }
         setCertificateReason(value);
     };
 
@@ -105,6 +123,11 @@ function BonafideCertificate() {
         }
         if (!isDataLoaded || !studentData || !academicData) {
             Swal.fire('थांबा', 'विद्यार्थी आणि शैक्षणिक माहिती लोड होत आहे किंवा अयशस्वी झाली आहे. कृपया थोडा वेळ थांबा किंवा पृष्ठ रीफ्रेश करा.', 'info');
+            return;
+        }
+        if(!isOnlyMarathi(certificateReason))
+        {
+            Swal.fire('आवश्यक','कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी Windows key + Spacebar दाबा');
             return;
         }
 
@@ -156,10 +179,8 @@ function BonafideCertificate() {
                 console.log("Bonafide record created:", bonafideResponse.data);
 
             }
-
-        
-                triggerPrint();
-       
+            triggerPrint();
+            setCertificateReason('');
 
         } catch (error) {
             console.error("Error generating bonafide certificate:", error);
@@ -355,23 +376,36 @@ function BonafideCertificate() {
 
     return (
         <div className='container mt-3 mb-3'>
-            <div className="row mb-3 justify-content-center">
-                <div className="col-md-8 col-lg-7"> {/* Adjusted for better centering */}
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <h5 className="card-title text-center mb-3">प्रमाणपत्रासाठी कारण</h5>
-                            <CombinedDropdownInput
-                                label="कारण निवडा किंवा नवीन टाईप करा"
-                                id="certificateReasonInput" // Specific ID for this instance
-                                value={certificateReason}
-                                onChange={handleReasonInputChange}
-                                required={true}
-                                options={reasonOptions}
-                                className="col-lg-12"
-                            />
-                            <div className="text-center mt-3">
+            <div className="row my-4 justify-content-center">
+                <div className="col-md-8 col-lg-7">
+                    <div className="card shadow rounded-3 border-0">
+                        <div className="card-header bg-primary bg-gradient text-white py-3 text-center">
+                            <h4 className="fw-bold mb-0">प्रमाणपत्रासाठी कारण</h4>
+                        </div>
+                        <div className="card-body p-4">
+                            {error && (
+                                <div className="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                                    <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                                    <div>"कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी Windows key + Spacebar दाबा"</div>
+                                </div>
+                            )}
+
+                            <div className="mb-4">
+                               
+                                <CombinedDropdownInput
+                                    label="कारण निवडा किंवा नवीन टाईप करा "
+                                    id="certificateReasonInput"
+                                    value={certificateReason}
+                                    onChange={handleReasonInputChange}
+                                    required={true}
+                                    options={reasonOptions}
+                                    className="col-lg-12"
+                                />
+                            </div>
+
+                            <div className="d-grid gap-2 mt-4">
                                 <button
-                                    className="btn btn-primary"
+                                    className="btn btn-primary btn-lg py-2 rounded-pill shadow-sm"
                                     onClick={handleGenerateAndPrint}
                                     disabled={!certificateReason.trim() || isLoading || !isDataLoaded}
                                 >
@@ -380,7 +414,12 @@ function BonafideCertificate() {
                                             <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                             प्रिंट करत आहे...
                                         </>
-                                    ) : 'प्रमाणपत्र तयार करा आणि प्रिंट करा'}
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-printer-fill me-2"></i>
+                                            प्रमाणपत्र तयार करा आणि प्रिंट करा
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>
