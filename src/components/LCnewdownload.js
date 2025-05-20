@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import apiService from '../services/api.service';
 import { useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import helper from '../services/helper.service';
 
 function LCnewdownload() {
 
@@ -296,7 +297,7 @@ function LCnewdownload() {
                                         </div>
                                     </div>
                                     <div className='border-bottom border-dark text-center m-0 p-0'>
-                                        <p className='m-0 p-0 fw-bold'>प्रथम दाखला (1 st L.C) L.C NO: {leavingInfo?.lcNumber} व L.C Date: {leavingInfo?.lcDate} अन्वये दिला होता </p>
+                                        <p className='m-0 p-0 fw-bold'>प्रथम दाखला (1 st L.C) L.C NO: {leavingInfo?.lcNumber} व L.C Date: {helper.formatISODateToDMY(leavingInfo?.lcDate,"-")} अन्वये दिला होता </p>
                                     </div>
                                 </div>
                             )}
@@ -451,7 +452,7 @@ function LCnewdownload() {
                                     <div className="col-6 border-bottom border-end p-0">
                                         <div className="d-flex">
                                             <div className="fw-bold Cpadding border-end" style={{ width: '50%' }}>जन्म दिनांक (अंकात) :</div>
-                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.dateOfBirth}</div>
+                                            <div className="Cpadding flex-grow-1">{helper.formatISODateToDMY(leavingInfo?.studentId?.dateOfBirth, "-")}</div>
                                         </div>
                                     </div>
                                     <div className="col-6 border-bottom p-0">
@@ -477,7 +478,7 @@ function LCnewdownload() {
                                     <div className="col-6 border-bottom border-end p-0">
                                         <div className="d-flex">
                                             <div className="fw-bold Cpadding border-end" style={{ width: '50%' }}>प्रवेश दिनांक :</div>
-                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.admissionDate}</div>
+                                            <div className="Cpadding flex-grow-1">{helper.formatISODateToDMY(leavingInfo?.studentId?.admissionDate)}</div>
                                         </div>
                                     </div>
                                     <div className="col-6 border-bottom p-0">
@@ -509,7 +510,7 @@ function LCnewdownload() {
                                     <div className="col-12 border-bottom p-0">
                                         <div className="d-flex">
                                             <div className="fw-bold Cpadding border-end" style={{ width: '40%' }}>शाळा सोडल्याचा दिनांक :</div>
-                                            <div className="Cpadding flex-grow-1">{leavingInfo?.dateOfLeavingSchool}</div>
+                                            <div className="Cpadding flex-grow-1">{helper.formatISODateToDMY(leavingInfo?.dateOfLeavingSchool)}</div>
                                         </div>
                                     </div>
                                 </div>

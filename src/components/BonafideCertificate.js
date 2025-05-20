@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'; // Keep for confirmations and errors
 import 'sweetalert2/dist/sweetalert2.min.css';
 import CombinedDropdownInput from './CombinedDropdownInput'; // Your custom component
+import helper from '../services/helper.service';
 
 function BonafideCertificate() {
     const printContentRef = useRef(null);
@@ -309,9 +310,9 @@ function BonafideCertificate() {
                 <div className='pt-3'>
                     <p>
                         प्रमाणपत्र देण्यात येते की ,{studentData.gender === "पुरुष" ? ("कुमार") : ("कुमारी")} <span className='fw-bold'>{studentData.studentName} {studentData.fatherName} {studentData.surName} </span>
-                        {studentData.gender === "पुरुष" ? ("हा") : ("ही")} दिनांक <span className='fw-bold'>{studentData.admissionDate}</span> ते दिनांक <span className='fw-bold'>{academicData.academicYear}</span> पर्यंत या विद्यालयाचा प्रामाणिक {studentData.gender === "पुरुष" ? ("विद्यार्थी") : ("विद्यार्थिनी")} {academicData.status === "learning" ? ("आहे") : ("होता/होती")}.
+                        {studentData.gender === "पुरुष" ? ("हा") : ("ही")} दिनांक <span className='fw-bold'>{helper.formatISODateToDMY(studentData.admissionDate,"-")}</span> ते दिनांक <span className='fw-bold'>{academicData.academicYear}</span> पर्यंत या विद्यालयाचा प्रामाणिक {studentData.gender === "पुरुष" ? ("विद्यार्थी") : ("विद्यार्थिनी")} {academicData.status === "learning" ? ("आहे") : ("होता/होती")}.
                         {studentData.gender === "पुरुष" ? ("तो") : ("ती")} सन <span className='fw-bold'>{academicData.academicYear}</span> या वर्षी <span className='fw-bold'>{academicData.standard?.standard}</span> ईयत्तेमध्ये शिक्षण घेत {academicData.status === "learning" ? ("आहे") : ("होता/होती")}.<br />
-                        विद्यालयाच्या नोंदणीबुकावरून {studentData.gender === "पुरुष" ? ("त्याची") : ("तिची")} जन्म तारीख (अंकी) <span className='fw-bold'>{studentData.dateOfBirth}</span> ही आहे.
+                        विद्यालयाच्या नोंदणीबुकावरून {studentData.gender === "पुरुष" ? ("त्याची") : ("तिची")} जन्म तारीख (अंकी) <span className='fw-bold'>{helper.formatISODateToDMY(studentData.dateOfBirth,"-")}</span> ही आहे.
                         जन्म तारीख (अक्षरी) <span className='fw-bold'>{studentData.dateOfBirthInWord}</span> ही आहे.
                         जन्मस्थळ <span className='fw-bold'>{studentData.birthPlace}</span> तालुका <span className='fw-bold'>{studentData.tehasilOfBirth?.tehsilName}</span> जिल्हा <span className='fw-bold'>{studentData.districtOfBirth?.districtName}</span> राज्य <span className='fw-bold'>{studentData.stateOfBirth?.stateName}</span> आहे.
                         {studentData.gender === "पुरुष" ? ("त्याचा") : ("तिचा")} धर्म <span className='fw-bold'>{studentData.religion}</span> जात <span className='fw-bold'>{studentData.caste || ''}</span> पोटजात <span className='fw-bold'>{studentData.subCaste || '_______'}</span> आहे.
@@ -323,7 +324,7 @@ function BonafideCertificate() {
                 <div className='row mt-4'>
                     <div className='col-6'>
                         <p>स्थळ :- {studentData?.school?.village?.villageName}</p>
-                        <p>दिनांक :-  {date.getFullYear()}-{date.getMonth()}-{date.getDate()}</p>
+                        <p>दिनांक :-  {date.getDate()}-{date.getMonth()}-{date.getFullYear()}</p>
                     </div>
                     <div className='col-6'>
                         {isOfficeCopy ? (

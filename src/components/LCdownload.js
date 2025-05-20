@@ -3,6 +3,7 @@ import apiService from '../services/api.service';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import helper from '../services/helper.service';
 
 function LCdownload() {
     const { id } = useParams();
@@ -285,7 +286,7 @@ function LCdownload() {
                                     </div>
                                 </div>
                                 <div className='border-bottom border-dark text-center m-0 p-0'>
-                                    <p className='m-0 p-0 fw-bold'>प्रथम दाखला (1 st L.C) L.C NO: {leavingInfo?.lcNumber} व L.C Date: {leavingInfo?.lcDate} अन्वये दिला होता </p>
+                                    <p className='m-0 p-0 fw-bold'>प्रथम दाखला (1 st L.C) L.C NO: {leavingInfo?.lcNumber} व L.C Date: {helper.formatISODateToDMY(leavingInfo?.lcDate,"-")} अन्वये दिला होता </p>
                                 </div>
                             </div>
                         )}
@@ -369,7 +370,7 @@ function LCdownload() {
                             <div className="col-6">
                                 <div className="d-flex">
                                     <p className="fw-bold me-2 p-0 m-0">६) जन्म दिनांक (अंकात) :</p>
-                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{leavingInfo?.studentId?.dateOfBirth}</p>
+                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{helper.formatISODateToDMY(leavingInfo?.studentId?.dateOfBirth,"-")}</p>
                                 </div>
                             </div>
                             <div className="col-6">
@@ -393,7 +394,7 @@ function LCdownload() {
                             <div className="col-12">
                                 <div className="d-flex">
                                     <p className="fw-bold me-2 p-0 m-0">८) प्रवेश दिनांक :</p>
-                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{leavingInfo?.studentId?.admissionDate}</p>
+                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{helper.formatISODateToDMY(leavingInfo?.studentId?.admissionDate, "-")}</p>
                                 </div>
                             </div>
                         </div>
@@ -417,7 +418,7 @@ function LCdownload() {
                             <div className="col-12">
                                 <div className="d-flex">
                                     <p className="fw-bold me-2 p-0 m-0">१०) शाळा सोडल्याचा दिनांक:</p>
-                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{leavingInfo?.dateOfLeavingSchool}</p>
+                                    <p className="border-bottom border-dark flex-grow-1 p-0 m-0">{helper.formatISODateToDMY(leavingInfo?.dateOfLeavingSchool,"-")}</p>
                                 </div>
                             </div>
                         </div>

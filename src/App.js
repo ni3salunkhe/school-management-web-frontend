@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, replace, Router } from 'react-router-dom';
 import Login from './pages/Login';
 import HeadmasterDashboard from './pages/HeadmasterDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
@@ -13,7 +13,44 @@ import { authService } from './services/authService';
 import { jwtDecode } from 'jwt-decode';
 import {getSidebarItems } from './utils/SidebarConfig'
 
+
+function NavigationBlocker() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleLinkClick = (e) => {
+      const link = e.target.closest('a');
+      if (link && link.href && location.pathname === '/') {
+        const targetPath = new URL(link.href).pathname;
+        if (targetPath !== '/') {
+          e.preventDefault();
+          alert('Navigation from root is blocked.');
+        }
+      }
+    };
+
+    const handlePopState = (e) => {
+      if (location.pathname === '/') {
+        // Push back to root
+        navigate('/', { replace: true });
+      }
+    };
+
+    document.addEventListener('click', handleLinkClick);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      document.removeEventListener('click', handleLinkClick);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [location.pathname, navigate]);
+
+  return null;
+}
+
 function App() {
+  const location = useLocation();
   const navigate=useNavigate()
   useEffect(()=>{
     const authenticated=authService.isAuthenticated();
@@ -21,16 +58,22 @@ function App() {
     if(!authenticated){
       navigate('/')
     }
-  },[])
 
-  const location = useLocation();
+  },[])
+  
+  if(!sessionStorage.getItem('token')){
+    navigate('/',{replace:true})
+  }
   const isLoginPage = location.pathname === '/';
     const componentMap = ['StudentManagement']; // dynamically from backend
   const { sidebarItemsHm, sidebarItemsClerk, sidebarItemsTeacher } = getSidebarItems(componentMap);
   return (
     <div>
       {!isLoginPage && <div style={{ minHeight: "45px" }}></div>}
+      
+        <NavigationBlocker />
        <Routes>
+
         <Route path="/" element={<Login />} />
         <Route
           path="/developer/*"
@@ -41,7 +84,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-        /> 
+          /> 
         <Route
           path="/headmaster/*"
           element={
@@ -51,7 +94,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-        />
+          />
         <Route
           path="/clerk/*"
           element={
@@ -61,7 +104,7 @@ function App() {
               </ Layout>
             </ProtectedRoute>
           }
-        />
+          />
         <Route
           path="/teacher/*"
           element={
@@ -73,7 +116,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-        />
+          />
       </Routes> 
     </div>
   );

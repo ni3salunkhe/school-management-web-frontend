@@ -268,7 +268,7 @@ function PresentyCertificate() {
             <div className='row'>
               <div className='col-6'>
                 <p>स्थळ :- {studentData?.school?.village?.villageName}</p>
-                <p>दिनांक :- {now.getFullYear()}-{now.getMonth()}-{now.getDate()}</p>
+                <p>दिनांक :- {now.getDate()}-{now.getMonth()}-{now.getFullYear()}</p>
               </div>
               <div className='col-6'>
                 <p>मुख्याध्यापक</p>
