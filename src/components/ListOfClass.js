@@ -274,7 +274,7 @@ function ListOfClass() {
                                                                 style={{ fontSize: '0.8rem' }}
                                                                 onClick={() => { navigate(`/clerk/editclassteacher/${classdata.id}`) }}
                                                             >
-                                                                वर्गशीक्षक बदला
+                                                                वर्गशिक्षक बदला
                                                             </button>
                                                         </td>
                                                     </tr>

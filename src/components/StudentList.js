@@ -30,17 +30,17 @@ function StudentList() {
 
         setLoading(true);
         const params = { udise, ...searchParams };
-        
-        axios.get(`http://localhost:8080/student/byclass/${teacherId}`,{
+
+        axios.get(`http://localhost:8080/student/byclass/${teacherId}`, {
             headers: {
-              "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+                "Authorization": `Bearer ${sessionStorage.getItem('token')}`
             }
-          })
+        })
             .then(response => {
                 setResults(response.data);
                 setLoading(false);
                 console.log(response.data);
-                
+
             })
             .catch((error) => {
                 console.error('Error fetching students', error);
@@ -118,7 +118,7 @@ function StudentList() {
                 <div className="col-12 col-lg-10">
                     <div className="text-center mb-4">
                         <div className="p-4 bg-white rounded shadow position-relative" >
-                        <div className="position-absolute top-0 end-0 m-2">
+                            <div className="position-absolute top-0 end-0 m-2">
                                 <Next classname={'btn bg-danger text-white btn-sm'} path={'/clerk/'} placeholder={'X'}></Next>
                             </div>
                             <h2 className="fw-bold text-dark mb-0" style={{ fontSize: '2rem' }}>
@@ -136,15 +136,15 @@ function StudentList() {
                                     शिक्षक निवडा
                                 </h5>
                                 {teacherId && (
-                                    <button 
-                                        className="btn btn-sm btn-outline-primary" 
+                                    <button
+                                        className="btn btn-sm btn-outline-primary"
                                         onClick={toggleSearchForm}
                                     >
                                         {showSearchForm ? 'शोध फॉर्म लपवा' : 'अधिक शोध पर्याय'}
                                     </button>
                                 )}
                             </div>
-                            
+
                             <div className="row">
                                 <div className="col-md-8 col-lg-6 mx-auto">
                                     <div className="select-container position-relative">
@@ -262,8 +262,8 @@ function StudentList() {
                                             <thead className="bg-light">
                                                 <tr>
                                                     <th className="py-3" width="25%">विद्यार्थ्याचे नाव</th>
-                                                    <th className="py-3" width="15%">आडनाव</th>
                                                     <th className="py-3" width="20%">वडिलांचे नाव</th>
+                                                    <th className="py-3" width="15%">आडनाव</th>
                                                     <th className="py-3" width="20%">आईचे नाव</th>
                                                     <th className="py-3 text-center" width="20%">क्रिया</th>
                                                 </tr>
@@ -272,8 +272,8 @@ function StudentList() {
                                                 {results.map((student) => (
                                                     <tr key={student.id}>
                                                         <td className="align-middle">{student.studentName}</td>
-                                                        <td className="align-middle">{student.surName}</td>
                                                         <td className="align-middle">{student.fatherName}</td>
+                                                        <td className="align-middle">{student.surName}</td>
                                                         <td className="align-middle">{student.motherName}</td>
                                                         <td className="text-center">
                                                             <button

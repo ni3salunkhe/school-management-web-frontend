@@ -133,7 +133,7 @@ function LColdForm() {
         // Date validation (lcDate should not be before dateOfLeavingSchool)
         if (formData.dateOfLeavingSchool && formData.lcDate) {
             if (new Date(formData.lcDate) < new Date(formData.dateOfLeavingSchool)) {
-                errors.lcDate = 'दाखला दिनांक शाळा सोडल्याच्या दिनांकापेक्षा पूर्वीचा असू शकत नाही';
+                errors.dateOfLeavingSchool = 'दाखला दिनांक शाळा सोडल्याच्या दिनांकापेक्षा पूर्वीचा असू शकत नाही';
                 isValid = false;
             }
         }
