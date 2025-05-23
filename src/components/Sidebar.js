@@ -1,6 +1,6 @@
 import React from "react";
 import { Nav, Button, Form, Offcanvas } from 'react-bootstrap';
-import { FiHome, FiFileText, FiUsers, FiSettings, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget, FiCreditCard } from 'react-icons/fi';
+import { FiHome, FiFileText, FiUsers, FiSettings, FaPlus, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget, FiCreditCard, FiBookOpen, FiUserX } from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useContext, useEffect } from "react";
 import { authService } from "../services/authService";
@@ -13,6 +13,7 @@ const Sidebar = ({ sidebarItems, role }) => {
   const location = useLocation();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarWidth, setSidebarWidth] = useState();
 
   // Track active route for highlighting
   const isActive = (path) => {
@@ -56,9 +57,29 @@ const Sidebar = ({ sidebarItems, role }) => {
       backgroundColor: isActive(path) ? '#f8f9fa' : 'transparent'
     };
   };
+  useEffect(() => {
 
-  if (location.pathname === '/teacher/monthlyattendancereport') {
-    return null;
+    if (location.pathname === '/teacher/monthlyattendancereport') {
+      return null;
+    }
+    if (location.pathname === '/clerk/head' || location.pathname === '/clerk/openingbalance') {
+      return setSidebarWidth('500px');
+    } else {
+      setSidebarWidth('300px')
+    }
+  }, [location.pathname])
+
+  let name = '';
+  const switchFunction = (item) => {
+    console.log(item)
+    switch (item) {
+      case 'mainMenu':
+        return 'विद्यार्थी व्यवस्थापन'
+      case 'account':
+        return 'खाते व्यवस्थापन'
+      default:
+        return null;
+    }
   }
 
   return (
@@ -67,7 +88,7 @@ const Sidebar = ({ sidebarItems, role }) => {
       <div
         className="d-none d-md-block overflow-auto"
         style={{
-          width: '300px',
+          width: `${sidebarWidth}`,
           backgroundColor: "white",
           position: 'sticky',
           top: '56px',
@@ -81,7 +102,7 @@ const Sidebar = ({ sidebarItems, role }) => {
               {/* Render section title */}
               <div className="px-3 mb-3">
                 <small className="text-muted text-uppercase fw-bold">
-                  {Object.keys(section)[0]}
+                  {switchFunction(Object.keys(section)[0])}
                 </small>
               </div>
 
@@ -167,9 +188,34 @@ const Sidebar = ({ sidebarItems, role }) => {
                     Icon = FiTarget;
                     name = "गाव/शहर"
                     break;
-                  case 'Credit':
+                  case 'Dashboard':
+                    Icon = FiTrendingUp;
+                    name = "खाते डॅशबोर्ड";
+                    break;
+                  case 'Bank':
+                    Icon = FiBookOpen;
+                    name = "बँक नोंदणी माहिती";
+                    break;
+                  case 'Opening Balance':
+                    Icon = FiBarChart2;
+                    name = "त्रायल बॅलन्स";
+                    break;
+                  case 'Head':
+                    Icon = FiFileText;
+                    name = "हेड माहिती नोंदणी";
+                    break;
+                  case 'Customer':
+                    Icon = FiUsers;
+                    name = "ग्राहक खाते बनवा";
+                    break;
+                  case 'Transactions list':
                     Icon = FiCreditCard;
-                    name = 'खाता बुक'
+                    name = "देवाणघेवाण माहिती";
+                    break;
+                  case 'Sub Head':
+                    Icon = FiUserX;
+                    name = "सब हेड माहिती नोंदणी";
+                    break;
                   default:
                     Icon = FiHome;
                 }
@@ -265,7 +311,7 @@ const Sidebar = ({ sidebarItems, role }) => {
                       break;
                     case 'Staff':
                       Icon = FiUsers;
-                      name = "शिक्षकवृंद/कर्मचारी माहिती"
+                      name = "शिक्षकवृंद माहिती"
                       break;
                     case 'Student':
                       Icon = FiHome;
@@ -328,7 +374,34 @@ const Sidebar = ({ sidebarItems, role }) => {
                       Icon = FiTarget;
                       name = "गाव/शहर"
                       break;
-
+                    case 'Dashboard':
+                      Icon = FiTrendingUp;
+                      name = "खाते डॅशबोर्ड";
+                      break;
+                    case 'Bank':
+                      Icon = FiBookOpen;
+                      name = "बँक नोंदणी माहिती";
+                      break;
+                    case 'Opening Balance':
+                      Icon = FiBarChart2;
+                      name = "त्रायल बॅलन्स";
+                      break;
+                    case 'Head':
+                      Icon = FiFileText;
+                      name = "हेड माहिती नोंदणी";
+                      break;
+                    case 'Customer':
+                      Icon = FiUsers;
+                      name = "ग्राहक खाते बनवा";
+                      break;
+                    case 'Transactions list':
+                      Icon = FiCreditCard;
+                      name = "देवाणघेवाण माहिती";
+                      break;
+                    case 'Sub Head':
+                      Icon = FiUserX;
+                      name = "सब हेड माहिती नोंदणी";
+                      break;
                     default:
                       Icon = FiHome;
                   }

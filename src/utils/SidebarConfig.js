@@ -28,17 +28,9 @@ export function getSidebarItems(componentMap) {
   }
 
   if (hasAccount) {
-    sidebarItemsHm.push({
-      account: ['Credit', 'Debit', 'Loan'],
+   sidebarItemsClerk.push({
+      account: ['Dashboard','Transactions list','Bank','Opening Balance','Customer','Head','Sub Head'],
     });
-
-    sidebarItemsClerk.push({
-      account: ['Credit'],
-    });
-
-    sidebarItemsTeacher.push({
-        account : ['Masters']
-    })
   }
 
   if (hasExam) {

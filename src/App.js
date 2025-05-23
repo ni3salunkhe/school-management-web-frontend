@@ -65,7 +65,7 @@ function App() {
     navigate('/',{replace:true})
   }
   const isLoginPage = location.pathname === '/';
-    const componentMap = ['StudentManagement']; // dynamically from backend
+    const componentMap = ['StudentManagement','Account']; // dynamically from backend
   const { sidebarItemsHm, sidebarItemsClerk, sidebarItemsTeacher } = getSidebarItems(componentMap);
   return (
     <div>
