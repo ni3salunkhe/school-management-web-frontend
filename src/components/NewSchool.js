@@ -48,7 +48,7 @@ const NewSchool = () => {
     }
 
     function isOnlyMarathi(input) {
-        const marathiRegex = /^[\u0900-\u097F\s]+$/;
+        const marathiRegex = /^[\u0900-\u097F\s\p{P}\p{S}]+$/u;
         return marathiRegex.test(input);
     }
 
@@ -74,6 +74,11 @@ const NewSchool = () => {
 
             if (schools.length === 0) {
                 console.warn("No school data found");
+                setExistingUdiseno([]);
+                setExistingSchool([]);
+                setExistingEmail([]);
+                setExistingHeadMasterEmail([]);
+                setExistingPhone([]);
             } else {
                 setAllSchool(schools); // Keep the full school data if needed elsewhere
                 // Extract specific fields for validation checks
@@ -83,11 +88,11 @@ const NewSchool = () => {
                 const headMasterEmails = schools.map(s => s.headMasterEmailId?.trim().toLowerCase()).filter(Boolean);
                 const phones = schools.map(s => s.headMasterMobileNo).filter(Boolean);
 
-                setExistingUdiseno(udisenos);
-                setExistingSchool(schoolNames);
-                setExistingEmail(emails);
-                setExistingHeadMasterEmail(headMasterEmails);
-                setExistingPhone(phones);
+                setExistingUdiseno(udisenos.length ? udisenos : []);
+                setExistingSchool(schoolNames.length ? schoolNames : []);
+                setExistingEmail(emails.length ? emails : []);
+                setExistingHeadMasterEmail(headMasterEmails.length ? headMasterEmails : []);
+                setExistingPhone(phones.length ? phones : []);
             }
 
         } catch (error) {
@@ -196,7 +201,8 @@ const NewSchool = () => {
                     updatedErrors.headMasterEmail = 'कृपया केवळ इंग्रजी अक्षरे/अंक/चिन्हे वापरा';
                 } else if (!emailRegex.test(value)) {
                     updatedErrors.headMasterEmail = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा आणि स्पेस नसल्याची खात्री करा.';
-                } else if (existingHeadMasetEmail.includes(value.trim().toLowerCase())) {
+                }
+                else if (existingHeadMasetEmail.includes(value.trim().toLowerCase())) {
                     updatedErrors.headMasterEmail = 'हे ईमेल आधीच अस्तित्वात आहे';
                 }
             }

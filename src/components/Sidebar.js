@@ -1,437 +1,409 @@
-import React from "react";
-import { Nav, Button, Form, Offcanvas } from 'react-bootstrap';
-import { FiHome, FiFileText, FiUsers, FiSettings, FaPlus, FiLogOut, FiFilter, FiBarChart2, FiBell, FiFilePlus, FiUserPlus, FiGrid, FiCalendar, FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget, FiCreditCard, FiBookOpen, FiUserX } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import { Offcanvas, Collapse } from 'react-bootstrap';
+import {
+  FiHome, FiFileText, FiUsers, FiLogOut, FiFilter,
+  FiBarChart2, FiUserPlus, FiGrid, FiCalendar,
+  FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget,
+  FiCreditCard, FiBookOpen, FiUserX, FiChevronDown, FiChevronRight, FiMenu, FiSettings,
+  FiChevronsLeft, FiChevronsRight
+} from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useState, useContext, useEffect } from "react";
-import { authService } from "../services/authService";
+import { authService } from "../services/authService"; // Assuming this path is correct
 
-const Sidebar = ({ sidebarItems, role }) => {
-  const [showSidebar, setShowSidebar] = useState(false);
-  const handleCloseSidebar = () => setShowSidebar(false);
-  const handleShowSidebar = () => setShowSidebar(true);
+// Define base widths
+const BASE_EXPANDED_WIDTH = '300px'; // Default expanded width
+const WIDER_EXPANDED_WIDTH = '500px'; // Wider width for specific routes
+const COMPACT_SIDEBAR_WIDTH = '80px';  // Compact width (icon-only)
+
+const Sidebar = ({ sidebarItems = [], role }) => {
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [sidebarWidth, setSidebarWidth] = useState();
 
-  // Track active route for highlighting
-  const isActive = (path) => {
-    return location.pathname.includes(path);
+  const [isSidebarCompact, setIsSidebarCompact] = useState(false);
+  // This state will hold the "target" expanded width based on the route
+  const [routeBasedExpandedWidth, setRouteBasedExpandedWidth] = useState(BASE_EXPANDED_WIDTH);
+  // This state will hold the actual width to be applied to the sidebar
+  const [currentAppliedWidth, setCurrentAppliedWidth] = useState(BASE_EXPANDED_WIDTH);
+
+
+  // 1. Determine the "target" expanded width based on the current route
+  useEffect(() => {
+    if (location.pathname === '/teacher/monthlyattendancereport') {
+      // Assuming you want to hide the sidebar or have a specific very small width
+      // For now, let's stick to the standard widths and handle hiding elsewhere if needed
+      setRouteBasedExpandedWidth(BASE_EXPANDED_WIDTH); // Or handle differently
+      return; // Exit if sidebar should be hidden for this path
+    }
+    if (location.pathname === '/clerk/head' || location.pathname === '/clerk/openingbalance') {
+      setRouteBasedExpandedWidth(WIDER_EXPANDED_WIDTH);
+    } else {
+      setRouteBasedExpandedWidth(BASE_EXPANDED_WIDTH);
+    }
+  }, [location.pathname]);
+
+  // 2. Determine the actual applied width based on compact state and route-based expanded width
+  useEffect(() => {
+    if (isSidebarCompact) {
+      setCurrentAppliedWidth(COMPACT_SIDEBAR_WIDTH);
+    } else {
+      setCurrentAppliedWidth(routeBasedExpandedWidth);
+    }
+  }, [isSidebarCompact, routeBasedExpandedWidth]);
+
+
+  // useEffect for expandedSections (active route highlighting, etc.) - NO CHANGE NEEDED HERE
+  useEffect(() => {
+    const getActiveSectionKey = () => {
+      if (!Array.isArray(sidebarItems) || !role || sidebarItems.length === 0) return null;
+      for (const section of sidebarItems) {
+        if (section && typeof section === 'object' && Object.keys(section).length > 0) {
+          const sectionKey = Object.keys(section)[0];
+          const items = section[sectionKey];
+          if (items && Array.isArray(items)) {
+            if (items.some(item => {
+              const path = `/${role}/${item.trim().toLowerCase().replace(/\s+/g, '')}`;
+              return location.pathname === path || (path !== `/${role}` && location.pathname.startsWith(path + '/'));
+            })) {
+              return sectionKey;
+            }
+          }
+        }
+      }
+      return null;
+    };
+
+    const activeKey = getActiveSectionKey();
+
+    setExpandedSections(prevExpanded => {
+      const isInitialLoad = Object.keys(prevExpanded).length === 0 ||
+                            !sidebarItems.every(section => {
+                                if (!section || typeof section !== 'object' || Object.keys(section).length === 0) return true; // skip if section is invalid
+                                const key = Object.keys(section)[0];
+                                return key in prevExpanded;
+                            }) ||
+                            sidebarItems.length !== Object.keys(prevExpanded).length;
+
+      if (isInitialLoad && Array.isArray(sidebarItems) && sidebarItems.length > 0) {
+        const initialState = {};
+        let firstValidKey = null;
+        sidebarItems.forEach(section => {
+          if (section && typeof section === 'object' && Object.keys(section).length > 0) {
+              const key = Object.keys(section)[0];
+              initialState[key] = false;
+              if (!firstValidKey) firstValidKey = key;
+          }
+        });
+
+        if (activeKey) {
+          initialState[activeKey] = true;
+        } else if (firstValidKey) { // Use the first valid key found
+          initialState[firstValidKey] = true;
+        }
+        return initialState;
+      }
+      if (activeKey && prevExpanded[activeKey] === false) {
+        return { ...prevExpanded, [activeKey]: true };
+      }
+      return prevExpanded;
+    });
+  }, [sidebarItems, role, location.pathname]);
+
+
+  const toggleSection = (sectionKey) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
   };
 
-  // Track window resize
+  const isActive = (path) => {
+    return location.pathname === path || (path !== `/${role}` && location.pathname.startsWith(path + '/'));
+  };
+
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      setWindowWidth(width);
       setIsMobile(width < 768);
-
-      if (width >= 768) {
-        setShowSidebar(false);
+      if (width >= 768 && showOffcanvas) {
+        setShowOffcanvas(false);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [showOffcanvas]); // Removed isSidebarCompact, resize shouldn't directly change compact state
 
   const handleLogout = () => {
-    authService.logout()
+    authService.logout();
+    navigate('/login');
   };
 
-  // Nav link style function
-  const getLinkStyle = (path) => {
-    return {
-      color: isActive(path) ? "white" : "black",
-      backgroundColor: isActive(path) ? "blue" : 'transparent',
-      borderRadius: '4px',
-      transition: 'all 0.2s ease'
-    };
-  };
+  const handleCloseOffcanvas = () => setShowOffcanvas(false);
+  const handleShowOffcanvas = () => setShowOffcanvas(true);
 
-  // Mobile nav link style function
-  const getMobileLinkStyle = (path) => {
-    return {
-      color: isActive(path) ? "grey" : 'inherit',
-      backgroundColor: isActive(path) ? '#f8f9fa' : 'transparent'
-    };
-  };
-  useEffect(() => {
-
-    if (location.pathname === '/teacher/monthlyattendancereport') {
-      return null;
+  const toggleSidebarCompact = () => {
+    setIsSidebarCompact(!isSidebarCompact);
+    // If collapsing, also collapse all dropdown sections for a cleaner compact view
+    if (!isSidebarCompact) { // This means it is *about to become* compact
+        const collapsedAll = {};
+        Object.keys(expandedSections).forEach(key => {
+            collapsedAll[key] = false;
+        });
+        setExpandedSections(collapsedAll);
     }
-    if (location.pathname === '/clerk/head' || location.pathname === '/clerk/openingbalance') {
-      return setSidebarWidth('500px');
-    } else {
-      setSidebarWidth('300px')
-    }
-  }, [location.pathname])
+  };
 
-  let name = '';
-  const switchFunction = (item) => {
-    console.log(item)
-    switch (item) {
-      case 'mainMenu':
-        return 'विद्यार्थी व्यवस्थापन'
-      case 'account':
-        return 'खाते व्यवस्थापन'
+
+  const getSectionTitle = (sectionKey) => {
+    switch (sectionKey) {
+      case 'mainMenu': return 'विद्यार्थी व्यवस्थापन';
+      case 'masterMenu': return 'मास्टर व्यवस्थापन';
+      case 'account': return 'खाते व्यवस्थापन';
+      case 'reports': return 'अहवाल';
       default:
-        return null;
+        return sectionKey.replace(/([A-Z](?=[a-z]))/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
     }
+  };
+
+  const getItemDetails = (item) => {
+    const iconProps = { size: 18, className: 'me-2 flex-shrink-0' };
+    let IconComponent = FiFileText;
+    let name = item;
+
+    switch (item.trim().toLowerCase().replace(/\s+/g, '')) {
+      case 'school': IconComponent = FiUsers; name = "शाळा माहिती"; break;
+      case 'class': IconComponent = FiGrid; name = "वर्ग माहिती"; break;
+      case 'classes': IconComponent = FiGrid; name = "वर्ग शिक्षक नियुक्ती"; break;
+      case 'staff': IconComponent = FiUsers; name = "शिक्षकवृंद माहिती"; break;
+      case 'student': IconComponent = FiHome; name = "विद्यार्थी जनरल रजिस्टर"; break;
+      case 'addacademicnewstudents': IconComponent = FiUserPlus; name = "नवीन विद्यार्थी प्रवेश"; break;
+      case 'listofstudents': IconComponent = FiBarChart2; name = "विद्यार्थी यादी/अहवाल"; break;
+      case 'changeclassteacher': IconComponent = FiFilter; name = "वर्गशिक्षक बदला"; break;
+      case 'markholiday': IconComponent = FiCalendar; name = "सुट्टी नोंद"; break;
+      case 'attendance': IconComponent = FiClipboard; name = "उपस्थिती नोंद"; break;
+      case 'catlogcoverpage': IconComponent = FiUserPlus; name = "कॅटलॉग कवर पेज"; break;
+      case 'updateyear': IconComponent = FiTrendingUp; name = "पास/नापास नोंदी"; break;
+      case 'dailyattendancereport': IconComponent = FiFileText; name = "दैनंदिन उपस्थिती अहवाल"; break;
+      case 'monthlyattendancereport': IconComponent = FiBarChart2; name = "मासिक उपस्थिती अहवाल"; break;
+      case 'state': IconComponent = FiMapPin; name = "राज्य"; break;
+      case 'district': IconComponent = FiMap; name = "जिल्हा"; break;
+      case 'tehsil': IconComponent = FiLayout; name = "तालुका"; break;
+      case 'village': IconComponent = FiTarget; name = "गाव/शहर"; break;
+      case 'dashboard': IconComponent = FiTrendingUp; name = "खाते डॅशबोर्ड"; break;
+      case 'bank': IconComponent = FiBookOpen; name = "बँक नोंदणी"; break;
+      case 'openingbalance': IconComponent = FiBarChart2; name = "ताळेबंद"; break;
+      case 'head': IconComponent = FiFileText; name = "लेखा शीर्ष (Head)"; break;
+      case 'customer': IconComponent = FiUsers; name = "ग्राहक खाते"; break;
+      case 'transactionslist': IconComponent = FiCreditCard; name = "व्यवहार सूची"; break;
+      case 'subhead': IconComponent = FiUserX; name = "उप-शीर्ष (Sub Head)"; break;
+      default:
+        name = item.replace(/([A-Z](?=[a-z]))/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+    }
+    return { IconComponent, name, iconProps };
+  };
+
+
+  const renderSidebarContent = (isMobileView = false) => (
+    <>
+      {isMobileView && (
+        <>
+          <div className="p-3 border-bottom d-flex align-items-center bg-light">
+            <div className="rounded-circle bg-secondary me-2 d-flex align-items-center justify-content-center text-white" style={{ width: '40px', height: '40px' }}>
+              {role ? role.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div>
+              <div className="fw-bold text-dark">{role ? role.toUpperCase() : 'User'}</div>
+              <small className="text-muted">Menu</small>
+            </div>
+          </div>
+          <div className="p-2">
+            <input
+              type="search"
+              placeholder="Search..."
+              className="form-control form-control-sm rounded-pill"
+              aria-label="Search menu items"
+            />
+          </div>
+        </>
+      )}
+
+      <nav className="nav flex-column py-2">
+        {Array.isArray(sidebarItems) && sidebarItems.map((section, index) => {
+          if (!section || typeof section !== 'object' || Object.keys(section).length === 0) return null;
+          const sectionKey = Object.keys(section)[0];
+          const items = section[sectionKey];
+          if (!Array.isArray(items) || items.length === 0) return null; // Ensure items array is not empty
+
+          const isExpanded = !!expandedSections[sectionKey];
+          const ChevronIcon = isExpanded ? FiChevronDown : FiChevronRight;
+          const { IconComponent: SectionIcon } = getItemDetails(items[0] || sectionKey);
+
+          return (
+            <React.Fragment key={`${sectionKey}-${index}`}>
+              <div
+                className={`nav-link text-muted text-uppercase fw-bold small px-3 py-2 d-flex align-items-center ${isSidebarCompact && !isMobileView ? 'justify-content-center' : 'justify-content-between'}`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => !(isSidebarCompact && !isMobileView) && toggleSection(sectionKey)}
+                title={ (isSidebarCompact && !isMobileView) ? getSectionTitle(sectionKey) : ""}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => (e.key === 'Enter' || e.key === ' ') && !(isSidebarCompact && !isMobileView) && toggleSection(sectionKey)}
+                aria-expanded={(isSidebarCompact && !isMobileView) ? undefined : isExpanded}
+                aria-controls={(isSidebarCompact && !isMobileView) ? undefined :`collapse-${sectionKey}`}
+              >
+                {(isSidebarCompact && !isMobileView) ? <SectionIcon size={22} /> : getSectionTitle(sectionKey)}
+                {!(isSidebarCompact && !isMobileView) && <ChevronIcon size={16} />}
+              </div>
+
+              {!(isSidebarCompact && !isMobileView) && (
+                <Collapse in={isExpanded}>
+                  <div id={`collapse-${sectionKey}`}>
+                    {items.map((item, itemIndex) => {
+                      const path = `/${role}/${item.trim().toLowerCase().replace(/\s+/g, '')}`;
+                      const { IconComponent, name, iconProps } = getItemDetails(item);
+                      const itemIsActive = isActive(path);
+                      return (
+                        <Link
+                          key={itemIndex}
+                          to={path}
+                          className={`nav-link d-flex align-items-center py-2 px-3 mx-2 mb-1 rounded-2 ${
+                            itemIsActive ? 'active bg-primary text-white shadow-sm' : 'text-dark link-hover'
+                          }`}
+                          onClick={isMobileView ? handleCloseOffcanvas : undefined}
+                          style={{ transition: 'all 0.2s ease-in-out' }}
+                          aria-current={itemIsActive ? "page" : undefined}
+                        >
+                          <IconComponent {...iconProps} />
+                          <span className="ms-1">{name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </Collapse>
+              )}
+
+               {(isSidebarCompact && !isMobileView) && (
+                 <div className="compact-item-list">
+                    {items.map((item, itemIndex) => {
+                      const path = `/${role}/${item.trim().toLowerCase().replace(/\s+/g, '')}`;
+                      const { IconComponent, name } = getItemDetails(item);
+                      const itemIsActive = isActive(path);
+                       return (
+                        <Link
+                          key={`${itemIndex}-compact`}
+                          to={path}
+                          className={`nav-link d-flex align-items-center justify-content-center py-2 px-3 mx-2 mb-1 rounded-2 ${
+                            itemIsActive ? 'active bg-primary text-white shadow-sm' : 'text-dark link-hover'
+                          }`}
+                          onClick={isMobileView ? handleCloseOffcanvas : undefined}
+                          style={{ transition: 'all 0.2s ease-in-out' }}
+                          aria-current={itemIsActive ? "page" : undefined}
+                          title={name}
+                        >
+                          <IconComponent size={22} />
+                        </Link>
+                      );
+                    })}
+                 </div>
+               )}
+            </React.Fragment>
+          );
+        })}
+      </nav>
+
+      {isMobileView && (
+        <div className="mt-auto p-3 border-top">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn btn-sm btn-outline-danger w-100 d-flex align-items-center justify-content-center"
+          >
+            <FiLogOut size={16} className="me-2" /> बाहेर पडा
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  // Conditionally render nothing if on a path where sidebar should be hidden
+  if (location.pathname === '/teacher/monthlyattendancereport') {
+    return null;
   }
 
   return (
     <>
-      {/* Sidebar for desktop */}
+      {isMobile && (
+        <button
+          className="btn btn-light d-md-none m-2 position-fixed top-0 start-0"
+          style={{ zIndex: 1051, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
+          type="button"
+          onClick={handleShowOffcanvas}
+          aria-controls="sidebarOffcanvas"
+          aria-label="Toggle navigation menu"
+        >
+          <FiMenu size={24} />
+        </button>
+      )}
+
       <div
-        className="d-none d-md-block overflow-auto"
+        className={`d-none d-md-flex flex-column bg-white shadow-sm vh-100 position-sticky top-0 sidebar-transition ${isSidebarCompact ? 'sidebar-compact' : ''}`}
         style={{
-          width: `${sidebarWidth}`,
-          backgroundColor: "white",
-          position: 'sticky',
-          top: '56px',
-          height: 'calc(100vh - 56px)',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+          width: currentAppliedWidth, // Use the merged width state
+          overflowX: 'hidden',
+          overflowY: 'auto',
         }}
-      ><Nav className="flex-column py-3">
-          {sidebarItems.map((section, index) => (
-            <React.Fragment key={index}>
-              {/* Render section title */}
-              <div className="px-3 mb-3">
-                <small className="text-muted text-uppercase fw-bold">
-                  {switchFunction(Object.keys(section)[0])}
-                </small>
-              </div>
-
-              {/* Render section links */}
-              {section[Object.keys(section)[0]].map((item, itemIndex) => {
-                const path = `/${role}/${item.trim().toLowerCase().replace(/\s+/g, '')}`;
-                const iconProps = { size: 18, className: 'me-2' };
-
-                // Determine the icon based on the item name
-                let Icon;
-                let name = "";
-                switch (item) {
-                  case 'School':
-                    Icon = FiUsers;
-                    name = "शाळा माहिती"
-                    break;
-                  case 'Class':
-                    Icon = FiGrid;
-                    name = "वर्ग माहिती"
-                    break;
-                  case 'Staff':
-                    Icon = FiUsers;
-                    name = "शिक्षकवृंद माहिती"
-                    break;
-                  case 'Student':
-                    Icon = FiHome;
-                    name = "विद्यार्थी जनरल रजिस्टर माहिती नोंद"
-                    break;
-                  case 'Classes':
-                    Icon = FiFileText;
-                    name = "वर्गांची माहिती"
-                    break;
-                  case 'Add Academic New Students':
-                    Icon = FiUserPlus;
-                    name = "नवीन विद्यार्थी प्रवेश नोंद"
-                    break;
-                  case 'List Of Students':
-                    Icon = FiBarChart2;
-                    name = "विद्यार्थी यादी आणि रिपोर्ट"
-                    break;
-                  case 'Change Class Teacher':
-                    Icon = FiFilter;
-                    name = "वर्गशिक्षक बदला"
-                    break;
-                  case 'Mark Holiday':
-                    Icon = FiCalendar;
-                    name = "सुट्टीची नोंद करा"
-                    break;
-                  case 'Attendance':
-                    Icon = FiClipboard;
-                    name = "उपस्थिती माहिती नोंद"
-                    break;
-                  case 'Update year':
-                    Icon = FiTrendingUp;
-                    name = "पास नापास नोंदी"
-                    break;
-                  case 'Catlog Cover Page':
-                    Icon = FiUserPlus;
-                    name = "कॅटलॉग कवर पेज"
-                    break;
-                  case 'Daily Attendance Report':
-                    Icon = FiFileText;
-                    name = "दैनंदिन उपस्थिती अहवाल"
-                    break;
-                  case 'Monthly Attendance Report':
-                    Icon = FiBarChart2;
-                    name = "मासिक उपस्थिती अहवाल"
-                    break;
-                  case 'State':
-                    Icon = FiMapPin;
-                    name = "राज्य"
-                    break;
-                  case 'District':
-                    Icon = FiMap;
-                    name = "जिल्हा"
-                    break;
-
-                  case 'Tehsil':
-                    Icon = FiLayout;
-                    name = "तहसील"
-                    break;
-                  case 'Village':
-                    Icon = FiTarget;
-                    name = "गाव/शहर"
-                    break;
-                  case 'Dashboard':
-                    Icon = FiTrendingUp;
-                    name = "खाते डॅशबोर्ड";
-                    break;
-                  case 'Bank':
-                    Icon = FiBookOpen;
-                    name = "बँक नोंदणी माहिती";
-                    break;
-                  case 'Opening Balance':
-                    Icon = FiBarChart2;
-                    name = "त्रायल बॅलन्स";
-                    break;
-                  case 'Head':
-                    Icon = FiFileText;
-                    name = "हेड माहिती नोंदणी";
-                    break;
-                  case 'Customer':
-                    Icon = FiUsers;
-                    name = "ग्राहक खाते बनवा";
-                    break;
-                  case 'Transactions list':
-                    Icon = FiCreditCard;
-                    name = "देवाणघेवाण माहिती";
-                    break;
-                  case 'Sub Head':
-                    Icon = FiUserX;
-                    name = "सब हेड माहिती नोंदणी";
-                    break;
-                  default:
-                    Icon = FiHome;
-                }
-
-                return (
-                  <Nav.Link
-                    key={itemIndex}
-                    as={Link}
-                    to={path}
-                    style={getLinkStyle(path)}
-                    className="d-flex align-items-center px-3 py-2 mb-1 mx-2"
-                  >
-                    <Icon {...iconProps} /> {name}
-                  </Nav.Link>
-                );
-              })}
-            </React.Fragment>
-          ))}
-
-          {/* <div className="mt-3 px-3">
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={handleLogout}
-              className="w-100 d-flex align-items-center justify-content-center"
+      >
+        <div className="p-3 border-bottom d-flex align-items-center sticky-top bg-white justify-content-between" style={{minHeight: '56px', flexShrink: 0}}>
+            <div className={`d-flex align-items-center overflow-hidden ${isSidebarCompact ? 'sidebar-brand-compact' : 'sidebar-brand-expanded'}`}>
+                <FiSettings size={24} className="me-2 text-primary flex-shrink-0" />
+                <h5 className="mb-0 text-primary fw-bold text-nowrap">SMS</h5>
+            </div>
+            <button
+                className="btn btn-sm btn-outline-secondary p-1 lh-1 flex-shrink-0"
+                onClick={toggleSidebarCompact}
+                title={isSidebarCompact ? "Expand Sidebar" : "Collapse Sidebar"}
+                aria-label={isSidebarCompact ? "Expand Sidebar" : "Collapse Sidebar"}
+                aria-expanded={!isSidebarCompact}
             >
-              <FiLogOut size={16} className="me-2" /> बाहेर पडा
-            </Button>
-          </div> */}
-        </Nav>
+                {isSidebarCompact ? <FiChevronsRight size={20} /> : <FiChevronsLeft size={20} />}
+            </button>
+        </div>
+        <div className="flex-grow-1 overflow-auto">
+            {renderSidebarContent(false)}
+        </div>
+        {/* <div className={`mt-auto p-3 border-top ${isSidebarCompact ? 'text-center' : ''}`} style={{flexShrink: 0}}>
+             <button
+                type="button"
+                onClick={handleLogout}
+                className={`btn btn-sm btn-outline-secondary w-100 d-flex align-items-center ${isSidebarCompact ? 'justify-content-center p-2' : 'justify-content-center'}`}
+                title="बाहेर पडा"
+            >
+                <FiLogOut size={isSidebarCompact ? 20 : 16} className={isSidebarCompact ? '' : 'me-2'}/>
+                {!isSidebarCompact && <span className="ms-1 text-nowrap">बाहेर पडा</span>}
+            </button>
+        </div> */}
       </div>
 
-      {/* Offcanvas Sidebar for mobile */}
       <Offcanvas
-        show={showSidebar}
-        onHide={handleCloseSidebar}
+        show={showOffcanvas}
+        onHide={handleCloseOffcanvas}
         placement="start"
-        style={{ maxWidth: '85%', width: '250px', zIndex: 1050 }}
-        backdrop={true}
+        className="d-md-none"
+        style={{ width: '280px' }}
+        id="sidebarOffcanvas"
+        aria-labelledby="sidebarOffcanvasLabel"
       >
-        <Offcanvas.Header closeButton className="border-bottom" style={{ backgroundColor: "gray", color: "black" }}>
-          <Offcanvas.Title>BCMS Menu</Offcanvas.Title>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title id="sidebarOffcanvasLabel" className="fw-bold h6">
+             SMS Menu
+          </Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body className="p-0">
-          <div className="p-3 border-bottom d-flex align-items-center">
-            <img
-              src="/api/placeholder/40/40"
-              alt="Profile"
-              className="rounded-circle me-2"
-            />
-            <div>
-              <div className="fw-bold">{role.toUpperCase()}</div>
-              <small className="text-muted">Administrator</small>
-            </div>
+        <Offcanvas.Body className="p-0 d-flex flex-column">
+          <div className="flex-grow-1 overflow-auto">
+            {renderSidebarContent(true)}
           </div>
-
-          <div className="p-2">
-            <Form className="mb-3">
-              <Form.Control
-                type="search"
-                placeholder="Search..."
-                className="form-control-sm rounded-pill"
-              />
-            </Form>
-          </div>
-
-          <Nav className="flex-column py-3">
-            {sidebarItems.map((section, index) => (
-              <React.Fragment key={index}>
-                {/* Render section title */}
-                <div className="px-3 mb-3">
-                  <small className="text-muted text-uppercase fw-bold">
-                    {Object.keys(section)[0]}
-                  </small>
-                </div>
-
-                {/* Render section links */}
-                {section[Object.keys(section)[0]].map((item, itemIndex) => {
-                  const path = `/${role}/${item.toLowerCase()}`;
-                  const iconProps = { size: 18, className: 'me-2' };
-
-                  // Determine the icon based on the item name
-                  let Icon;
-                  let name = "";
-                  switch (item) {
-                    case 'School':
-                      Icon = FiUsers;
-                      name = "शाळा माहिती"
-                      break;
-                    case 'Class':
-                      Icon = FiGrid;
-                      name = "वर्ग माहिती"
-                      break;
-                    case 'Staff':
-                      Icon = FiUsers;
-                      name = "शिक्षकवृंद माहिती"
-                      break;
-                    case 'Student':
-                      Icon = FiHome;
-                      name = "विद्यार्थी जनरल रजिस्टर माहिती नोंद"
-                      break;
-                    case 'Classes':
-                      Icon = FiFileText;
-                      name = "वर्गांची माहिती"
-                      break;
-                    case 'Add Academic New Students':
-                      Icon = FiUserPlus;
-                      name = "नवीन विद्यार्थी प्रवेश नोंद"
-                      break;
-                    case 'List Of Students':
-                      Icon = FiBarChart2;
-                      name = "विद्यार्थी यादी आणि रिपोर्ट"
-                      break;
-                    case 'Change Class Teacher':
-                      Icon = FiFilter;
-                      name = "वर्गशिक्षक बदला"
-                      break;
-                    case 'Mark Holiday':
-                      Icon = FiCalendar;
-                      name = "सुट्टीची नोंद करा"
-                      break;
-                    case 'Attendance':
-                      Icon = FiClipboard;
-                      name = "उपस्थिती माहिती नोंद"
-                      break;
-                    case 'Update year':
-                      Icon = FiTrendingUp;
-                      name = "पास नापास नोंदी"
-                      break;
-                    case 'Catlog Cover Page':
-                      Icon = FiUserPlus;
-                      name = "कॅटलॉग कवर पेज"
-                      break;
-                    case 'Daily Attendance Report':
-                      Icon = FiFileText;
-                      name = "दैनंदिन उपस्थिती अहवाल"
-                      break;
-                    case 'Monthly Attendance Report':
-                      Icon = FiBarChart2;
-                      name = "मासिक उपस्थिती अहवाल"
-                      break;
-                    case 'State':
-                      Icon = FiMapPin;
-                      name = "राज्य"
-                      break;
-                    case 'District':
-                      Icon = FiMap;
-                      name = "जिल्हा"
-                      break;
-
-                    case 'Tehsil':
-                      Icon = FiLayout;
-                      name = "तहसील"
-                      break;
-                    case 'Village':
-                      Icon = FiTarget;
-                      name = "गाव/शहर"
-                      break;
-                    case 'Dashboard':
-                      Icon = FiTrendingUp;
-                      name = "खाते डॅशबोर्ड";
-                      break;
-                    case 'Bank':
-                      Icon = FiBookOpen;
-                      name = "बँक नोंदणी माहिती";
-                      break;
-                    case 'Opening Balance':
-                      Icon = FiBarChart2;
-                      name = "त्रायल बॅलन्स";
-                      break;
-                    case 'Head':
-                      Icon = FiFileText;
-                      name = "हेड माहिती नोंदणी";
-                      break;
-                    case 'Customer':
-                      Icon = FiUsers;
-                      name = "ग्राहक खाते बनवा";
-                      break;
-                    case 'Transactions list':
-                      Icon = FiCreditCard;
-                      name = "देवाणघेवाण माहिती";
-                      break;
-                    case 'Sub Head':
-                      Icon = FiUserX;
-                      name = "सब हेड माहिती नोंदणी";
-                      break;
-                    default:
-                      Icon = FiHome;
-                  }
-
-                  return (
-                    <Nav.Link
-                      key={itemIndex}
-                      as={Link}
-                      to={path}
-                      style={getLinkStyle(path)}
-                      className="d-flex align-items-center px-3 py-2 mb-1 mx-2"
-                    >
-                      <Icon {...iconProps} /> {name}
-                    </Nav.Link>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-
-            <div className="mt-3 px-3">
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={handleLogout}
-                className="w-100 d-flex align-items-center justify-content-center"
-              >
-                <FiLogOut size={16} className="me-2" /> बाहेर पडा
-              </Button>
-            </div>
-          </Nav>
         </Offcanvas.Body>
       </Offcanvas>
     </>

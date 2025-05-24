@@ -17,4 +17,4 @@ export const fetchAllUsernames = async () => {
       console.error("Error fetching usernames:", error);
       return []; // Return empty array on error
     }
-  };
+};

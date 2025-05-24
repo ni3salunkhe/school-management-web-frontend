@@ -79,7 +79,7 @@ function Account({ role }) {
       //   );
       default:
         // This case should ideally not be hit if role checks are done before rendering AccountModulePage
-        return <div>Invalid role or access denied to Accounting module.</div>;
+        return null;
     }
   };
 
