@@ -80,7 +80,7 @@ export default function CombinedDropdownInput({
   return (
     <div className={className} ref={dropdownRef}>
       <label htmlFor={id} className="form-label fw-semibold small">
-        {label} {required && <span className="text-dark">*</span>}
+        {label} {required && <span className="text-danger">*</span>}
       </label>
       <div className="position-relative">
         <input
