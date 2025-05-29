@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, FileText, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import apiService from '../../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 // import { getSubHeadMasters, getCustomers, saveCashReceipt, getNextVoucherNumber } from '../../../../services/accountApi'; // Your API service
 // import { getCurrentFinancialYear } from '../../../../utils/financialYear'; // Your helper
 
@@ -27,14 +29,16 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
-        // const accountsData = await getSubHeadMasters({ types: ['Income', 'Liability', 'Asset'] }); // Fetch relevant accounts
-        // const customersData = await getCustomers();
-        // const nextVoucher = await getNextVoucherNumber('CR'); // CR for Cash Receipt
-
+        if (!schoolUdise) {
+          setCustomers([]); // Ensure customers is empty if no udise
+          return;
+        }
         // --- MOCK DATA (Remove when API is ready) ---
         const accountsData = [
           { id: 'TUITION_FEES', name: 'Tuition Fees Income (Income)' },
@@ -44,16 +48,14 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
           { id: 'LOAN_RECEIVED', name: 'Loan Received (Liability)' },
           { id: 'SALE_OF_OLD_ASSET', name: 'Sale of Old Asset (Asset)' },
         ];
-        const customersData = [
-          { id: 'CUST001', name: 'Aarav Sharma (S/O Ramesh Sharma)' },
-          { id: 'CUST002', name: 'Priya Patel (D/O Suresh Patel)' },
-          { id: 'CUST000', name: 'Walk-in/Other' } // For generic receipts
-        ];
+
+        const customersData = await apiService.getbyid("customermaster/getbyudise/", schoolUdise);
+
         const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
         // --- END MOCK DATA ---
 
         setCreditAccounts(accountsData || []);
-        setCustomers(customersData || []);
+        setCustomers(customersData.data || []);
 
         if (isEditMode && transactionId) {
           // const existingTx = await getCashReceiptById(transactionId); // API call
@@ -109,8 +111,8 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
       return;
     }
     if (!formData.narration.trim()) {
-        setError("Narration/Purpose is required.");
-        return;
+      setError("Narration/Purpose is required.");
+      return;
     }
 
 
@@ -129,9 +131,9 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
       // }
       console.log('Submitting Data:', payload); // API Call placeholder
       setSuccess(`Mock: ${isEditMode ? 'Updated' : 'Saved'} Successfully! Vch No: ${formData.voucherNo}`);
-       if (!isEditMode) {
+      if (!isEditMode) {
         const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        setFormData({...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0]}); // Reset form
+        setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] }); // Reset form
       }
 
     } catch (err) {
@@ -145,7 +147,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   const handleClear = () => {
     // const currentVoucherNo = formData.voucherNo; // Keep voucher no if it's auto-generated for new entry
     // setFormData({...initialFormData, voucherNo: isEditMode ? formData.voucherNo : currentVoucherNo, date: new Date().toISOString().split('T')[0]});
-    setFormData(prev => ({...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0]}));
+    setFormData(prev => ({ ...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0] }));
     setError(null);
     setSuccess(null);
   };
@@ -193,7 +195,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
                 <label htmlFor="date" className="form-label">Date *</label>
                 <input
                   type="date" id="date" name="date" className="form-control"
-                  value={formData.date} onChange={handleInputChange} required
+                  value={(formData.date)} onChange={handleInputChange} required
                 />
               </div>
               <div className="col-md-4">
@@ -214,37 +216,36 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
                   value={formData.receivedFromId} onChange={handleCustomerChange} required
                 >
                   <option value="">Select Party/Customer</option>
-                  {customers.map(cust => <option key={cust.id} value={cust.id}>{cust.name}</option>)}
-                  <option value="OTHER">Other (Specify Below)</option>
+                  {customers.map(cust => <option key={cust.custId} value={cust.custId}>{cust.custName}</option>)}
                 </select>
               </div>
-               {formData.receivedFromId === 'OTHER' && (
+              {formData.receivedFromId === 'OTHER' && (
                 <div className="col-md-6">
-                    <label htmlFor="receivedFromName" className="form-label">Specify Payer Name *</label>
-                    <input
+                  <label htmlFor="receivedFromName" className="form-label">Specify Payer Name *</label>
+                  <input
                     type="text" id="receivedFromName" name="receivedFromName" className="form-control"
                     value={formData.receivedFromName} onChange={handleInputChange}
                     placeholder="Enter payer's name" required={formData.receivedFromId === 'OTHER'}
-                    />
+                  />
                 </div>
-                )}
-                 {formData.receivedFromId !== 'OTHER' && formData.receivedFromId !== '' && (
-                     <div className="col-md-6">
-                        <label className="form-label">Payer Name (Selected)</label>
-                        <input type="text" className="form-control" value={formData.receivedFromName} readOnly disabled />
-                    </div>
-                 )}
+              )}
+              {formData.receivedFromId !== 'OTHER' && formData.receivedFromId !== '' && (
+                <div className="col-md-6">
+                  <label className="form-label">Payer Name (Selected)</label>
+                  <input type="text" className="form-control" value={formData.receivedFromName} readOnly disabled />
+                </div>
+              )}
 
             </div>
 
             <div className="row g-3 mb-3">
-                <div className="col-md-12">
-                    <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
-                    <input
-                    type="text" id="narration" name="narration" className="form-control"
-                    value={formData.narration} onChange={handleInputChange}
-                    placeholder="e.g., Tuition fees for Class X - July, Advance for sports event" required
-                    />
+              <div className="col-md-12">
+                <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
+                <input
+                  type="text" id="narration" name="narration" className="form-control"
+                  value={formData.narration} onChange={handleInputChange}
+                  placeholder="e.g., Tuition fees for Class X - July, Advance for sports event" required
+                />
               </div>
             </div>
 
@@ -287,7 +288,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
                 Print Receipt
               </button>
               <button type="button" className="btn btn-secondary" onClick={handleClear} disabled={loading}>
-                 <XCircle size={16} className="me-1" /> Clear
+                <XCircle size={16} className="me-1" /> Clear
               </button>
             </div>
           </form>
