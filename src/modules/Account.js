@@ -16,6 +16,7 @@ import CashPaymentForm from '../components/account/CashPaymentForm';
 import BankReceiptForm from '../components/account/BankReceiptForm';
 import BankPaymentForm from '../components/account/BankPaymentForm';
 import TransactionList from '../components/account/TransactionList';
+import AccountTypeMasterForm from '../components/account/AccountTypeMasterForm';
 // import ReportsDashboard from '../components/account/Reports/ReportsDashboard'; // The overview page for reports
 // import GeneralLedgerReport from '../components/account/Reports/GeneralLedgerReport';
 // import DayBookReport from '../components/account/Reports/DayBookReport';
@@ -42,6 +43,7 @@ function Account({ role }) {
             <Route path="head" element={<HeadMasterForm />} />
             <Route path="subhead" element={<SubHeadMasterForm />} />
             <Route path="openingbalance" element={<OpeningBalanceForm />} />
+            <Route path="accounttype" element={<AccountTypeMasterForm />} />
 
             {/* Transactions - Entry Forms */}
             <Route path="dashboard/cash-receipt" element={<CashReceiptForm />} />

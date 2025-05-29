@@ -80,6 +80,13 @@ const apiService = {
         "Authorization": `Bearer ${sessionStorage.getItem('token')}`
       }
     })
+  },
+
+  deleteById(endpoint){
+    return axios.delete(this.url+endpoint,{
+      headers: {
+        "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+      }})
   }
 
   

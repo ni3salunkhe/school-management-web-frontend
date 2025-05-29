@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Offcanvas, Collapse } from 'react-bootstrap';
+import { FaUniversity } from 'react-icons/fa';
 import {
   FiHome, FiFileText, FiUsers, FiLogOut, FiFilter,
   FiBarChart2, FiUserPlus, FiGrid, FiCalendar,
@@ -37,7 +38,7 @@ const Sidebar = ({ sidebarItems = [], role }) => {
       setRouteBasedExpandedWidth(BASE_EXPANDED_WIDTH); // Or handle differently
       return; // Exit if sidebar should be hidden for this path
     }
-    if (location.pathname === '/clerk/head' || location.pathname === '/clerk/openingbalance') {
+    if (location.pathname === '/clerk/openingbalance') {
       setRouteBasedExpandedWidth(WIDER_EXPANDED_WIDTH);
     } else {
       setRouteBasedExpandedWidth(BASE_EXPANDED_WIDTH);
@@ -192,12 +193,13 @@ const Sidebar = ({ sidebarItems = [], role }) => {
       case 'tehsil': IconComponent = FiLayout; name = "तालुका"; break;
       case 'village': IconComponent = FiTarget; name = "गाव/शहर"; break;
       case 'dashboard': IconComponent = FiTrendingUp; name = "खाते डॅशबोर्ड"; break;
-      case 'bank': IconComponent = FiBookOpen; name = "बँक नोंदणी"; break;
+      case 'bank': IconComponent = FaUniversity; name = "बँक नोंदणी"; break;
       case 'openingbalance': IconComponent = FiBarChart2; name = "ताळेबंद"; break;
       case 'head': IconComponent = FiFileText; name = "लेखा शीर्ष (Head)"; break;
       case 'customer': IconComponent = FiUsers; name = "ग्राहक खाते"; break;
       case 'transactionslist': IconComponent = FiCreditCard; name = "व्यवहार सूची"; break;
       case 'subhead': IconComponent = FiUserX; name = "उप-शीर्ष (Sub Head)"; break;
+      case 'accounttype': IconComponent = FiBookOpen; name="खाते प्रकार मास्टर"; break;
       default:
         name = item.replace(/([A-Z](?=[a-z]))/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
     }

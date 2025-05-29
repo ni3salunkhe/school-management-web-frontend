@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, FileText, XCircle } from 'lucide-react';
 // import { getSubHeadMasters, getCustomers, saveCashPayment, getNextVoucherNumber } from '../../../../services/accountApi';
 import { Link } from 'react-router-dom';
+import apiService from '../../services/api.service';
+import { jwtDecode } from 'jwt-decode'
 
 const initialFormData = {
   voucherNo: '',
@@ -23,16 +25,18 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const staffId = jwtDecode(sessionStorage.getItem('token'))?.id;
+  const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
+  const fetchCustomers = async () => {
+    const response = await apiService.getdata(`customermaster/getbyudise/${schoolUdise}`);
+    setParties(response.data);
+    console.log(response.data);
+  }
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
-        // const accountsData = await getSubHeadMasters({ types: ['Expense', 'Asset', 'Liability'] });
-        // const partiesData = await getCustomers(); // Or a combined party list API
-        // const nextVoucher = await getNextVoucherNumber('CP'); // CP for Cash Payment
-
-        // --- MOCK DATA ---
         const accountsData = [
           { id: 'EXP_SAL', name: 'Salaries Expense (Expense)' },
           { id: 'EXP_RENT', name: 'Rent Expense (Expense)' },
@@ -52,8 +56,6 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         setParties(partiesData || []);
 
         if (isEditMode && transactionId) {
-          // const existingTx = await getCashPaymentById(transactionId);
-          // setFormData(prev => ({...prev, ...existingTx, voucherNo: existingTx.voucherNo || prev.voucherNo }));
           console.log("Edit mode for CP ID:", transactionId);
         } else {
           setFormData(prev => ({ ...prev, voucherNo: nextVoucher }));
@@ -65,6 +67,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       }
     };
     fetchInitialData();
+    fetchCustomers();
   }, [isEditMode, transactionId]);
 
   const handleInputChange = (e) => {
@@ -76,11 +79,13 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
   const handlePartyChange = (e) => {
     const partyId = e.target.value;
-    const selectedParty = parties.find(p => p.id === partyId);
+    const selectedParty = parties.find(p => p.custId === Number(partyId));
+    console.log(parties);
+    
     setFormData(prev => ({
       ...prev,
       paidToId: partyId,
-      paidToName: selectedParty ? selectedParty.name : (partyId === "OTHER_PAYEE" ? prev.paidToName : "")
+      paidToName: selectedParty ? selectedParty.custName : (partyId === "OTHER_PAYEE" ? prev.paidToName : "")
     }));
   };
 
@@ -94,21 +99,22 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       return;
     }
     if (parseFloat(formData.amount) <= 0) {
-        setError("Amount must be greater than zero.");
-        return;
+      setError("Amount must be greater than zero.");
+      return;
     }
 
     setLoading(true);
     try {
-      const payload = { ...formData, amount: parseFloat(formData.amount) };
+      const payload = { ...formData, entryNo: formData.voucherNo, schoolUdise, staffId, custId: formData.paidToId, amount: parseFloat(formData.amount), };
       // if (isEditMode) { await updateCashPayment(transactionId, payload); }
       // else { await saveCashPayment(payload); }
+      await apiService.postdata("cashpayment/", payload);
       console.log('Submitting Cash Payment (Mock):', payload);
       setSuccess(`Cash Payment ${isEditMode ? 'Updated' : 'Saved'} Successfully! Voucher No: ${formData.voucherNo}`);
       if (!isEditMode) {
         // const nextVoucher = await getNextVoucherNumber('CP');
         const nextVoucher = `CP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        setFormData({...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0]});
+        setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] });
       }
     } catch (err) {
       setError(`Operation Failed: ${err.message}`);
@@ -118,7 +124,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   };
 
   const handleClear = () => {
-    setFormData(prev => ({...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0]}));
+    setFormData(prev => ({ ...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0] }));
     setError(null);
     setSuccess(null);
   };
@@ -166,30 +172,29 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             <div className="row g-3 mb-3">
               <div className="col-md-6">
                 <label htmlFor="paidToId" className="form-label">Paid To (Party) *</label>
-                 <select id="paidToId" name="paidToId" className="form-select" value={formData.paidToId} onChange={handlePartyChange} required>
-                    <option value="">Select Party/Payee</option>
-                    {parties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    <option value="OTHER_PAYEE">Other (Specify Below)</option>
-                 </select>
+                <select id="paidToId" name="paidToId" className="form-select" value={formData.paidToId} onChange={handlePartyChange} required>
+                  <option value="">Select Party/Payee</option>
+                  {parties.map(p => <option key={p.custId} value={p.custId}>{p.custName}</option>)}
+                </select>
               </div>
               {formData.paidToId === 'OTHER_PAYEE' && (
                 <div className="col-md-6">
-                    <label htmlFor="paidToName" className="form-label">Specify Payee Name *</label>
-                    <input type="text" id="paidToName" name="paidToName" className="form-control" value={formData.paidToName} onChange={handleInputChange} placeholder="Enter payee's name" required={formData.paidToId === 'OTHER_PAYEE'}/>
+                  <label htmlFor="paidToName" className="form-label">Specify Payee Name *</label>
+                  <input type="text" id="paidToName" name="paidToName" className="form-control" value={formData.paidToName} onChange={handleInputChange} placeholder="Enter payee's name" required={formData.paidToId === 'OTHER_PAYEE'} />
                 </div>
               )}
               {formData.paidToId && formData.paidToId !== 'OTHER_PAYEE' && (
                 <div className="col-md-6">
-                    <label className="form-label">Payee Name (Selected)</label>
-                    <input type="text" className="form-control" value={formData.paidToName} readOnly disabled />
+                  <label className="form-label">Payee Name (Selected)</label>
+                  <input type="text" className="form-control" value={formData.paidToName} readOnly disabled />
                 </div>
               )}
             </div>
-             <div className="row g-3 mb-3">
-                <div className="col-md-12">
-                    <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
-                    <input type="text" id="narration" name="narration" className="form-control" value={formData.narration} onChange={handleInputChange} placeholder="e.g., Office rent for July, Advance salary to staff" required/>
-                </div>
+            <div className="row g-3 mb-3">
+              <div className="col-md-12">
+                <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
+                <input type="text" id="narration" name="narration" className="form-control" value={formData.narration} onChange={handleInputChange} placeholder="e.g., Office rent for July, Advance salary to staff" required />
+              </div>
             </div>
 
 
