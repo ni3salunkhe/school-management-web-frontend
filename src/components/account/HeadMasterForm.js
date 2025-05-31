@@ -32,7 +32,7 @@ const HeadMasterForm = () => {
   const [options, setOptions] = useState();
   const [selectedOption, setSelectedOption] = useState('');
   const [bookTypeId, setBookTypeId] = useState(null)
-
+  
   const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
   const fetchBooksides = async () => {
@@ -83,8 +83,8 @@ const HeadMasterForm = () => {
     if (name === 'headName') {
       if (!value.trim()) {
         errors.headName = 'हेड नाव आवश्यक आहे.';
-      } else if (!isMarathi(value)) {
-        errors.headName = 'हेड नाव फक्त मराठीत असावे.';
+      } else if (isMarathi(value)) {
+        errors.headName = 'हेड नाव फक्त इंग्रजीत असावे.';
       } else if (headList.some(h => h.head_name.trim().toLowerCase() === value.trim().toLowerCase() && h.headId !== formData.headCode)) {
         errors.headName = 'हेड नाव आधीच अस्तित्वात आहे.';
       } else {
@@ -135,13 +135,13 @@ const HeadMasterForm = () => {
       selectedObject = Number(selectedObject.booktypeId.booktypeId)
 
       const payload = {
-        headId: formData.headCode,
+        headId: Number(formData.headCode),
         head_name: formData.headName,
         schoolUdise: udiseNo,
         bookTypeMaster: selectedObject,
         bookSideMaster: selectedOption
       };
-
+      console.log(payload)
       if (isEditing && formData.headCode) {
         if (formData.isSystemDefined) {
           setError("सिस्टम डिफाइन्ड हेड बदलता येत नाही.");

@@ -53,13 +53,15 @@ const SubHeadMasterForm = () => {
     setError(null);
     try {
       const response = await apiService.getdata(`subheadmaster/getbyudise/${udiseNo}`);
+      console.log(response.data)
       const subHeads = (response.data || []).map(sh => ({
         ...sh,
-        id: sh.subHeadId,
-        subHeadCode: sh.subHeadId,
+        id: sh.subheadId,
+        subHeadCode: sh.subheadId,
         parentHeadId: sh.headId.headId,
         parentHeadName: parentHeads.find(ph => ph.headId === sh.headId.headId)?.head_name || 'N/A'
       }));
+      console.log(subHeads)
       setSubHeadList(subHeads);
     } catch (err) {
       setError('उप-हेड मिळवताना त्रुटी: ' + err.message);
@@ -85,7 +87,7 @@ const SubHeadMasterForm = () => {
     // Duplicate check for subHeadName
     if (name === "subHeadName") {
       const duplicateName = subHeadList.some(sh =>
-        sh.subHeadName.toLowerCase() === value.toLowerCase() &&
+        sh.subheadName.toLowerCase() === value.toLowerCase() &&
         sh.id !== formData.id
       );
 
@@ -161,13 +163,14 @@ const SubHeadMasterForm = () => {
     try {
       const payload = {
         ...formData,
-        subHeadId: formData.subHeadCode,
+        subheadName:formData.subHeadName,
+        subheadId: formData.subHeadCode,
         headId: formData.parentHeadId,
         schoolUdise: udiseNo
       };
 
       if (isEditing && formData.subHeadCode) {
-        await apiService.put(`subheadmaster/${payload.subHeadId}`, payload);
+        await apiService.put(`subheadmaster/${payload.subheadId}`, payload);
         showAlert.sweetAlert("यशस्वी", "सब हेड माहिती अपडेट झाली.", "success");
         setSuccess(`उप-हेड "${formData.subHeadName}" यशस्वीरीत्या अपडेट झाले!`);
       } else {
@@ -193,7 +196,8 @@ const SubHeadMasterForm = () => {
     setIsEditing(true);
     setFormData({
       ...subHead,
-      subHeadId: subHead.subHeadCode,
+      subHeadName:subHead.subheadName,
+      subheadId: subHead.subHeadCode,
       parentHeadId: subHead.parentHeadId
     });
     setError(null);
@@ -209,7 +213,7 @@ const SubHeadMasterForm = () => {
   };
 
   const filteredSubHeadList = subHeadList.filter(sh =>
-    (sh.subHeadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sh.subHeadCode && sh.subHeadCode.toLowerCase().includes(searchTerm.toLowerCase()))) &&
     (filterParentHead === '' || sh.parentHeadId === filterParentHead)
   );
@@ -360,7 +364,7 @@ const SubHeadMasterForm = () => {
               ) : (
                 filteredSubHeadList.map(sh => (
                   <tr key={sh.id}>
-                    <td>{sh.subHeadName}</td>
+                    <td>{sh.subheadName}</td>
                     <td>{sh.subHeadCode}</td>
                     <td>{sh.parentHeadName}</td>
                     <td>
