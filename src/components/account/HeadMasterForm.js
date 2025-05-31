@@ -83,9 +83,9 @@ const HeadMasterForm = () => {
     if (name === 'headName') {
       if (!value.trim()) {
         errors.headName = 'हेड नाव आवश्यक आहे.';
-      } else if (!isMarathi(value)) {
-        errors.headName = 'हेड नाव फक्त मराठीत असावे.';
-      } else if (headList.some(h => h.head_name.trim().toLowerCase() === value.trim().toLowerCase() && h.headId !== formData.headCode)) {
+      } else if (isMarathi(value)) {
+        errors.headName = 'Plese enter Head Name in English.';
+      } else if (headList.some(h => h.headName.trim().toLowerCase() === value.trim().toLowerCase() && h.headId !== formData.headCode)) {
         errors.headName = 'हेड नाव आधीच अस्तित्वात आहे.';
       } else {
         errors.headName = '';
@@ -136,7 +136,7 @@ const HeadMasterForm = () => {
 
       const payload = {
         headId: formData.headCode,
-        head_name: formData.headName,
+        headName: formData.headName,
         schoolUdise: udiseNo,
         bookTypeMaster: selectedObject,
         bookSideMaster: selectedOption
@@ -177,7 +177,7 @@ const HeadMasterForm = () => {
     setIsEditing(true);
     setFormData({
       id: head.id,
-      headName: head.head_name,
+      headName: head.headName,
       headCode: head.headId,
       isSystemDefined: head.isSystemDefined
     });
@@ -322,13 +322,13 @@ const HeadMasterForm = () => {
                     <tbody>
                       {headList.map(head => (
                         <tr key={head.id}>
-                          <td>{head.head_name}</td>
+                          <td>{head.headName}</td>
                           <td>{head.headId || '-'}</td>
                           <td>
                             <div className="btn-group btn-group-sm">
                               <button className="btn btn-outline-primary" onClick={() => handleEdit(head)} title="संपादन"><Edit size={14} /></button>
                               {!head.isSystemDefined && (
-                                <button className="btn btn-outline-danger" onClick={() => handleDelete(head.headId, head.head_name)} title="हटवा"><Trash2 size={14} /></button>
+                                <button className="btn btn-outline-danger" onClick={() => handleDelete(head.headId, head.headName)} title="हटवा"><Trash2 size={14} /></button>
                               )}
                             </div>
                           </td>

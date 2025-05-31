@@ -13,7 +13,7 @@ const initialFormData = {
   amount: '',
   narr: '',
   debitAccountId: 'CASH_IN_HAND',
-  tranType: 'Cash_Receipt'
+  tranType: 'Cash Receipt'
 };
 
 const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // Props for edit mode
@@ -23,6 +23,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [selectCustomer, setSelectCustomer] = useState({});
 
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
@@ -59,7 +60,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   }, [isEditMode, transactionId]);
 
   console.log(customers);
-  
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,10 +72,19 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   const handleCustomerChange = (e) => {
     const customerId = e.target.value;
     const selectedCustomer = customers.find(c => c.id === customerId);
+    const fetchsingalCustomer = async () => {
+      const customerData = await apiService.getbyid("customermaster/", customerId);
+      setSelectCustomer(customerData.data);
+      console.log(customerData.data);
+    }
+    fetchsingalCustomer();
     setFormData(prev => ({
       ...prev,
-      custId: customerId    }));
+      custId: customerId
+    }));
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,7 +107,12 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
 
     setLoading(true);
     try {
-      const payload = { ...formData, amount: parseFloat(formData.amount) };
+
+      if (!formData.custId) {
+        return;
+      }
+
+      const payload = { ...formData, amount: parseFloat(formData.amount), schoolUdise: schoolUdise, headId: selectCustomer.headId.headId, subheadId: selectCustomer.subheadId.subheadId, entryDate: formData.createDate };
       // if (isEditMode) {
       //   await updateCashReceipt(transactionId, payload);
       //   setSuccess('Cash Receipt Updated Successfully!');
@@ -108,8 +123,11 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
       //   const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
       //   setFormData({...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0]}); // Reset form
       // }
+      const response=await apiService.post("cashreceipt/",payload);
+      console.log(response.data);
+      
       console.log('Submitting Data:', payload); // API Call placeholder
-      setSuccess(`Mock: ${isEditMode ? 'Updated' : 'Saved'} Successfully! Vch No: ${formData.voucherNo}`);
+      setSuccess(`Mock: ${isEditMode ? 'Updated' : 'Saved'} Successfully!`);
       if (!isEditMode) {
         const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
       }
