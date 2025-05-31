@@ -8,17 +8,12 @@ import { jwtDecode } from 'jwt-decode';
 // import { getCurrentFinancialYear } from '../../../../utils/financialYear'; // Your helper
 
 const initialFormData = {
-  voucherNo: '',
-  date: new Date().toISOString().split('T')[0],
-  receivedFromId: '', // For customer ID if selected from a list
-  receivedFromName: '', // For manual entry or display name of selected customer
+  createDate: new Date().toISOString().split('T')[0],
+  custId: '',
   amount: '',
-  narration: '', // This is the main description of the transaction
-  debitAccountId: 'CASH_IN_HAND', // Pre-selected SubHeadMaster ID for Cash In Hand
-  creditAccountId: '', // User selects the income/liability/asset SubHeadMaster ID
-  // financialYear: getCurrentFinancialYear(), // You might get this from context or backend
-  remarks: '',
-  purpose: '', // This can be a dropdown for common purposes if needed
+  narr: '',
+  debitAccountId: 'CASH_IN_HAND',
+  tranType: 'Cash Receipt'
 };
 
 const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // Props for edit mode
@@ -28,6 +23,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [selectCustomer, setSelectCustomer] = useState({});
 
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
@@ -39,22 +35,9 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
           setCustomers([]); // Ensure customers is empty if no udise
           return;
         }
-        // --- MOCK DATA (Remove when API is ready) ---
-        const accountsData = [
-          { id: 'TUITION_FEES', name: 'Tuition Fees Income (Income)' },
-          { id: 'ADMISSION_FEES', name: 'Admission Fees (Income)' },
-          { id: 'OTHER_INCOME', name: 'Miscellaneous Income (Income)' },
-          { id: 'STUDENT_DEPOSIT', name: 'Student Security Deposit (Liability)' },
-          { id: 'LOAN_RECEIVED', name: 'Loan Received (Liability)' },
-          { id: 'SALE_OF_OLD_ASSET', name: 'Sale of Old Asset (Asset)' },
-        ];
 
         const customersData = await apiService.getbyid("customermaster/getbyudise/", schoolUdise);
 
-        const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        // --- END MOCK DATA ---
-
-        setCreditAccounts(accountsData || []);
         setCustomers(customersData.data || []);
 
         if (isEditMode && transactionId) {
@@ -62,7 +45,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
           // setFormData(prev => ({...prev, ...existingTx, voucherNo: existingTx.voucherNo || prev.voucherNo }));
           console.log("Edit mode for transaction ID:", transactionId); // Placeholder
         } else {
-          setFormData(prev => ({ ...prev, voucherNo: nextVoucher }));
+          setFormData(prev => ({ ...prev }));
         }
 
       } catch (err) {
@@ -76,6 +59,9 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
     fetchInitialData();
   }, [isEditMode, transactionId]);
 
+  console.log(customers);
+
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -86,31 +72,34 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
   const handleCustomerChange = (e) => {
     const customerId = e.target.value;
     const selectedCustomer = customers.find(c => c.id === customerId);
+    const fetchsingalCustomer = async () => {
+      const customerData = await apiService.getbyid("customermaster/", customerId);
+      setSelectCustomer(customerData.data);
+      console.log(customerData.data);
+    }
+    fetchsingalCustomer();
     setFormData(prev => ({
       ...prev,
-      receivedFromId: customerId,
-      receivedFromName: selectedCustomer ? selectedCustomer.name : (customerId === "OTHER" ? prev.receivedFromName : "")
+      custId: customerId
     }));
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
-    if (!formData.creditAccountId) {
-      setError("Please select a credit account.");
-      return;
-    }
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       setError("Amount must be greater than zero.");
       return;
     }
-    if (!formData.receivedFromName && !formData.receivedFromId) {
+    if (!formData.receivedFromName && !formData.custId) {
       setError("Please specify who the amount was received from.");
       return;
     }
-    if (!formData.narration.trim()) {
+    if (!formData.narr.trim()) {
       setError("Narration/Purpose is required.");
       return;
     }
@@ -118,7 +107,12 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
 
     setLoading(true);
     try {
-      const payload = { ...formData, amount: parseFloat(formData.amount) };
+
+      if (!formData.custId) {
+        return;
+      }
+
+      const payload = { ...formData, amount: parseFloat(formData.amount), schoolUdise: schoolUdise, headId: selectCustomer.headId.headId, subheadId: selectCustomer.subheadId.subheadId, entryDate: formData.createDate };
       // if (isEditMode) {
       //   await updateCashReceipt(transactionId, payload);
       //   setSuccess('Cash Receipt Updated Successfully!');
@@ -129,11 +123,13 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
       //   const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
       //   setFormData({...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0]}); // Reset form
       // }
+      const response=await apiService.post("cashreceipt/",payload);
+      console.log(response.data);
+      
       console.log('Submitting Data:', payload); // API Call placeholder
-      setSuccess(`Mock: ${isEditMode ? 'Updated' : 'Saved'} Successfully! Vch No: ${formData.voucherNo}`);
+      setSuccess(`Mock: ${isEditMode ? 'Updated' : 'Saved'} Successfully!`);
       if (!isEditMode) {
         const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] }); // Reset form
       }
 
     } catch (err) {
@@ -183,43 +179,33 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
           <form onSubmit={handleSubmit}>
             <div className="row g-3 mb-3">
               <div className="col-md-4">
-                <label htmlFor="voucherNo" className="form-label">Voucher No.</label>
+                <label htmlFor="createDate" className="form-label">Date *</label>
                 <input
-                  type="text" id="voucherNo" name="voucherNo" className="form-control"
-                  value={formData.voucherNo} onChange={handleInputChange}
-                  readOnly={!isEditMode} // Usually auto-generated for new, editable for existing if allowed
-                  placeholder="Auto/Manual"
+                  type="date" id="createDate" name="createDate" className="form-control"
+                  value={(formData.createDate)} onChange={handleInputChange} required
                 />
               </div>
-              <div className="col-md-4">
-                <label htmlFor="date" className="form-label">Date *</label>
-                <input
-                  type="date" id="date" name="date" className="form-control"
-                  value={(formData.date)} onChange={handleInputChange} required
-                />
-              </div>
-              <div className="col-md-4">
-                <label htmlFor="amount" className="form-label">Amount *</label>
-                <input
-                  type="number" id="amount" name="amount" className="form-control"
-                  value={formData.amount} onChange={handleInputChange}
-                  placeholder="0.00" step="0.01" min="0.01" required
-                />
-              </div>
+
             </div>
 
             <div className="row g-3 mb-3">
               <div className="col-md-6">
-                <label htmlFor="receivedFromId" className="form-label">Received From (Party) *</label>
+                <label htmlFor="custId" className="form-label">Received From (Party) *</label>
                 <select
-                  id="receivedFromId" name="receivedFromId" className="form-select"
-                  value={formData.receivedFromId} onChange={handleCustomerChange} required
+                  id="custId" name="custId" className="form-select"
+                  value={formData.custId} onChange={handleCustomerChange} required
                 >
                   <option value="">Select Party/Customer</option>
                   {customers.map(cust => <option key={cust.custId} value={cust.custId}>{cust.custName}</option>)}
                 </select>
               </div>
-              {formData.receivedFromId === 'OTHER' && (
+
+              <div className="col-md-6">
+                <label className="form-label">Debit Account</label>
+                <input type="text" className="form-control" value="Cash In Hand (Default)" readOnly disabled />
+              </div>
+
+              {/* {formData.custId === 'OTHER' && (
                 <div className="col-md-6">
                   <label htmlFor="receivedFromName" className="form-label">Specify Payer Name *</label>
                   <input
@@ -228,46 +214,43 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
                     placeholder="Enter payer's name" required={formData.receivedFromId === 'OTHER'}
                   />
                 </div>
-              )}
-              {formData.receivedFromId !== 'OTHER' && formData.receivedFromId !== '' && (
+              )} */}
+              {/* {formData.receivedFromId !== 'OTHER' && formData.receivedFromId !== '' && (
                 <div className="col-md-6">
                   <label className="form-label">Payer Name (Selected)</label>
                   <input type="text" className="form-control" value={formData.receivedFromName} readOnly disabled />
                 </div>
-              )}
+              )} */}
 
             </div>
 
             <div className="row g-3 mb-3">
-              <div className="col-md-12">
-                <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
+
+            </div>
+
+
+            <h5 className='fw-bold border-top pt-4'>नगद तपशील</h5>
+            <div className="row g-3 mb-3">
+              <div className="col-md-3">
+                <label htmlFor="amount" className="form-label">Amount *</label>
                 <input
-                  type="text" id="narration" name="narration" className="form-control"
-                  value={formData.narration} onChange={handleInputChange}
+                  type="number" id="amount" name="amount" className="form-control"
+                  value={formData.amount} onChange={handleInputChange}
+                  placeholder="0.00" step="0.01" min="0.01" required
+                />
+              </div>
+
+              <div className="col-md-9">
+                <label htmlFor="narr" className="form-label">Narration/Purpose *</label>
+                <input
+                  type="text" id="narr" name="narr" className="form-control"
+                  value={formData.narr} onChange={handleInputChange}
                   placeholder="e.g., Tuition fees for Class X - July, Advance for sports event" required
                 />
               </div>
             </div>
 
-
-            <div className="row g-3 mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Debit Account</label>
-                <input type="text" className="form-control" value="Cash In Hand (Default)" readOnly disabled />
-              </div>
-              <div className="col-md-6">
-                <label htmlFor="creditAccountId" className="form-label">Credit Account *</label>
-                <select
-                  id="creditAccountId" name="creditAccountId" className="form-select"
-                  value={formData.creditAccountId} onChange={handleInputChange} required
-                >
-                  <option value="">Select Credit Account Head</option>
-                  {creditAccounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="row g-3 mb-3">
+            {/* <div className="row g-3 mb-3">
               <div className="col-12">
                 <label htmlFor="remarks" className="form-label">Remarks</label>
                 <textarea
@@ -276,7 +259,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => { // P
                   placeholder="Any additional notes (optional)"
                 ></textarea>
               </div>
-            </div>
+            </div> */}
 
             <div className="d-flex gap-2 mt-4">
               <button type="submit" className="btn btn-primary" disabled={loading}>

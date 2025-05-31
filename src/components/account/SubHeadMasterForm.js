@@ -9,7 +9,7 @@ import showAlert from '../../services/alert';
 
 const initialFormData = {
   id: null,
-  subHeadName: '',
+  subheadName: '',
   subHeadCode: '', // Unique numeric code
   parentHeadId: '', // ID of the HeadMaster it belongs to
   isProfitLossItem: false,
@@ -59,7 +59,7 @@ const SubHeadMasterForm = () => {
         id: sh.subheadId,
         subHeadCode: sh.subheadId,
         parentHeadId: sh.headId.headId,
-        parentHeadName: parentHeads.find(ph => ph.headId === sh.headId.headId)?.head_name || 'N/A'
+        parentHeadName: parentHeads.find(ph => ph.headId === sh.headId.headId)?.headName || 'N/A'
       }));
       console.log(subHeads)
       setSubHeadList(subHeads);
@@ -83,9 +83,10 @@ const SubHeadMasterForm = () => {
       }
     }
 
+console.log(subHeadList);
 
-    // Duplicate check for subHeadName
-    if (name === "subHeadName") {
+    // Duplicate check for subheadName
+    if (name === "subheadName") {
       const duplicateName = subHeadList.some(sh =>
         sh.subheadName.toLowerCase() === value.toLowerCase() &&
         sh.id !== formData.id
@@ -147,7 +148,7 @@ const SubHeadMasterForm = () => {
 
     if (error) return;
 
-    if (!formData.subHeadName || !formData.parentHeadId || !formData.subHeadCode) {
+    if (!formData.subheadName || !formData.parentHeadId || !formData.subHeadCode) {
       setError("उप-हेड नाव, कोड आणि मुख्य हेड आवश्यक आहे.");
       return;
     }
@@ -171,8 +172,9 @@ const SubHeadMasterForm = () => {
 
       if (isEditing && formData.subHeadCode) {
         await apiService.put(`subheadmaster/${payload.subheadId}`, payload);
+        await apiService.put(`subheadmaster/${payload.subheadId}`, payload);
         showAlert.sweetAlert("यशस्वी", "सब हेड माहिती अपडेट झाली.", "success");
-        setSuccess(`उप-हेड "${formData.subHeadName}" यशस्वीरीत्या अपडेट झाले!`);
+        setSuccess(`उप-हेड "${formData.subheadName}" यशस्वीरीत्या अपडेट झाले!`);
       } else {
         const result = await showAlert.confirmBox("माहिती जतन करायची आहे का?");
         if (!result.isConfirmed) {
@@ -180,7 +182,7 @@ const SubHeadMasterForm = () => {
           return;
         }
         await apiService.postdata(`subheadmaster/`, payload);
-        setSuccess(`उप-हेड "${formData.subHeadName}" यशस्वीरीत्या जतन झाले!`);
+        setSuccess(`उप-हेड "${formData.subheadName}" यशस्वीरीत्या जतन झाले!`);
         showAlert.sweetAlert("यशस्वी", "सब हेड माहिती जतन झाली.", "success");
       }
       handleClear();
@@ -213,7 +215,7 @@ const SubHeadMasterForm = () => {
   };
 
   const filteredSubHeadList = subHeadList.filter(sh =>
-    (sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (sh.subHeadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sh.subHeadCode && sh.subHeadCode.toLowerCase().includes(searchTerm.toLowerCase()))) &&
     (filterParentHead === '' || sh.parentHeadId === filterParentHead)
   );
@@ -245,16 +247,16 @@ const SubHeadMasterForm = () => {
           <form onSubmit={handleSubmit} noValidate>
             <div className="row g-3">
               <div className="col-md-4">
-                <label htmlFor="subHeadName" className="form-label">
+                <label htmlFor="subheadName" className="form-label">
                   उप-हेड नाव {mandatoryFields()}
                 </label>
                 <input
                   type="text"
-                  id="subHeadName"
-                  name="subHeadName"
+                  id="subheadName"
+                  name="subheadName"
                   className={`form-control ${error && error.includes('नाव') ? 'is-invalid' : ''}`}
                   placeholder="उप-हेड नाव लिहा"
-                  value={formData.subHeadName}
+                  value={formData.subheadName}
                   onChange={handleInputChange}
                   maxLength={100}
                   autoFocus
@@ -295,7 +297,7 @@ const SubHeadMasterForm = () => {
                 >
                   <option value="">-- मुख्य हेड निवडा --</option>
                   {parentHeads.map(ph => (
-                    <option key={ph.headId} value={ph.headId}>{ph.head_name}</option>
+                    <option key={ph.headId} value={ph.headId}>{ph.headName}</option>
                   ))}
                 </select>
                 {error && error.includes('मुख्य') && <div className="invalid-feedback">{error}</div>}
@@ -337,7 +339,7 @@ const SubHeadMasterForm = () => {
               >
                 <option value="">-- मुख्य हेड द्वारे फिल्टर करा --</option>
                 {parentHeads.map(ph => (
-                  <option key={ph.headId} value={ph.headId}>{ph.head_name}</option>
+                  <option key={ph.headId} value={ph.headId}>{ph.headName}</option>
                 ))}
               </select>
             </div>
