@@ -41,7 +41,7 @@ const SubHeadMasterForm = () => {
 
   const fetchParentHeads = async () => {
     try {
-      const response = await apiService.getdata(`headmaster/getbyudise/${udiseNo}`);
+      const response = await apiService.getdata(`headmaster/`);
       setParentHeads(response.data || []);
     } catch (err) {
       setError('मुख्य हेड मिळवताना त्रुटी: ' + err.message);
@@ -52,7 +52,7 @@ const SubHeadMasterForm = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.getdata(`subheadmaster/getbyudise/${udiseNo}`);
+      const response = await apiService.getdata(`subheadmaster/`);
       console.log(response.data)
       const subHeads = (response.data || []).map(sh => ({
         ...sh,
@@ -88,12 +88,12 @@ console.log(subHeadList);
     // Duplicate check for subheadName
     if (name === "subheadName") {
       const duplicateName = subHeadList.some(sh =>
-        sh.subheadName.toLowerCase() === value.toLowerCase() &&
+        sh.subheadName && sh.subheadName.toLowerCase() === value.toLowerCase() &&
         sh.id !== formData.id
       );
 
-      if (!isMarathi(value)) {
-        setError("कृपया केवळ मराठी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा");
+      if (isMarathi(value)) {
+        setError("कृपया केवळ इंग्रजी भाषा वापरा. भाषा बदलण्यासाठी windows key + स्पेसबार दाबा");
         setFormData(newFormData);
         return;
       }
@@ -164,7 +164,7 @@ console.log(subHeadList);
     try {
       const payload = {
         ...formData,
-        subheadName:formData.subHeadName,
+        subheadName:formData.subheadName,
         subheadId: formData.subHeadCode,
         headId: formData.parentHeadId,
         schoolUdise: udiseNo
@@ -198,7 +198,7 @@ console.log(subHeadList);
     setIsEditing(true);
     setFormData({
       ...subHead,
-      subHeadName:subHead.subheadName,
+      subheadName:subHead.subheadName,
       subheadId: subHead.subHeadCode,
       parentHeadId: subHead.parentHeadId
     });
@@ -214,9 +214,11 @@ console.log(subHeadList);
     setSuccess(null);
   };
 
+  console.log(subHeadList);
+  
   const filteredSubHeadList = subHeadList.filter(sh =>
-    (sh.subHeadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sh.subHeadCode && sh.subHeadCode.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+    (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (sh.subHeadCode && String(sh.subHeadCode).includes(searchTerm.toLowerCase()))) &&
     (filterParentHead === '' || sh.parentHeadId === filterParentHead)
   );
 
