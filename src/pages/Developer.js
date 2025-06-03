@@ -9,6 +9,7 @@ import DistrictForm from '../components/DistrictForm'
 import TehsilForm from '../components/TehsilForm'
 import VillageOrCityForm from '../components/VillageOrCityForm'
 import ViewUsers from '../components/ViewUsers'
+import YearMaster from '../components/account/YearMaster'
 
 function Developer() {
   return (
@@ -22,6 +23,7 @@ function Developer() {
         <Route path='tehsil' element={<TehsilForm />} />
         <Route path='village' element={<VillageOrCityForm />} />
         <Route path='view-users' element={<ViewUsers />} />
+        <Route path='year' element={<YearMaster/>}/>
       </Routes>
     </Container>
   )
