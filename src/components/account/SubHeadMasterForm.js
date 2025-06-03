@@ -82,9 +82,6 @@ const SubHeadMasterForm = () => {
         return;
       }
     }
-
-console.log(subHeadList);
-
     // Duplicate check for subheadName
     if (name === "subheadName") {
       const duplicateName = subHeadList.some(sh =>

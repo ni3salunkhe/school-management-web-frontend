@@ -93,7 +93,7 @@ const CustomerMasterForm = () => {
     setLoading(true);
     setError(null);
     try {
-      const heads = await apiService.getbyid("headmaster/getbyudise/", schoolUdise);
+      const heads = await apiService.getdata("headmaster/");
       console.log(heads.data);
       setHeads(heads.data);
 
@@ -223,12 +223,12 @@ const CustomerMasterForm = () => {
       case "headId":
         if (!value) newErrors.headId = "कृपया हेड निवडा"; // Value here is the ID (number or string)
         break;
-      case "subheadId":
-        // Subhead is only required if a head is selected.
-        // If head is not selected, subhead cannot be selected, so it shouldn't be an error yet.
-        // This validation will be triggered when headId *is* selected.
-        if (formData.headId && !value) newErrors.subheadId = "कृपया सबहेड निवडा";
-        break;
+      // case "subheadId":
+      //   // Subhead is only required if a head is selected.
+      //   // If head is not selected, subhead cannot be selected, so it shouldn't be an error yet.
+      //   // This validation will be triggered when headId *is* selected.
+      //   if (formData.headId && !value) newErrors.subheadId = "कृपया सबहेड निवडा";
+      //   break;
       default: break;
     }
     return newErrors;
@@ -656,14 +656,14 @@ const CustomerMasterForm = () => {
                   <option value="">-- हेड निवडा --</option>
                   {heads.map(head => (
                     <option key={head.headId} value={head.headId}>
-                      {head.head_name}
+                      {head.headName}
                     </option>
                   ))}
                 </select>
                 {errors.headId && <div className="invalid-feedback small">{errors.headId}</div>}
               </div>
 
-              <div className='col-12 col-md-6'>
+              {/* <div className='col-12 col-md-6'>
                 <label htmlFor='subheadId' className="form-label small fw-bold mb-1">सबहेड</label>
                 <select
                   className={`form-select form-select-sm ${errors.subheadId ? 'is-invalid' : ''}`}
@@ -681,7 +681,7 @@ const CustomerMasterForm = () => {
                   ))}
                 </select>
                 {errors.subheadId && <div className="invalid-feedback small">{errors.subheadId}</div>}
-              </div>
+              </div> */}
             </div>
 
             <div className="row g-2 g-md-3 mb-3">

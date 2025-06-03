@@ -1,0 +1,14 @@
+.lock-icon {
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.lock-icon.locked:hover {
+  transform: rotate(15deg);
+  color: #dc3545; /* red */
+}
+
+.lock-icon.unlocked:hover {
+  transform: scale(1.2);
+  color: #28a745; /* green */
+}

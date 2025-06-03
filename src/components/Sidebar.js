@@ -38,7 +38,7 @@ const Sidebar = ({ sidebarItems = [], role }) => {
       setRouteBasedExpandedWidth(BASE_EXPANDED_WIDTH); // Or handle differently
       return; // Exit if sidebar should be hidden for this path
     }
-    if (location.pathname === '/clerk/openingbalance') {
+    if (location.pathname === '') {
       setRouteBasedExpandedWidth(WIDER_EXPANDED_WIDTH);
     } else {
       setRouteBasedExpandedWidth(BASE_EXPANDED_WIDTH);

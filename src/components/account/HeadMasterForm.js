@@ -5,6 +5,8 @@ import mandatoryFields from '../../services/mandatoryField';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
 import showAlert from '../../services/alert';
+import { FaLock, FaLockOpen } from 'react-icons/fa';
+
 
 const initialFormData = {
   id: null,
@@ -32,8 +34,30 @@ const HeadMasterForm = () => {
   const [options, setOptions] = useState();
   const [selectedOption, setSelectedOption] = useState('');
   const [bookTypeId, setBookTypeId] = useState(null)
-  
+  const [pswrdShow, setPswrdShow] = useState(false)
   const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+
+  const [locked, setLocked] = useState(true);
+  const [headFormShow, setHeadFormShow] = useState(false)
+  let password;
+
+  const toggleLock = () => {
+    setPswrdShow(!pswrdShow)
+    setLocked(!locked);
+  };
+
+  const handlePasswordInput = (e) => {
+    password = e.target.value
+  }
+  
+  const handleSubmitPass = (e) => {
+    e.preventDefault()
+    if (password === "12345678") {
+      setHeadFormShow(true)
+    }
+
+    setPswrdShow(false)
+  }
 
   const fetchBooksides = async () => {
     try {
@@ -62,7 +86,7 @@ const HeadMasterForm = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.getdata(`headmaster/getbyudise/${udiseNo}`);
+      const response = await apiService.getdata(`headmaster/`);
       setHeadList(response.data);
     } catch (err) {
       setError(`माहिती मिळवण्यात अडचण: ${err.message}`);
@@ -73,7 +97,6 @@ const HeadMasterForm = () => {
 
   const handleChange = (event) => {
     setSelectedOption(parseInt(event.target.value));
-
   };
 
   const handleInputChange = (e) => {
@@ -222,88 +245,127 @@ const HeadMasterForm = () => {
             </ol>
           </nav>
         </div>
+
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
       <div className="card mb-4">
-        <div className="card-header">
-          <h5>{isEditing ? 'हेड संपादन करा' : <><Layers size={20} className="me-2" /> नवीन हेड जोडा</>}</h5>
-        </div>
-        <div className="card-body">
-          <form onSubmit={handleSubmit}>
-            <div className="row g-3 mb-3">
-              <div className="col-md-5">
-                <label htmlFor="headCode" className="form-label">हेड कोड {mandatoryFields()}</label>
-                <input
-                  type="text"
-                  id="headCode"
-                  name="headCode"
-                  className={`form-control ${fieldErrors.headCode ? 'is-invalid' : ''}`}
-                  value={formData.headCode}
-                  onChange={handleInputChange}
-                  placeholder="उदा. 1001"
-                  required
-                  disabled={isEditing && formData.isSystemDefined}
-                />
-                {fieldErrors.headCode && <div className="invalid-feedback">{fieldErrors.headCode}</div>}
-              </div>
-              <div className="col-md-5">
-                <label htmlFor="headName" className="form-label">मुख्य हेडचे नाव {mandatoryFields()}</label>
-                <input
-                  type="text"
-                  id="headName"
-                  name="headName"
-                  className={`form-control ${fieldErrors.headName ? 'is-invalid' : ''}`}
-                  value={formData.headName}
-                  onChange={handleInputChange}
-                  placeholder="उदा. मालमत्ता, जबाबदाऱ्या"
-                  required
-                  disabled={isEditing && formData.isSystemDefined}
-                />
-                {fieldErrors.headName && <div className="invalid-feedback">{fieldErrors.headName}</div>}
-              </div>
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">
+            {isEditing ? 'हेड संपादन करा' : (
+              <>
+                <Layers size={20} className="me-2" /> नवीन हेड जोडा
+              </>
+            )}
+          </h5>
+
+          {pswrdShow &&
+
+            <div>
+              <form onSubmit={handleSubmitPass}>
+                <div className='d-flex g-3'>
+                  <input
+                    type="password"
+                    id="unlockPassword"
+                    name="unlockPassword"
+                    placeholder='पासवर्ड प्रविष्ट करा'
+                    className='form-control'
+                    value={password}
+                    style={{ width: "180px", height: "30px" }}
+                    onChange={handlePasswordInput}
+                  />
+                  <button className='sm-button rounded bg-primary text-white' type='submit'> Show </button>
+                </div>
+              </form>
             </div>
-            <div className="row g-3 mb-3">
-              <div >
-                <div className="d-flex flex-wrap gap-3">
-                  {Array.isArray(options) && options.map((option) => (
-                    <div key={option.booksideId} className="form-check form-check-inline">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="radioGroup"
-                        id={`radio-${option.booksideId}`}
-                        value={option.booksideId}
-                        checked={selectedOption === option.booksideId}
-                        onChange={handleChange}
-                      />
-                      <label className="form-check-label" htmlFor={`radio-${option.booksideId}`}>
-                        {option.booksideName}
-                      </label>
-                    </div>
-                  ))}
+          }
+
+          <span
+            className={`lock-icon ${locked ? 'locked' : 'unlocked'}`}
+            onClick={toggleLock}
+            role="button"
+            aria-label="Toggle Lock"
+          >
+            {locked ? <FaLock size={20} /> : <FaLockOpen size={20} />}
+          </span>
+        </div>
+        {
+          headFormShow && <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <div className="row g-3 mb-3">
+                <div className="col-md-5">
+                  <label htmlFor="headCode" className="form-label">हेड कोड {mandatoryFields()}</label>
+                  <input
+                    type="text"
+                    id="headCode"
+                    name="headCode"
+                    className={`form-control ${fieldErrors.headCode ? 'is-invalid' : ''}`}
+                    value={formData.headCode}
+                    onChange={handleInputChange}
+                    placeholder="उदा. 1001"
+                    required
+                    disabled={isEditing && formData.isSystemDefined}
+                  />
+                  {fieldErrors.headCode && <div className="invalid-feedback">{fieldErrors.headCode}</div>}
+                </div>
+                <div className="col-md-5">
+                  <label htmlFor="headName" className="form-label">मुख्य हेडचे नाव {mandatoryFields()}</label>
+                  <input
+                    type="text"
+                    id="headName"
+                    name="headName"
+                    className={`form-control ${fieldErrors.headName ? 'is-invalid' : ''}`}
+                    value={formData.headName}
+                    onChange={handleInputChange}
+                    placeholder="उदा. मालमत्ता, जबाबदाऱ्या"
+                    required
+                    disabled={isEditing && formData.isSystemDefined}
+                  />
+                  {fieldErrors.headName && <div className="invalid-feedback">{fieldErrors.headName}</div>}
                 </div>
               </div>
-            </div>
-            <div className="d-flex gap-2">
-              {!(isEditing && formData.isSystemDefined) && (
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  <Save size={16} className="me-1" />
-                  {loading ? (isEditing ? 'अपडेट करत आहे...' : 'जतन करत आहे...') : (isEditing ? 'अपडेट करा' : 'जतन करा')}
+              <div className="row g-3 mb-3">
+                <div >
+                  <div className="d-flex flex-wrap gap-3">
+                    {Array.isArray(options) && options.map((option) => (
+                      <div key={option.booksideId} className="form-check form-check-inline">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="radioGroup"
+                          id={`radio-${option.booksideId}`}
+                          value={option.booksideId}
+                          checked={selectedOption === option.booksideId}
+                          onChange={handleChange}
+                        />
+                        <label className="form-check-label" htmlFor={`radio-${option.booksideId}`}>
+                          {option.booksideName}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="d-flex gap-2">
+                {!(isEditing && formData.isSystemDefined) && (
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    <Save size={16} className="me-1" />
+                    {loading ? (isEditing ? 'अपडेट करत आहे...' : 'जतन करत आहे...') : (isEditing ? 'अपडेट करा' : 'जतन करा')}
+                  </button>
+                )}
+                <button type="button" className="btn btn-secondary" onClick={handleClear} disabled={loading}>
+                  <XCircle size={16} className="me-1" />
+                  {isEditing ? 'संपादन रद्द करा' : 'फॉर्म रिकामा करा'}
                 </button>
-              )}
-              <button type="button" className="btn btn-secondary" onClick={handleClear} disabled={loading}>
-                <XCircle size={16} className="me-1" />
-                {isEditing ? 'संपादन रद्द करा' : 'फॉर्म रिकामा करा'}
-              </button>
-            </div>
-            {isEditing && formData.isSystemDefined && <p className="mt-2 text-muted"><small>सिस्टम डिफाइन्ड हेड बदलता येत नाही.</small></p>}
-          </form>
-        </div>
-      </div>
+              </div>
+              {isEditing && formData.isSystemDefined && <p className="mt-2 text-muted"><small>सिस्टम डिफाइन्ड हेड बदलता येत नाही.</small></p>}
+            </form>
+          </div>
 
+        }
+      </div>
       <div className="card">
         <div className="card-header"><h5>माहितीचे हेड</h5></div>
         <div className="card-body p-0">
