@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, FileText, XCircle, Landmark } from 'lucide-react';
 // import { getBankMasters, getSubHeadMasters, getCustomers, saveBankPayment, getNextVoucherNumber } from '../../../../services/accountApi';
 import { Link } from 'react-router-dom';
+import apiService from '../../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 
 const initialFormData = {
   voucherNo: '',
@@ -30,6 +32,9 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
   const transactionTypes = ["Cheque", "NEFT", "RTGS", "IMPS", "UPI", "Direct Debit", "Card Payment", "Other"];
 
+  const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+
+
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
@@ -39,16 +44,24 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         // const partiesData = await getCustomers(); // Or a combined party list
         // const nextVoucher = await getNextVoucherNumber('BP');
 
+        if (!udiseNo) {
+          return;
+        }
+
+        const banks = await apiService.getbyid("bank/byudiseno/", udiseNo);
+        const partiesData = await apiService.getbyid("customermaster/getbyudise/", udiseNo);
+        console.log(partiesData.data);
+
         // --- MOCK DATA ---
-        const banks = [ { id: 'bk001', bankName: 'State Bank of India - Main (Savings)', accountNumber: '...8901' }, { id: 'bk002', bankName: 'HDFC Bank - Corporate (Current)', accountNumber: '...2109' }];
-        const accounts = [ { id: 'EXP_SAL', name: 'Salaries Expense' }, { id: 'EXP_RENT', name: 'Rent Payment' }, { id: 'AST_PURCH', name: 'Asset Purchase - Computers'} , { id: 'LIAB_PAY', name: 'Loan EMI Payment'}];
-        const partiesData = [ { id: 'VEND001', name: 'Alpha Stationers' }, { id: 'STAFF001', name: 'Mr. Suresh Kumar (Salary)' }, { id: 'PARTY000', name: 'Other Payee'}];
+        // const banks = [ { id: 'bk001', bankName: 'State Bank of India - Main (Savings)', accountNumber: '...8901' }, { id: 'bk002', bankName: 'HDFC Bank - Corporate (Current)', accountNumber: '...2109' }];
+        const accounts = [{ id: 'EXP_SAL', name: 'Salaries Expense' }, { id: 'EXP_RENT', name: 'Rent Payment' }, { id: 'AST_PURCH', name: 'Asset Purchase - Computers' }, { id: 'LIAB_PAY', name: 'Loan EMI Payment' }];
+        // const partiesData = [{ id: 'VEND001', name: 'Alpha Stationers' }, { id: 'STAFF001', name: 'Mr. Suresh Kumar (Salary)' }, { id: 'PARTY000', name: 'Other Payee' }];
         const nextVoucher = `BP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
         // --- END MOCK DATA ---
 
-        setBankAccounts(banks || []);
+        setBankAccounts(banks.data || []);
         setDebitAccounts(accounts || []);
-        setParties(partiesData || []);
+        setParties(partiesData.data || []);
 
         if (isEditMode && transactionId) {
           // const existingTx = await getBankPaymentById(transactionId);
@@ -92,9 +105,9 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       setError("Please fill all required fields: Bank A/C, Paid To, Amount, Narration, Debit A/C, and Reference No (if applicable).");
       return;
     }
-     if (parseFloat(formData.amount) <= 0) {
-        setError("Amount must be greater than zero.");
-        return;
+    if (parseFloat(formData.amount) <= 0) {
+      setError("Amount must be greater than zero.");
+      return;
     }
 
 
@@ -108,7 +121,7 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       if (!isEditMode) {
         // const nextVoucher = await getNextVoucherNumber('BP');
         const nextVoucher = `BP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        setFormData({...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0]});
+        setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] });
       }
     } catch (err) {
       setError(`Operation Failed: ${err.message}`);
@@ -118,12 +131,12 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   };
 
   const handleClear = () => {
-    setFormData(prev => ({...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0]}));
+    setFormData(prev => ({ ...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0] }));
     setError(null);
     setSuccess(null);
   };
 
-   if (loading && !formData.voucherNo && !isEditMode) {
+  if (loading && !formData.voucherNo && !isEditMode) {
     return <div className="text-center p-5"><div className="spinner-border"></div><p>Loading form...</p></div>;
   }
 
@@ -145,14 +158,10 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       {success && <div className="alert alert-success" role="alert">{success}</div>}
 
       <div className="card">
-        <div className="card-header"><h5 className="mb-0"><Landmark size={20} className="me-2"/>Enter Bank Payment Details</h5></div>
+        <div className="card-header"><h5 className="mb-0"><Landmark size={20} className="me-2" />Enter Bank Payment Details</h5></div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
             <div className="row g-3 mb-3">
-              <div className="col-md-3">
-                <label htmlFor="voucherNo" className="form-label">Voucher No.</label>
-                <input type="text" id="voucherNo" name="voucherNo" className="form-control" value={formData.voucherNo} onChange={handleInputChange} readOnly={!isEditMode}/>
-              </div>
               <div className="col-md-3">
                 <label htmlFor="date" className="form-label">Date *</label>
                 <input type="date" id="date" name="date" className="form-control" value={formData.date} onChange={handleInputChange} required />
@@ -161,7 +170,7 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
                 <label htmlFor="bankAccountId" className="form-label">Bank Account (Credit) *</label>
                 <select id="bankAccountId" name="bankAccountId" className="form-select" value={formData.bankAccountId} onChange={handleInputChange} required>
                   <option value="">Select Bank Account</option>
-                  {bankAccounts.map(bank => <option key={bank.id} value={bank.id}>{bank.bankName} ({bank.accountNumber})</option>)}
+                  {bankAccounts.map(bank => <option key={bank.id} value={bank.id}>{bank.bankname} ({bank.accountno})</option>)}
                 </select>
               </div>
             </div>
@@ -172,31 +181,31 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
                 <input type="number" id="amount" name="amount" className="form-control" value={formData.amount} onChange={handleInputChange} placeholder="0.00" step="0.01" min="0.01" required />
               </div>
               <div className="col-md-4">
-                <label htmlFor="transactionType" className="form-label">Transaction Type *</label>
-                 <select id="transactionType" name="transactionType" className="form-select" value={formData.transactionType} onChange={handleInputChange} required>
-                    {transactionTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                <label htmlFor="transactionType" className="form-label">Payment Type *</label>
+                <select id="transactionType" name="transactionType" className="form-select" value={formData.transactionType} onChange={handleInputChange} required>
+                  {transactionTypes.map(type => <option key={type} value={type}>{type}</option>)}
                 </select>
               </div>
-             {formData.transactionType !== 'Direct Debit' && formData.transactionType !== 'Card Payment' && formData.transactionType !== 'Other' && (
-                  <>
+              {formData.transactionType !== 'Direct Debit' && formData.transactionType !== 'Card Payment' && formData.transactionType !== 'Other' && (
+                <>
+                  <div className="col-md-4">
+                    <label htmlFor="referenceNo" className="form-label">{formData.transactionType === 'Cheque' ? 'Cheque No.' : 'Ref/UTR No.'} *</label>
+                    <input type="text" id="referenceNo" name="referenceNo" className="form-control" value={formData.referenceNo} onChange={handleInputChange} placeholder="Enter reference number" required />
+                  </div>
+                  {formData.transactionType === 'Cheque' && (
                     <div className="col-md-4">
-                        <label htmlFor="referenceNo" className="form-label">{formData.transactionType === 'Cheque' ? 'Cheque No.' : 'Ref/UTR No.'} *</label>
-                        <input type="text" id="referenceNo" name="referenceNo" className="form-control" value={formData.referenceNo} onChange={handleInputChange} placeholder="Enter reference number" required />
+                      <label htmlFor="referenceDate" className="form-label">Cheque Date</label>
+                      <input type="date" id="referenceDate" name="referenceDate" className="form-control" value={formData.referenceDate} onChange={handleInputChange} />
                     </div>
-                    {formData.transactionType === 'Cheque' && (
-                        <div className="col-md-4">
-                            <label htmlFor="referenceDate" className="form-label">Cheque Date</label>
-                            <input type="date" id="referenceDate" name="referenceDate" className="form-control" value={formData.referenceDate} onChange={handleInputChange} />
-                        </div>
-                    )}
-                  </>
+                  )}
+                </>
               )}
               {(formData.transactionType === 'Other' || formData.transactionType === 'Direct Debit' || formData.transactionType === 'Card Payment') && (
-                 <div className="col-md-4">
-                    <label htmlFor="referenceNo" className="form-label">Reference/Details (Optional)</label>
-                    <input type="text" id="referenceNo" name="referenceNo" className="form-control" value={formData.referenceNo} onChange={handleInputChange} placeholder="e.g., Loan EMI ID, Card Type" />
+                <div className="col-md-4">
+                  <label htmlFor="referenceNo" className="form-label">Reference/Details (Optional)</label>
+                  <input type="text" id="referenceNo" name="referenceNo" className="form-control" value={formData.referenceNo} onChange={handleInputChange} placeholder="e.g., Loan EMI ID, Card Type" />
                 </div>
-               )}
+              )}
             </div>
 
 
@@ -204,44 +213,37 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
               <div className="col-md-6">
                 <label htmlFor="paidToId" className="form-label">Paid To (Party) *</label>
                 <select id="paidToId" name="paidToId" className="form-select" value={formData.paidToId} onChange={handlePartyChange} required>
-                    <option value="">Select Party/Payee</option>
-                    {parties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    <option value="OTHER_PAYEE_BP">Other (Specify Below)</option>
-                 </select>
+                  <option value="">Select Party/Payee</option>
+                  {parties.map(p => <option key={p.id} value={p.id}>{p.custName}</option>)}
+                </select>
               </div>
-              {formData.paidToId === 'OTHER_PAYEE_BP' && (
-                <div className="col-md-6">
-                    <label htmlFor="paidToName" className="form-label">Specify Payee Name *</label>
-                    <input type="text" id="paidToName" name="paidToName" className="form-control" value={formData.paidToName} onChange={handleInputChange} placeholder="Enter payee's name" required={formData.paidToId === 'OTHER_PAYEE_BP'}/>
-                </div>
-              )}
-               {formData.paidToId && formData.paidToId !== 'OTHER_PAYEE_BP' && (
-                <div className="col-md-6">
-                    <label className="form-label">Payee Name (Selected)</label>
-                    <input type="text" className="form-control" value={formData.paidToName} readOnly disabled />
-                </div>
-              )}
+
+              <div className="col-md-6">
+                <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
+                <input type="text" id="narration" name="narration" className="form-control" value={formData.narration} onChange={handleInputChange} placeholder="e.g., Vendor payment for supplies, Salary for July" required />
+              </div>
+
+              {/* <div className="col-md-6">
+                <label htmlFor="paidToName" className="form-label">Specify Payee Name *</label>
+                <input type="text" id="paidToName" name="paidToName" className="form-control" value={formData.paidToName} onChange={handleInputChange} placeholder="Enter payee's name" required={formData.paidToId === 'OTHER_PAYEE_BP'} />
+              </div> */}
             </div>
 
             <div className="row g-3 mb-3">
-                <div className="col-md-6">
-                    <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
-                    <input type="text" id="narration" name="narration" className="form-control" value={formData.narration} onChange={handleInputChange} placeholder="e.g., Vendor payment for supplies, Salary for July" required/>
-                </div>
-                <div className="col-md-6">
-                    <label htmlFor="debitAccountId" className="form-label">Debit Account * (Expense/Asset/Liability)</label>
-                    <select id="debitAccountId" name="debitAccountId" className="form-select" value={formData.debitAccountId} onChange={handleInputChange} required>
-                    <option value="">Select Debit Account Head</option>
-                    {debitAccounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                    </select>
-                </div>
-            </div>
 
-            <div className="row g-3 mb-3">
-              <div className="col-12">
-                <label htmlFor="remarks" className="form-label">Remarks</label>
-                <textarea id="remarks" name="remarks" className="form-control" rows="2" value={formData.remarks} onChange={handleInputChange} placeholder="Any additional notes (optional)"></textarea>
+              <div className='col-md-6'>
+                <label>Image</label>
+                <input type='file'></input>
+
               </div>
+
+              {/* <div className="col-md-6">
+                <label htmlFor="debitAccountId" className="form-label">Debit Account * (Expense/Asset/Liability)</label>
+                <select id="debitAccountId" name="debitAccountId" className="form-select" value={formData.debitAccountId} onChange={handleInputChange} required>
+                  <option value="">Select Debit Account Head</option>
+                  {debitAccounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+                </select>
+              </div> */}
             </div>
 
             <div className="d-flex gap-2 mt-4">

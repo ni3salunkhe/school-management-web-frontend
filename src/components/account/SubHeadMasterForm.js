@@ -48,6 +48,9 @@ const SubHeadMasterForm = () => {
     }
   };
 
+  console.log(subHeadList);
+
+
   const fetchSubHeads = async () => {
     setLoading(true);
     setError(null);
@@ -83,7 +86,7 @@ const SubHeadMasterForm = () => {
       }
     }
 
-console.log(subHeadList);
+    console.log(subHeadList);
 
     // Duplicate check for subheadName
     if (name === "subheadName") {
@@ -164,7 +167,7 @@ console.log(subHeadList);
     try {
       const payload = {
         ...formData,
-        subheadName:formData.subheadName,
+        subheadName: formData.subheadName,
         subheadId: formData.subHeadCode,
         headId: formData.parentHeadId,
         schoolUdise: udiseNo
@@ -198,7 +201,7 @@ console.log(subHeadList);
     setIsEditing(true);
     setFormData({
       ...subHead,
-      subheadName:subHead.subheadName,
+      subheadName: subHead.subheadName,
       subheadId: subHead.subHeadCode,
       parentHeadId: subHead.parentHeadId
     });
@@ -215,13 +218,25 @@ console.log(subHeadList);
   };
 
   console.log(subHeadList);
-  
-  const filteredSubHeadList = subHeadList.filter(sh =>
-    (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sh.subHeadCode && String(sh.subHeadCode).includes(searchTerm.toLowerCase()))) &&
-    (filterParentHead === '' || sh.parentHeadId === filterParentHead)
-  );
 
+  // const filteredSubHeadList = subHeadList.filter(sh =>
+  //   (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     (sh.subHeadCode && String(sh.subHeadCode).includes(searchTerm.toLowerCase()))) &&
+  //   (filterParentHead === '' || sh.parentHeadId === filterParentHead)
+  // );
+
+    const filteredSubHeadList = subHeadList.filter(sh => {
+    const matchesSearch =
+      (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (sh.subHeadCode && String(sh.subHeadCode).includes(searchTerm));
+
+    const matchesParentHead =
+      !filterParentHead || String(sh.parentHeadId) === filterParentHead;
+
+    return matchesSearch && matchesParentHead;
+  });
+
+  
   return (
     <div className="container-fluid py-3">
       <div className="row mb-3">

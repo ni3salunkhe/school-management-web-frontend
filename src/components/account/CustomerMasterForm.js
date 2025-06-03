@@ -93,7 +93,8 @@ const CustomerMasterForm = () => {
     setLoading(true);
     setError(null);
     try {
-      const heads = await apiService.getbyid("headmaster/getbyudise/", schoolUdise);
+      // const heads = await apiService.getbyid("headmaster/getbyudise/", schoolUdise);
+      const heads=await apiService.getdata("headmaster/");
       console.log(heads.data);
       setHeads(heads.data);
 
@@ -656,7 +657,7 @@ const CustomerMasterForm = () => {
                   <option value="">-- हेड निवडा --</option>
                   {heads.map(head => (
                     <option key={head.headId} value={head.headId}>
-                      {head.head_name}
+                      {head.headName}
                     </option>
                   ))}
                 </select>
