@@ -657,7 +657,6 @@ const CustomerMasterForm = () => {
                   {heads.map(head => (
                     <option key={head.headId} value={head.headId}>
                       {head.headName}
-                      {head.headName}
                     </option>
                   ))}
                 </select>

@@ -1,99 +1,155 @@
 // src/components/account/Transactions/Forms/BankPaymentForm.js
 import React, { useState, useEffect } from 'react';
 import { Plus, FileText, XCircle, Landmark } from 'lucide-react';
-// import { getBankMasters, getSubHeadMasters, getCustomers, saveBankPayment, getNextVoucherNumber } from '../../../../services/accountApi';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 const initialFormData = {
-  voucherNo: '',
-  date: new Date().toISOString().split('T')[0],
-  bankAccountId: '', // ID of the BankMaster
-  paidToId: '',
-  paidToName: '',
+  createDate: new Date().toISOString().split('T')[0],
+  entryDate: new Date().toISOString().split('T')[0],
+  custId: '',
+  tranType: 'Bank Payment',
   amount: '',
-  transactionType: 'Cheque', // Cheque, NEFT, RTGS, UPI
-  referenceNo: '', // Cheque No, UTR No, etc.
-  referenceDate: '', // Cheque Date
-  narration: '',
-  debitAccountId: '', // User selects Expense/Asset/Liability account
-  remarks: '',
+  narr: '',
+  bankId: '',
+  schoolUdise: '',
+  year: '',
+  paymentType: '',
+  img: null,
+  billNo: '',
+  headId: '',
+  subheadId: ''
 };
 
 const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const [formData, setFormData] = useState(initialFormData);
   const [bankAccounts, setBankAccounts] = useState([]);
-  const [debitAccounts, setDebitAccounts] = useState([]);
   const [parties, setParties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-  const transactionTypes = ["Cheque", "NEFT", "RTGS", "IMPS", "UPI", "Direct Debit", "Card Payment", "Other"];
-
-  const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
-
+  const paymentTypes = ["Cheque", "NEFT", "RTGS", "IMPS", "UPI", "Direct Deposit", "Card Swipe"];
 
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
-        // const banks = await getBankMasters({ status: 'Active' });
-        // const accounts = await getSubHeadMasters({ types: ['Expense', 'Asset', 'Liability'] });
-        // const partiesData = await getCustomers(); // Or a combined party list
-        // const nextVoucher = await getNextVoucherNumber('BP');
-
-        if (!udiseNo) {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+          setError('प्रमाणीकरण टोकन सापडले नाही');
           return;
         }
 
-        const banks = await apiService.getbyid("bank/byudiseno/", udiseNo);
-        const partiesData = await apiService.getbyid("customermaster/getbyudise/", udiseNo);
-        console.log(partiesData.data);
+        const decodedToken = jwtDecode(token);
+        const udiseNo = decodedToken?.udiseNo;
 
-        // --- MOCK DATA ---
-        // const banks = [ { id: 'bk001', bankName: 'State Bank of India - Main (Savings)', accountNumber: '...8901' }, { id: 'bk002', bankName: 'HDFC Bank - Corporate (Current)', accountNumber: '...2109' }];
-        const accounts = [{ id: 'EXP_SAL', name: 'Salaries Expense' }, { id: 'EXP_RENT', name: 'Rent Payment' }, { id: 'AST_PURCH', name: 'Asset Purchase - Computers' }, { id: 'LIAB_PAY', name: 'Loan EMI Payment' }];
-        // const partiesData = [{ id: 'VEND001', name: 'Alpha Stationers' }, { id: 'STAFF001', name: 'Mr. Suresh Kumar (Salary)' }, { id: 'PARTY000', name: 'Other Payee' }];
-        const nextVoucher = `BP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        // --- END MOCK DATA ---
+        if (!udiseNo) {
+          setError('टोकन मध्ये UDISE क्रमांक सापडला नाही');
+          return;
+        }
 
-        setBankAccounts(banks.data || []);
-        setDebitAccounts(accounts || []);
-        setParties(partiesData.data || []);
+        // प्रारंभिक शाळा UDISE सेट करा
+        setFormData(prev => ({
+          ...prev,
+          schoolUdise: udiseNo,
+        }));
+
+        // बँक आणि ग्राहक आणा
+        const [banksResponse, partiesResponse] = await Promise.all([
+          apiService.getbyid("bank/byudiseno/", udiseNo),
+          apiService.getbyid("customermaster/getcustomersbyudise/", udiseNo)
+        ]);
+
+        setBankAccounts(banksResponse.data || []);
+        setParties(partiesResponse.data || []);
+
+        console.log(partiesResponse.data);
 
         if (isEditMode && transactionId) {
-          // const existingTx = await getBankPaymentById(transactionId);
-          // setFormData(prev => ({...prev, ...existingTx, voucherNo: existingTx.voucherNo || prev.voucherNo}));
-          console.log("Edit BP ID:", transactionId);
-        } else {
-          setFormData(prev => ({ ...prev, voucherNo: nextVoucher }));
+          // विद्यमान व्यवहार डेटा आणा
+          const existingData = await apiService.getbyid("bankpayment/", transactionId);
+          if (existingData.data) {
+            setFormData(prev => ({
+              ...prev,
+              ...existingData.data,
+              entryDate: existingData.data.entryDate || prev.entryDate,
+              createDate: existingData.data.createDate || prev.createDate
+            }));
+          }
         }
       } catch (err) {
-        setError(`Failed to load initial data: ${err.message}`);
+        console.error('प्रारंभिक डेटा आणण्यात त्रुटी:', err);
+        setError(`प्रारंभिक डेटा लोड करण्यात अयशस्वी: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
+
     fetchInitialData();
   }, [isEditMode, transactionId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
     setError(null);
     setSuccess(null);
   };
 
   const handlePartyChange = (e) => {
     const partyId = e.target.value;
-    const selectedParty = parties.find(p => p.id === partyId);
-    setFormData(prev => ({
-      ...prev,
-      paidToId: partyId,
-      paidToName: selectedParty ? selectedParty.name : (partyId === "OTHER_PAYEE_BP" ? prev.paidToName : "")
-    }));
+    const selectedParty = parties.find(p => p.custId === parseInt(partyId));
+
+    if (selectedParty) {
+      setSelectedCustomer(selectedParty);
+      setFormData(prev => ({
+        ...prev,
+        custId: partyId,
+        headId: selectedParty.headId?.headId || '',
+        subheadId: selectedParty.subheadId?.subheadId || ''
+      }));
+    } else {
+      setSelectedCustomer(null);
+      setFormData(prev => ({
+        ...prev,
+        custId: partyId,
+        headId: '',
+        subheadId: ''
+      }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({ ...prev, img: e.target.files[0] }));
+    }
+  };
+
+  const validateForm = () => {
+    const requiredFields = {
+      bankId: 'बँक खाते',
+      custId: 'ग्राहक/पक्ष',
+      amount: 'रक्कम',
+      narr: 'वर्णन',
+      paymentType: 'पेमेंट प्रकार'
+    };
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!formData[field] || formData[field] === '') {
+        setError(`${label} आवश्यक आहे`);
+        return false;
+      }
+    }
+
+    if (parseFloat(formData.amount) <= 0) {
+      setError("रक्कम शून्यापेक्षा जास्त असणे आवश्यक आहे");
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -101,161 +157,267 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     setError(null);
     setSuccess(null);
 
-    if (!formData.bankAccountId || !formData.debitAccountId || !formData.amount || (!formData.paidToName && !formData.paidToId) || !formData.narration.trim() || (formData.transactionType !== 'Direct Debit' && formData.transactionType !== 'Card Payment' && !formData.referenceNo)) {
-      setError("Please fill all required fields: Bank A/C, Paid To, Amount, Narration, Debit A/C, and Reference No (if applicable).");
+    if (!validateForm()) {
       return;
     }
-    if (parseFloat(formData.amount) <= 0) {
-      setError("Amount must be greater than zero.");
-      return;
-    }
-
 
     setLoading(true);
     try {
-      const payload = { ...formData, amount: parseFloat(formData.amount), creditAccountId: formData.bankAccountId }; // Bank account is credited
-      // if (isEditMode) { await updateBankPayment(transactionId, payload); }
-      // else { await saveBankPayment(payload); }
-      console.log('Submitting Bank Payment (Mock):', payload);
-      setSuccess(`Bank Payment ${isEditMode ? 'Updated' : 'Saved'} Successfully! Voucher No: ${formData.voucherNo}`);
+      // मल्टिपार्ट फॉर्म सबमिशनसाठी FormData तयार करा
+      const formDataToSend = new FormData();
+
+      // img वगळून सर्व फॉर्म फील्ड जोडा
+      Object.keys(formData).forEach(key => {
+        if (key !== 'img' && formData[key] !== null && formData[key] !== '') {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
+
+      // उपस्थित असल्यास इमेज फाइल जोडा
+      if (formData.img) {
+        formDataToSend.append('img', formData.img);
+      }
+
+      // रक्कम फील्ड बॅकएंड अपेक्षेशी जुळवा (कॅपिटल A)
+      formDataToSend.set('Amount', formData.amount);
+
+      let response;
+      if (isEditMode && transactionId) {
+        response = await apiService.put(`bankpayment/${transactionId}`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        Swal.fire('यशस्वी', 'बँक पेमेंट यशस्वीरीत्या संपादित केले!', 'success');
+
+      } else {
+        response = await apiService.post("bankpayment/", formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        console.log(response.data);
+        Swal.fire('यशस्वी', 'बँक पेमेंट यशस्वीरीत्या जतन केले!', 'success');
+      }
+
+      setSuccess(`बँक पेमेंट ${isEditMode ? 'अपडेट' : 'जतन'} यशस्वीरीत्या झाले!`);
+
       if (!isEditMode) {
-        // const nextVoucher = await getNextVoucherNumber('BP');
-        const nextVoucher = `BP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-        setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] });
+        // नवीन एंट्रीसाठी फॉर्म रीसेट करा
+        setFormData(prev => ({
+          ...initialFormData,
+          createDate: new Date().toISOString().split('T')[0],
+          entryDate: new Date().toISOString().split('T')[0],
+          schoolUdise: prev.schoolUdise
+        }));
+        setSelectedCustomer(null);
       }
     } catch (err) {
-      setError(`Operation Failed: ${err.message}`);
+      console.error('सबमिट त्रुटी:', err);
+      setError(`ऑपरेशन अयशस्वी: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleClear = () => {
-    setFormData(prev => ({ ...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0] }));
+    const currentUdise = formData.schoolUdise;
+    // const nextVoucher = `BP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
+
+    setFormData({
+      ...initialFormData,
+      // voucherNo: isEditMode ? formData.voucherNo : nextVoucher,
+      createDate: new Date().toISOString().split('T')[0],
+      entryDate: new Date().toISOString().split('T')[0],
+      schoolUdise: currentUdise
+    });
+    setSelectedCustomer(null);
     setError(null);
     setSuccess(null);
   };
 
   if (loading && !formData.voucherNo && !isEditMode) {
-    return <div className="text-center p-5"><div className="spinner-border"></div><p>Loading form...</p></div>;
+    return (
+      <div className="text-center p-5">
+        <div className="spinner-border"></div>
+        <p>फॉर्म लोड करत आहे...</p>
+      </div>
+    );
   }
 
   return (
     <div className="container-fluid py-3">
       <div className="row mb-3">
         <div className="col-12">
-          <h3>{isEditMode ? 'Edit Bank Payment' : 'New Bank Payment'}</h3>
+          <h3>{isEditMode ? 'बँक पेमेंट संपादित करा' : 'नवीन बँक पेमेंट'}</h3>
           <nav aria-label="breadcrumb">
             <ol className="breadcrumb">
-              <li className="breadcrumb-item"><Link to="/account/transactions/bank-payments">Transactions</Link></li>
-              <li className="breadcrumb-item active" aria-current="page">{isEditMode ? 'Edit' : 'New'} Bank Payment</li>
+              <li className="breadcrumb-item">
+                <Link to="/account/transactions/bank-payments">व्यवहार</Link>
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">
+                {isEditMode ? 'संपादित करा' : 'नवीन'} बँक पेमेंट
+              </li>
             </ol>
           </nav>
         </div>
       </div>
 
-      {error && <div className="alert alert-danger" role="alert">{error}</div>}
-      {success && <div className="alert alert-success" role="alert">{success}</div>}
+      {/* {error && <div className="alert alert-danger" role="alert">{error}</div>}
+      {success && <div className="alert alert-success" role="alert">{success}</div>} */}
 
       <div className="card">
-        <div className="card-header"><h5 className="mb-0"><Landmark size={20} className="me-2" />Enter Bank Payment Details</h5></div>
+        <div className="card-header">
+          <h5 className="mb-0">
+            <Landmark size={20} className="me-2" />
+            बँक पेमेंट तपशील प्रविष्ट करा
+          </h5>
+        </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
             <div className="row g-3 mb-3">
               <div className="col-md-3">
-                <label htmlFor="date" className="form-label">Date *</label>
-                <input type="date" id="date" name="date" className="form-control" value={formData.date} onChange={handleInputChange} required />
+                <label htmlFor="entryDate" className="form-label">एंट्री दिनांक *</label>
+                <input
+                  type="date"
+                  id="entryDate"
+                  name="entryDate"
+                  className="form-control"
+                  value={formData.entryDate}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
               <div className="col-md-6">
-                <label htmlFor="bankAccountId" className="form-label">Bank Account (Credit) *</label>
-                <select id="bankAccountId" name="bankAccountId" className="form-select" value={formData.bankAccountId} onChange={handleInputChange} required>
-                  <option value="">Select Bank Account</option>
-                  {bankAccounts.map(bank => <option key={bank.id} value={bank.id}>{bank.bankname} ({bank.accountno})</option>)}
+                <label htmlFor="bankId" className="form-label">बँक खाते *</label>
+                <select
+                  id="bankId"
+                  name="bankId"
+                  className="form-select"
+                  value={formData.bankId}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">बँक खाते निवडा</option>
+                  {bankAccounts.map(bank => (
+                    <option key={bank.id} value={bank.id}>
+                      {bank.bankname} - {bank.accountno}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             <div className="row g-3 mb-3">
-              <div className="col-md-4">
-                <label htmlFor="amount" className="form-label">Amount *</label>
-                <input type="number" id="amount" name="amount" className="form-control" value={formData.amount} onChange={handleInputChange} placeholder="0.00" step="0.01" min="0.01" required />
-              </div>
-              <div className="col-md-4">
-                <label htmlFor="transactionType" className="form-label">Payment Type *</label>
-                <select id="transactionType" name="transactionType" className="form-select" value={formData.transactionType} onChange={handleInputChange} required>
-                  {transactionTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              <div className="col-md-6">
+                <label htmlFor="custId" className="form-label">यांना पेमेंट (पक्ष) *</label>
+                <select
+                  id="custId"
+                  name="custId"
+                  className="form-select"
+                  value={formData.custId}
+                  onChange={handlePartyChange}
+                  required
+                >
+                  <option value="">पक्ष/पेयी निवडा</option>
+                  {parties.map(party => (
+                    <option key={party.custId} value={party.custId}>
+                      {party.custName}
+                    </option>
+                  ))}
                 </select>
               </div>
-              {formData.transactionType !== 'Direct Debit' && formData.transactionType !== 'Card Payment' && formData.transactionType !== 'Other' && (
-                <>
-                  <div className="col-md-4">
-                    <label htmlFor="referenceNo" className="form-label">{formData.transactionType === 'Cheque' ? 'Cheque No.' : 'Ref/UTR No.'} *</label>
-                    <input type="text" id="referenceNo" name="referenceNo" className="form-control" value={formData.referenceNo} onChange={handleInputChange} placeholder="Enter reference number" required />
+              <div className="col-md-6">
+                <label htmlFor="narr" className="form-label">वर्णन/हेतू *</label>
+                <input
+                  type="text"
+                  id="narr"
+                  name="narr"
+                  className="form-control"
+                  value={formData.narr}
+                  onChange={handleInputChange}
+                  placeholder="उदा., पुरवठ्यासाठी विक्रेता पेमेंट"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="row g-3 mb-3">
+              <div className="col-md-4">
+                <label htmlFor="amount" className="form-label">रक्कम *</label>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  className="form-control"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0.01"
+                  required
+                />
+              </div>
+              <div className="col-md-4">
+                <label htmlFor="paymentType" className="form-label">पेमेंट प्रकार *</label>
+                <select
+                  id="paymentType"
+                  name="paymentType"
+                  className="form-select"
+                  value={formData.paymentType}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">पेमेंट प्रकार निवडा</option>
+                  {paymentTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-4">
+                <label htmlFor="img" className="form-label">चेक/स्लीप/पावती प्रत</label>
+                <input
+                  type="file"
+                  id="img"
+                  name="img"
+                  className="form-control"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                />
+                {formData.img && (
+                  <small className="text-muted">निवडले: {formData.img.name}</small>
+                )}
+              </div>
+            </div>
+
+            {selectedCustomer && (
+              <div className="row g-3 mb-3">
+                <div className="col-12">
+                  <div className="alert alert-info">
+                    <strong>निवडलेल्या ग्राहकाचे तपशील:</strong><br />
+                    नाव: {selectedCustomer.custName}<br />
+                    {selectedCustomer.headId && `मुख्य: ${selectedCustomer.headId.headName}`}<br />
+                    {selectedCustomer.subheadId && `उपमुख्य: ${selectedCustomer.subheadId.subheadName}`}
                   </div>
-                  {formData.transactionType === 'Cheque' && (
-                    <div className="col-md-4">
-                      <label htmlFor="referenceDate" className="form-label">Cheque Date</label>
-                      <input type="date" id="referenceDate" name="referenceDate" className="form-control" value={formData.referenceDate} onChange={handleInputChange} />
-                    </div>
-                  )}
-                </>
-              )}
-              {(formData.transactionType === 'Other' || formData.transactionType === 'Direct Debit' || formData.transactionType === 'Card Payment') && (
-                <div className="col-md-4">
-                  <label htmlFor="referenceNo" className="form-label">Reference/Details (Optional)</label>
-                  <input type="text" id="referenceNo" name="referenceNo" className="form-control" value={formData.referenceNo} onChange={handleInputChange} placeholder="e.g., Loan EMI ID, Card Type" />
                 </div>
-              )}
-            </div>
-
-
-            <div className="row g-3 mb-3">
-              <div className="col-md-6">
-                <label htmlFor="paidToId" className="form-label">Paid To (Party) *</label>
-                <select id="paidToId" name="paidToId" className="form-select" value={formData.paidToId} onChange={handlePartyChange} required>
-                  <option value="">Select Party/Payee</option>
-                  {parties.map(p => <option key={p.id} value={p.id}>{p.custName}</option>)}
-                </select>
               </div>
-
-              <div className="col-md-6">
-                <label htmlFor="narration" className="form-label">Narration/Purpose *</label>
-                <input type="text" id="narration" name="narration" className="form-control" value={formData.narration} onChange={handleInputChange} placeholder="e.g., Vendor payment for supplies, Salary for July" required />
-              </div>
-
-              {/* <div className="col-md-6">
-                <label htmlFor="paidToName" className="form-label">Specify Payee Name *</label>
-                <input type="text" id="paidToName" name="paidToName" className="form-control" value={formData.paidToName} onChange={handleInputChange} placeholder="Enter payee's name" required={formData.paidToId === 'OTHER_PAYEE_BP'} />
-              </div> */}
-            </div>
-
-            <div className="row g-3 mb-3">
-
-              <div className='col-md-6'>
-                <label>Image</label>
-                <input type='file'></input>
-
-              </div>
-
-              {/* <div className="col-md-6">
-                <label htmlFor="debitAccountId" className="form-label">Debit Account * (Expense/Asset/Liability)</label>
-                <select id="debitAccountId" name="debitAccountId" className="form-select" value={formData.debitAccountId} onChange={handleInputChange} required>
-                  <option value="">Select Debit Account Head</option>
-                  {debitAccounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                </select>
-              </div> */}
-            </div>
+            )}
 
             <div className="d-flex gap-2 mt-4">
-              <button type="submit" className="btn btn-danger" disabled={loading}> {/* Changed to btn-danger for payment */}
+              <button type="submit" className="btn btn-danger" disabled={loading}>
                 <Plus size={16} className="me-1" />
-                {loading ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update Payment' : 'Save Payment')}
+                {loading ? (isEditMode ? 'अपडेट करत आहे...' : 'जतन करत आहे...') : (isEditMode ? 'पेमेंट अपडेट करा' : 'पेमेंट जतन करा')}
               </button>
-              <button type="button" className="btn btn-info" disabled={loading || !formData.amount}>
-                <FileText size={16} className="me-1" /> Print Voucher
+              <button
+                type="button"
+                className="btn btn-info"
+                disabled={loading || !formData.amount}
+              >
+                <FileText size={16} className="me-1" /> व्हाउचर प्रिंट करा
               </button>
-              <button type="button" className="btn btn-secondary" onClick={handleClear} disabled={loading}>
-                <XCircle size={16} className="me-1" /> Clear
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleClear}
+                disabled={loading}
+              >
+                <XCircle size={16} className="me-1" /> साफ करा
               </button>
             </div>
           </form>
