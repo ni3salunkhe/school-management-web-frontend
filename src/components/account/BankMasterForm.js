@@ -11,6 +11,7 @@ const initialFormData = {
   id: null,
   bankName: '',
   accountNumber: '',
+  headId:null,
   accounttype: '',
   branchName: '',
   ifscCode: '',
@@ -30,12 +31,14 @@ const BankMasterForm = () => {
   const [formError, setFormError] = useState(null); // For form submission errors
   const [formSuccess, setFormSuccess] = useState(null); // For form submission success
   const [searchTerm, setSearchTerm] = useState('');
+  const [heads, setHeads] = useState([]);
   const udiseNo = sessionStorage.getItem('token') ? jwtDecode(sessionStorage.getItem('token'))?.udiseNo : null;
 
   useEffect(() => {
     if (udiseNo) {
       fetchBanks();
       fetchAccountType();
+      fetchHeads();
     } else {
       setError("Udise No. not found. Cannot fetch data.");
     }
@@ -53,6 +56,28 @@ const BankMasterForm = () => {
       setLoading(false);
     }
   };
+
+  const fetchHeads = async () => {
+    if (!udiseNo) {
+      setHeads([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const heads = await apiService.getdata("headmaster/");
+      console.log(heads.data);
+      setHeads(heads.data);
+
+    }
+    catch (err) {
+      setError(`Failed to fetch customers: ${err.message}`);
+      setHeads([]);
+    }
+    finally {
+      setLoading(false);
+    }
+  }
 
   const fetchAccountType = async () => {
     try {
@@ -83,16 +108,22 @@ const BankMasterForm = () => {
         message = 'खाते नंबर बरोबर नाही (16 अंक). (उदा. 1234567890001234)';
       }
     }
+
+    if(name==='headId' && !value)
+    {
+      message ='हेड आवश्यक आहे.';
+    }
+
     if (name === 'accounttype' && !value) {
-        message = 'खात्याचा प्रकार आवश्यक आहे.';
+      message = 'खात्याचा प्रकार आवश्यक आहे.';
     }
     if (name === 'branchName') {
-        if (!value.trim()) message = 'शाखेचे नाव आवश्यक आहे.';
-        else if (value && !isMarathi(value)) message = 'हे क्षेत्र फक्त मराठीत असावे.';
+      if (!value.trim()) message = 'शाखेचे नाव आवश्यक आहे.';
+      else if (value && !isMarathi(value)) message = 'हे क्षेत्र फक्त मराठीत असावे.';
     }
     if (name === 'address') {
-        if (!value.trim()) message = 'पत्ता आवश्यक आहे.';
-        else if (value && !isMarathi(value)) message = 'हे क्षेत्र फक्त मराठीत असावे.';
+      if (!value.trim()) message = 'पत्ता आवश्यक आहे.';
+      else if (value && !isMarathi(value)) message = 'हे क्षेत्र फक्त मराठीत असावे.';
     }
     if (name === 'ifscCode') {
       const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
@@ -111,7 +142,7 @@ const BankMasterForm = () => {
     const { name, value } = e.target;
     let processedValue = value;
     if (name === 'ifscCode') {
-        processedValue = value.toUpperCase();
+      processedValue = value.toUpperCase();
     }
     const fieldError = validateField(name, processedValue);
     setErrors({ ...errors, [name]: fieldError });
@@ -130,18 +161,18 @@ const BankMasterForm = () => {
     const fieldsToValidate = ['bankName', 'accountNumber', 'accounttype', 'branchName', 'ifscCode', 'address'];
 
     fieldsToValidate.forEach(field => {
-        const message = validateField(field, formData[field]);
-        if (message) {
-            newErrors[field] = message;
-            formIsValid = false;
-        }
+      const message = validateField(field, formData[field]);
+      if (message) {
+        newErrors[field] = message;
+        formIsValid = false;
+      }
     });
 
     setErrors(newErrors);
 
     if (!formIsValid) {
-        showAlert.sweetAlert("त्रुटि!", "कृपया फॉर्ममधील त्रुटी तपासा आणि दुरुस्त करा.", "error");
-        return;
+      showAlert.sweetAlert("त्रुटि!", "कृपया फॉर्ममधील त्रुटी तपासा आणि दुरुस्त करा.", "error");
+      return;
     }
 
     const bankDto = {
@@ -149,6 +180,7 @@ const BankMasterForm = () => {
       bankname: formData.bankName.trim(),
       accountno: formData.accountNumber.trim(),
       accounttype: formData.accounttype, // This should be the ID
+      headId:formData.headId,
       branch: formData.branchName.trim(),
       ifsccode: formData.ifscCode.trim().toUpperCase(),
       address: formData.address.trim(),
@@ -168,8 +200,8 @@ const BankMasterForm = () => {
           setFormSuccess("बँक माहिती यशस्वीरित्या जतन झाली.");
           showAlert.sweetAlert("यशस्वी", "बँक माहिती जतन झाली.", "success");
         } else {
-            setLoading(false);
-            return; // User cancelled
+          setLoading(false);
+          return; // User cancelled
         }
       }
       handleClear(); // Clear form and errors
@@ -210,7 +242,7 @@ const BankMasterForm = () => {
         showAlert.sweetAlert("हटवले", `"${name}" बँक यशस्वीरित्या हटवली गेली.`, "success");
         fetchBanks(); // Refresh list
         if (formData.id === id) { // If deleting the bank currently in form
-            handleClear();
+          handleClear();
         }
       } catch (err) {
         const apiErrorMessage = err.response?.data?.message || err.message;
@@ -237,13 +269,13 @@ const BankMasterForm = () => {
   );
 
   if (!udiseNo && !error) {
-      return (
-          <div className="container py-4" style={{ maxWidth: '1000px' }}>
-              <div className="alert alert-warning text-center">
-                  युडीएस क्रमांक लोड होत आहे किंवा उपलब्ध नाही.
-              </div>
-          </div>
-      );
+    return (
+      <div className="container py-4" style={{ maxWidth: '1000px' }}>
+        <div className="alert alert-warning text-center">
+          युडीएस क्रमांक लोड होत आहे किंवा उपलब्ध नाही.
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -278,7 +310,7 @@ const BankMasterForm = () => {
 
           <form onSubmit={handleSubmit} noValidate>
             <div className="row g-3">
-              <div className="col-md-6">
+              <div className="col-md-5">
                 <label htmlFor="bankName" className="form-label fw-medium">बँकेचे नाव{mandatoryFields()}</label>
                 <input
                   id="bankName"
@@ -290,7 +322,7 @@ const BankMasterForm = () => {
                 />
                 {errors.bankName && <div className="invalid-feedback">{errors.bankName}</div>}
               </div>
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <label htmlFor="accountNumber" className="form-label fw-medium">खाते क्रमांक{mandatoryFields()}</label>
                 <input
                   id="accountNumber"
@@ -304,6 +336,25 @@ const BankMasterForm = () => {
                   inputMode="numeric" // Hint for mobile keyboards
                 />
                 {errors.accountNumber && <div className="invalid-feedback">{errors.accountNumber}</div>}
+              </div>
+              <div className='col-12 col-md-3'>
+                <label htmlFor='headId' className="form-label small fw-bold mb-1">हेड</label>
+                <select
+                  className={`form-select ${errors.headId ? 'is-invalid' : ''}`}
+                  id='headId'
+                  name="headId"
+                  value={formData.headId}
+                  onChange={handleInputChange}
+                  disabled={loading || heads.length === 0}
+                >
+                  <option value="">-- हेड निवडा --</option>
+                  {heads.map(head => (
+                    <option key={head.headId} value={head.headId}>
+                      {head.headName}
+                    </option>
+                  ))}
+                </select>
+                {errors.headId && <div className="invalid-feedback small">{errors.headId}</div>}
               </div>
               <div className="col-md-4">
                 <label htmlFor="accounttype" className="form-label fw-medium">खात्याचा प्रकार{mandatoryFields()}</label>
@@ -383,8 +434,8 @@ const BankMasterForm = () => {
             className="form-control form-control-sm w-auto"
             placeholder="शोधा (नाव, खाते क्र., IFSC)"
             value={searchTerm}
-            onChange={(e) => {setSearchTerm(e.target.value); setError(null);}} // Clear general error on search
-            style={{maxWidth: '280px'}}
+            onChange={(e) => { setSearchTerm(e.target.value); setError(null); }} // Clear general error on search
+            style={{ maxWidth: '280px' }}
           />
         </div>
         <div className="card-body p-0">
@@ -400,7 +451,7 @@ const BankMasterForm = () => {
               अद्याप कोणतीही बँक नोंदवलेली नाही. कृपया <a href="#bankName" onClick={() => document.getElementById('bankName')?.focus()} className="text-decoration-none">नवीन बँक जोडा</a>.
             </p>
           ) : !loading && filteredBankList.length === 0 && bankList.length > 0 ? (
-             <p className="p-4 text-center text-muted mb-0">
+            <p className="p-4 text-center text-muted mb-0">
               तुमच्या शोधाशी जुळणारी कोणतीही बँक सापडली नाही.
             </p>
           ) : filteredBankList.length > 0 ? (
@@ -413,8 +464,8 @@ const BankMasterForm = () => {
                     <th scope="col">खात्याचा प्रकार</th>
                     <th scope="col">शाखा</th>
                     <th scope="col">IFSC कोड</th>
-                    <th scope="col" style={{minWidth: '150px'}}>पत्ता</th>
-                    <th scope="col" className="text-center" style={{width: '100px'}}>कृती</th>
+                    <th scope="col" style={{ minWidth: '150px' }}>पत्ता</th>
+                    <th scope="col" className="text-center" style={{ width: '100px' }}>कृती</th>
                   </tr>
                 </thead>
                 <tbody className="small">
@@ -451,7 +502,7 @@ const BankMasterForm = () => {
                 </tbody>
               </table>
             </div>
-          ) : null /* Fallback for other states, e.g. initial load or error state handled above */ }
+          ) : null /* Fallback for other states, e.g. initial load or error state handled above */}
         </div>
         {bankList.length > 0 && (
           <div className="card-footer text-muted small bg-light border-top py-2">
