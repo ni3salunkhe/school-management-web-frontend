@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Building2, Users, CreditCard, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import apiService from '../../services/api.service';
 // import { getDashboardSummary } from '../../../services/accountApi'; // Your API service
 
 const Dashboard = () => {
@@ -13,8 +14,17 @@ const Dashboard = () => {
   });
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [creditAmount, setCreditAmount] = useState(null)
+  const [debitAmount, setDebitAmount] = useState(null)
 
   useEffect(() => {
+
+    const fetchSumofCrDr = async () => {
+      const response = await apiService.getdata(`openingbal/sum`);
+      setCreditAmount(response.data.totalCr)
+      setDebitAmount(response.data.totalDr)
+    }
+
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
@@ -43,6 +53,7 @@ const Dashboard = () => {
       }
     };
     fetchDashboardData();
+    fetchSumofCrDr()
   }, []);
 
   const formatCurrency = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
@@ -170,7 +181,8 @@ const Dashboard = () => {
               <h5 className="mb-0">Quick Actions</h5>
             </div>
             <div className="card-body">
-              <div className="list-group">
+              {
+                creditAmount !== debitAmount ? <div className="list-group">
                 <Link to="cash-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
                   <Plus size={20} className="me-3 text-primary" /> Create Cash Receipt
                 </Link>
@@ -183,10 +195,11 @@ const Dashboard = () => {
                 <Link to="bank-payment" className="list-group-item list-group-item-action d-flex align-items-center">
                   <Plus size={20} className="me-3 text-warning" /> Create Bank Payment
                 </Link>
-                 <Link to="/account/masters/sub-head" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
+                <Link to="/account/masters/sub-head" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
                   <Plus size={20} className="me-3 text-secondary" /> Manage Account Heads
                 </Link>
-              </div>
+              </div>:<div>First Balance the credit amount and debit amount</div>
+              }
             </div>
           </div>
         </div>

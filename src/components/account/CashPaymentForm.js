@@ -3,6 +3,8 @@ import { Plus, FileText, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import { BiIdCard } from 'react-icons/bi';
+
 
 const initialFormData = {
   voucherNo: '',
@@ -18,6 +20,11 @@ const initialFormData = {
 };
 
 const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
+  const [mainHead, setMainHead] = useState({})
+  const head = async () => {
+    const headName = "Cash In Hand"
+    const response = await apiService.getdata(`headmaster/getbyheadname/${headName}`)
+  }
   const [formData, setFormData] = useState(initialFormData);
   const [debitAccounts, setDebitAccounts] = useState([]);
   const [parties, setParties] = useState([]);
@@ -25,16 +32,41 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-
+  const [currentBalance, setCurrentBalance] = useState(null)
+  const [mainHeadBalance, setMainHeadBalance] = useState(null)
   const staffId = jwtDecode(sessionStorage.getItem('token'))?.id;
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
   const fetchCustomers = async () => {
     const response = await apiService.getdata(`customermaster/getbyudise/${schoolUdise}`);
-    setParties(response.data || []);
+    const filteredParties = (response.data || []).filter(
+      party => party.custName !== "कॅश इन हँड"
+    );
+    setParties(filteredParties);
+    console.log(response.data)
+    const recordedMain = (response.data || []).find(c => c.custName === "कॅश इन हँड")
+    console.log(recordedMain)
+    setMainHead({
+      headName: recordedMain.custName,
+      headId: recordedMain.custId
+    })
+    fetchBalanceForHead(recordedMain.custId)
   };
 
+  const fetchBalance = async(id) =>{
+    await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b)=>
+    setCurrentBalance(b.data )
+    )
+  }
+
+  const fetchBalanceForHead = async(id) =>{
+    await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b)=>
+    setMainHeadBalance(b.data )
+    )
+  }
+
   useEffect(() => {
+    head()
     const fetchInitialData = async () => {
       setLoading(true);
       try {
@@ -59,8 +91,10 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     };
     fetchInitialData();
     fetchCustomers();
+    
   }, [isEditMode, transactionId]);
 
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -72,12 +106,14 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const handlePartyChange = (e) => {
     const partyId = e.target.value;
     const selectedParty = parties.find(p => p.custId === Number(partyId));
+    console.log(selectedParty)
     setFormData(prev => ({
       ...prev,
       paidToId: partyId,
       paidToHead: selectedParty ? selectedParty.headId.headId : '',
       paidToSubHead: selectedParty ? selectedParty.subheadId.subheadId : ''
     }));
+    fetchBalance(selectedParty ? selectedParty.subheadId.subheadId : '')
   };
 
   const handleSubmit = async (e) => {
@@ -117,12 +153,14 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
       await apiService.postdata("cashpayment/", payload);
       setSuccess(`रोख पेमेंट यशस्वीरित्या जतन झाले! व्हाउचर नं.: ${formData.voucherNo}`);
+      setCurrentBalance(null)
       const nextVoucher = `CP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
       setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] });
     } catch (err) {
       setError(`ऑपरेशन अयशस्वी: ${err.message}`);
     } finally {
       setLoading(false);
+      fetchCustomers();
     }
   };
 
@@ -150,38 +188,77 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         <div className="card-header"><h5 className="mb-0">रोख पेमेंट तपशील</h5></div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="row g-3 mb-3">
-              <div className="col-md-4">
-                <label htmlFor="date" className="form-label">दिनांक *</label>
-                <input type="date" id="date" name="date" className="form-control" value={formData.date} onChange={handleInputChange} required />
-              </div>
-
-              <div className="col-md-4">
-                <label htmlFor="paidToId" className="form-label">पक्षकार *</label>
-                <select id="paidToId" name="paidToId" className={`form-select ${validationErrors.paidToId ? 'is-invalid' : ''}`} value={formData.paidToId} onChange={handlePartyChange}>
-                  <option value="">पक्षकार निवडा</option>
-                  {parties.map(p => <option key={p.custId} value={p.custId}>{p.custName}</option>)}
-                </select>
-                {validationErrors.paidToId && <div className="invalid-feedback">{validationErrors.paidToId}</div>}
-              </div>
-
-              <div className="col-md-4">
-                <label className="form-label">जमा खाते</label>
-                <input type="text" className="form-control" value="हातातील रोकड (Cash In Hand)" readOnly disabled />
+            <div className="mb-4 bg-light p-3 rounded">
+              <div className="row g-3 mb-3">
+                <div className="col-md-4 float-end">
+                  <label htmlFor="date" className="form-label">दिनांक *</label>
+                  <input type="date" id="date" name="date" className="form-control" value={formData.date} onChange={handleInputChange} required />
+                </div>
               </div>
             </div>
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                देयकर्ता खाते माहिती
+              </h5>
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label className="form-label">जमा खाते</label>
+                  <input type="text" className="form-control" value={mainHead.headName} readOnly disabled />
+                </div>
 
-            <div className="row g-3 mb-3">
-              <div className="col-md-4">
-                <label htmlFor="amount" className="form-label">रक्कम *</label>
-                <input type="number" id="amount" name="amount" className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`} value={formData.amount} onChange={handleInputChange} required />
-                {validationErrors.amount && <div className="invalid-feedback">{validationErrors.amount}</div>}
+                <div className="col-md-2">
+                  <label className="form-label">खाते क्र.</label>
+                  <input type="text" className="form-control" value={mainHead.headId} name='headId' readOnly disabled />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label">वर्तमान शिल्लक</label>
+                  <input type="text" className="form-control" value={mainHeadBalance} readOnly disabled />
+                </div>
               </div>
+            </div>
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                प्राप्तकर्ता खाते माहिती
+              </h5>
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label htmlFor="paidToId" className="form-label">पक्षकार *</label>
+                  <select id="paidToId" name="paidToId" className={`form-select ${validationErrors.paidToId ? 'is-invalid' : ''}`} value={formData.paidToId} onChange={handlePartyChange}>
+                    <option value="">पक्षकार निवडा</option>
+                    {parties.map(p => <option key={p.custId} value={p.custId}>{p.custName}</option>)}
+                  </select>
+                  {validationErrors.paidToId && <div className="invalid-feedback">{validationErrors.paidToId}</div>}
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label">खाते क्र.</label>
+                  <input type="text" className="form-control" value={formData.paidToId} name='headId' readOnly disabled />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label">वर्तमान शिल्लक</label>
+                  <input type="text" className="form-control" value={currentBalance} readOnly disabled />
+                </div>
+              </div>
+            </div>
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                देय रक्कम व इतर माहिती
+              </h5>
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label htmlFor="amount" className="form-label">रक्कम *</label>
+                  <input type="number" id="amount" name="amount" className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`} value={formData.amount} onChange={handleInputChange} required />
+                  {validationErrors.amount && <div className="invalid-feedback">{validationErrors.amount}</div>}
+                </div>
 
-              <div className="col-md-8">
-                <label htmlFor="narration" className="form-label">खर्चाचा तपशील *</label>
-                <input type="text" id="narration" name="narration" className={`form-control ${validationErrors.narration ? 'is-invalid' : ''}`} value={formData.narration} onChange={handleInputChange} />
-                {validationErrors.narration && <div className="invalid-feedback">{validationErrors.narration}</div>}
+                <div className="col-md-8">
+                  <label htmlFor="narration" className="form-label">खर्चाचा तपशील </label>
+                  <input type="text" id="narration" name="narration" className={`form-control ${validationErrors.narration ? 'is-invalid' : ''}`} value={formData.narration} onChange={handleInputChange} />
+                  {validationErrors.narration && <div className="invalid-feedback">{validationErrors.narration}</div>}
+                </div>
               </div>
             </div>
 

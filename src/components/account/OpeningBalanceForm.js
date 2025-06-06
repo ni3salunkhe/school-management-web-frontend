@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, DollarSign } from 'lucide-react';
+import { Save, DollarSign, Pencil, Trash2, Group } from 'lucide-react';
 import apiService from '../../services/api.service';
 
 const OpeningBalanceForm = () => {
@@ -9,10 +9,94 @@ const OpeningBalanceForm = () => {
   const [allHeads, setAllHeads] = useState([]);
   const [allSubHeads, setAllSubHeads] = useState([]);
   const [financialYearsList, setFinancialYearsList] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [creditAmount, setCreditAmount] = useState(1500.00);
+  const [debitAmount, setDebitAmount] = useState(1200.00);
+  const [filteredSubheads, setFilterdSubheads] = useState([])
+  const isBalanced = creditAmount === debitAmount;
+  const [balances, setBalances] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [flag, setFlag] = useState(false)
+
+  useEffect(() => {
+    fetchOpeningBalances();
+  }, []);
+
+  const fetchOpeningBalances = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getdata('openingbal/');
+      setBalances(response.data || []);
+    } catch (err) {
+      setError(`Failed to fetch opening balances: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this entry?')) return;
+    try {
+      await apiService.deletedata(`openingbal/${id}`);
+      fetchOpeningBalances();
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+    }
+  };
+
+  const toggleSelectRow = (id) => {
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+    );
+    console.log(selectedRows)
+  };
+
+  const selectedLedger = async () => {
+    if (selectedRows.length === 0) {
+      alert('No rows selected');
+      return;
+    }
+
+    try {
+      const selectedEntries = balances.filter((b) => selectedRows.includes(b.id));
+      console.log(selectedEntries)
+      const ledgerPayload = selectedEntries.map((entry) => ({
+        entryType: 'Opening Balance',
+        headid: entry.headId?.headId,
+        subhead: entry.subHeadId?.subheadId,
+        Dr_Amt: entry.drAmt,
+        Cr_Amt: entry.crAmt,
+        narr: 'Opening balance',
+        // date: `${entry.year.split('-')[0]}-04-01`, // assumes 1st April of start year
+        // year: entry.year
+      }));
+
+      console.log(ledgerPayload)
+      console.log("Submitting to General Ledger:", ledgerPayload);
+
+      await apiService.postdata('generalledger/bulk', ledgerPayload);
+
+      alert('Successfully added to General Ledger!');
+      setSelectedRows([]); // Reset selection
+    } catch (error) {
+      console.error('Ledger submission failed:', error);
+      alert(`Failed to submit to General Ledger: ${error.message}`);
+    }
+  };
+
+  const deleteSelected = async () => {
+    if (!window.confirm('Delete selected records?')) return;
+    try {
+      await Promise.all(selectedRows.map((id) => apiService.deletedata(`openingbal/${id}`)));
+      setSelectedRows([]);
+      fetchOpeningBalances();
+    } catch (err) {
+      alert('Batch delete failed: ' + err.message);
+    }
+  };
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -23,6 +107,7 @@ const OpeningBalanceForm = () => {
     ];
     setFinancialYearsList(mockYears);
     fetchAccounts();
+    fetchSumofCrDr();
   }, []);
 
   useEffect(() => {
@@ -56,7 +141,7 @@ const OpeningBalanceForm = () => {
 
       setAllHeads(heads);
       setAllSubHeads(entries);
-      setSubheadEntries(entries); // initial
+      setSubheadEntries(entries);
     } catch (err) {
       setError(`Failed to fetch accounts: ${err.message}`);
     } finally {
@@ -64,10 +149,25 @@ const OpeningBalanceForm = () => {
     }
   };
 
+  const fetchSumofCrDr = async () => {
+    const response = await apiService.getdata(`openingbal/sum`).catch((e)=>console.log(e));
+    setCreditAmount(response.data.totalCr)
+    setDebitAmount(response.data.totalDr)
+  }
+
   const fetchOpeningBalancesForYear = async (fy) => {
     setLoading(true);
     try {
       let obData = [];
+      const response = await apiService.getdata(`openingbal/`);
+      const existingSubHeadIds = (response.data || []).map(item => item.subHeadId.subheadId); // Get IDs from nested object
+
+      const filteredData = allSubHeads.filter(h => !existingSubHeadIds.includes(h.subHeadId)); // Exclude existing ones
+      console.log(response.data);
+
+      setSubheadEntries(filteredData);
+
+
 
       if (fy === '2024-2025') {
         obData = [
@@ -76,7 +176,7 @@ const OpeningBalanceForm = () => {
         ];
       }
 
-      const updatedEntries = allSubHeads.map((entry) => {
+      const updatedEntries = filteredData.map((entry) => {
         const match = obData.find((ob) => ob.subHeadId === entry.subHeadId);
         return {
           ...entry,
@@ -98,11 +198,11 @@ const OpeningBalanceForm = () => {
       prev.map((entry) =>
         entry.subHeadId === subHeadId
           ? {
-              ...entry,
-              [field]: value,
-              ...(field === 'debit' ? { credit: '' } : {}),
-              ...(field === 'credit' ? { debit: '' } : {}),
-            }
+            ...entry,
+            [field]: value,
+            ...(field === 'debit' ? { credit: '' } : {}),
+            ...(field === 'credit' ? { debit: '' } : {}),
+          }
           : entry
       )
     );
@@ -153,8 +253,16 @@ const OpeningBalanceForm = () => {
     } finally {
       setSaving(false);
       setSelectedHeadId('')
+      fetchSumofCrDr()
+      fetchOpeningBalances();
+
     }
+
+
   };
+  if (flag === true) {
+    console.log(selectedRows)
+  }
 
   const filteredEntries = selectedHeadId
     ? subheadEntries.filter((entry) => entry.headId === parseInt(selectedHeadId))
@@ -162,16 +270,58 @@ const OpeningBalanceForm = () => {
 
   const totalDebit = calculateTotal('debit');
   const totalCredit = calculateTotal('credit');
-  const difference = totalDebit - totalCredit;
+  const difference = creditAmount - debitAmount;
 
   return (
     <div className="container-fluid py-3">
       <h3>Opening Balance Entry</h3>
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
+      <div className="row justify-content-center py-2">
+        <div className="col-md-8 col-lg-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-primary text-white">
+              <h5 className="mb-0">Account Balance Summary</h5>
+            </div>
+            <div className="card-body">
+              <div className="row mb-3">
+                <div className="col-6">
+                  <div className="text-center p-3 bg-success bg-opacity-10 rounded">
+                    <h6 className="text-success mb-2">Credit Amount</h6>
+                    <h4 className="text-success fw-bold">₹{creditAmount.toFixed(2)}</h4>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="text-center p-3 bg-danger bg-opacity-10 rounded">
+                    <h6 className="text-danger mb-2">Debit Amount</h6>
+                    <h4 className="text-danger fw-bold">₹{debitAmount.toFixed(2)}</h4>
+                  </div>
+                </div>
+              </div>
 
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
+              <div className="text-center">
+                {isBalanced ? (
+                  <div className="alert alert-success" role="alert">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    <strong>Balanced!</strong> Credit and Debit amounts are equal.
+                  </div>
+                ) : (
+                  <div className="alert alert-warning" role="alert">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Imbalance Detected!</strong>
+                    <br />
+                    Difference: ₹{difference.toFixed(2)}
+                    <br />
+                    {creditAmount > debitAmount ? 'Credit exceeds Debit' : 'Debit exceeds Credit'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="card ">
+        <div className="card-header d-flex justify-content-between align-items-center bg-primary text-white">
           <div className="d-flex align-items-center gap-2">
             <DollarSign size={20} />
             <strong> Set Opening Balances</strong>
@@ -269,7 +419,7 @@ const OpeningBalanceForm = () => {
                 <button
                   type="submit"
                   className="btn btn-success"
-                  // disabled={saving || difference !== 0}
+                // disabled={saving || difference !== 0}
                 >
                   <Save size={16} className="me-1" />
                   {saving ? 'Saving...' : 'Save Opening Balances'}
@@ -282,10 +432,78 @@ const OpeningBalanceForm = () => {
           )}
         </div>
 
-        <div className="card-footer">
+        <div className="card-footer bg-success bg-opacity-10">
           <small className="text-muted">
             Only balance sheet accounts can have opening balances. Ensure totals are equal.
           </small>
+        </div>
+      </div>
+      <div className="card mt-4">
+        <div className="card-header d-flex justify-content-between bg-primary text-white">
+          <h5 className="mb-0">Opening Balance Records</h5>
+          {selectedRows.length > 0 && (
+            <button className="btn btn-danger btn-sm float-end" onClick={deleteSelected}>
+              Delete Selected ({selectedRows.length})
+            </button>
+          )}
+          {selectedRows.length > 0 && (
+            <button className="btn btn-success btn-sm " onClick={selectedLedger}>
+              Add to general ledger ({selectedRows.length})
+            </button>
+          )}
+        </div>
+
+        <div className="card-body table-responsive">
+          {error && <div className="alert alert-danger">{error}</div>}
+          <table className="table table-sm table-bordered">
+            <thead className="table-light">
+              <tr>
+                <th><input type="checkbox" onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedRows(balances.map((b) => b.id));
+                  } else {
+                    setSelectedRows([]);
+                  }
+                }} /></th>
+                <th>Subhead</th>
+                <th>Head</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Year</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {balances.map((b) => {
+                const type = b.drAmt > 0 ? 'Debit' : 'Credit';
+                const amount = b.drAmt > 0 ? b.drAmt : b.crAmt;
+                return (
+                  <tr key={b.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(b.id)}
+                        onChange={() => toggleSelectRow(b.id)}
+                      />
+                    </td>
+                    <td>{b.subHeadId?.subheadName}</td>
+                    <td>{b.headId?.headName}</td>
+                    <td>{type}</td>
+                    <td>₹{amount.toLocaleString()}</td>
+                    <td>{b.year}</td>
+                    <td>
+                      <button className="btn btn-outline-primary btn-sm me-1" onClick={() => alert('Edit not implemented')}>
+                        <Pencil size={14} />
+                      </button>
+                      <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(b.id)}>
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

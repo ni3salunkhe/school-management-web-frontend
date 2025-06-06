@@ -172,15 +172,15 @@ const CustomerMasterForm = () => {
     switch (name) {
       case "custName":
         if (!trimmedValue) newErrors.custName = "ग्राहक नाव आवश्यक आहे.";
-        else if (!/^[\u0900-\u097F\s.,!?'"-]+$/.test(trimmedValue)) newErrors.custName = "कृपया नाव मराठी भाषेत प्रविष्ट करा.";
+        // else if (!/^[\u0900-\u097F\s.,!?'"-]+$/.test(trimmedValue)) newErrors.custName = "कृपया नाव मराठी भाषेत प्रविष्ट करा.";
         break;
       case "customerType":
         if (!trimmedValue) newErrors.customerType = "ग्राहक प्रकार आवश्यक आहे.";
-        else if (!/^[\u0900-\u097F\s.,!?'"-]+$/.test(trimmedValue)) newErrors.customerType = "कृपया ग्राहक प्रकार मराठी भाषेत प्रविष्ट करा.";
+        // else if (!/^[\u0900-\u097F\s.,!?'"-]+$/.test(trimmedValue)) newErrors.customerType = "कृपया ग्राहक प्रकार मराठी भाषेत प्रविष्ट करा.";
         break;
-      case "contactPerson":
-        if (trimmedValue && !/^[\u0900-\u097F\s.,!?'"-]+$/.test(trimmedValue)) newErrors.contactPerson = "कृपया संपर्क व्यक्ती मराठी भाषेत प्रविष्ट करा.";
-        break;
+      // case "contactPerson":
+      //   if (trimmedValue && !/^[\u0900-\u097F\s.,!?'"-]+$/.test(trimmedValue)) newErrors.contactPerson = "कृपया संपर्क व्यक्ती मराठी भाषेत प्रविष्ट करा.";
+      //   break;
       case "custMob1":
         if (!trimmedValue) newErrors.custMob1 = "मोबाईल नंबर आवश्यक आहे.";
         else if (!/^[0-9]{10}$/.test(trimmedValue)) newErrors.custMob1 = "कृपया 10-अंकी इंग्रजी मोबाईल नंबर प्रविष्ट करा.";
@@ -200,9 +200,9 @@ const CustomerMasterForm = () => {
           else if (customers.some(cust => cust.email && cust.email.trim().toLowerCase() === trimmedValue.toLowerCase() && (isEditing ? cust.custId !== formData.custId : true))) newErrors.email = "हा ईमेल आधीपासून अस्तित्वात आहे.";
         }
         break;
-      case "custAddress":
-        if (trimmedValue && !/^[\u0900-\u097F0-9\s.,!?'"/-]+$/.test(trimmedValue)) newErrors.custAddress = "कृपया पत्ता मराठी भाषेत प्रविष्ट करा.";
-        break;
+      // case "custAddress":
+      //   if (trimmedValue && !/^[\u0900-\u097F0-9\s.,!?'"/-]+$/.test(trimmedValue)) newErrors.custAddress = "कृपया पत्ता मराठी भाषेत प्रविष्ट करा.";
+      //   break;
       case "pinCode":
         if (trimmedValue && !/^\d{6}$/.test(trimmedValue)) newErrors.pinCode = "कृपया 6 अंकांचा पिनकोड प्रविष्ट करा.";
         break;
@@ -656,7 +656,6 @@ const CustomerMasterForm = () => {
                   <option value="">-- हेड निवडा --</option>
                   {heads.map(head => (
                     <option key={head.headId} value={head.headId}>
-                      {head.headName}
                       {head.headName}
                     </option>
                   ))}

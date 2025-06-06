@@ -1,5 +1,5 @@
 // src/components/account/Masters/SubHeadMasterForm.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Edit, Save, XCircle, ListPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import mandatoryFields from '../../services/mandatoryField';
@@ -28,6 +28,7 @@ const SubHeadMasterForm = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterParentHead, setFilterParentHead] = useState('');
   const udiseNo = jwtDecode(sessionStorage.getItem('token')).udiseNo;
+  const [nextId, setNextId] = useState(null)
   const isMarathi = (text) => /^[\u0900-\u097F\s]+$/.test(text);
   useEffect(() => {
     fetchParentHeads();
@@ -48,7 +49,17 @@ const SubHeadMasterForm = () => {
     }
   };
 
-  console.log(subHeadList);
+  const idIncrement = async () => {
+    await apiService.getdata("subheadmaster/next-id")
+      .then(res => setNextId(res.data)
+      )
+
+  }
+  useEffect(() => {
+    idIncrement()
+  }, []);
+
+  console.log(nextId);
 
 
   const fetchSubHeads = async () => {
@@ -148,24 +159,20 @@ const SubHeadMasterForm = () => {
 
     if (error) return;
 
-    if (!formData.subheadName || !formData.parentHeadId || !formData.subHeadCode) {
+    if (!formData.subheadName || !formData.parentHeadId) {
       setError("उप-हेड नाव, कोड आणि मुख्य हेड आवश्यक आहे.");
       return;
     }
-    // if (!formData.isProfitLossItem && !formData.isBalanceSheetItem) {
-    //   setError("हेड लाभ-तोटा किंवा बॅलन्स शीट मध्ये असणे आवश्यक आहे.");
-    //   return;
-    // }
-
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
+      let id = nextId
       const payload = {
         ...formData,
         subheadName: formData.subheadName,
-        subheadId: formData.subHeadCode,
+        subheadId: id++,
         headId: formData.parentHeadId,
         schoolUdise: udiseNo
       };
@@ -191,6 +198,8 @@ const SubHeadMasterForm = () => {
       setError(`ऑपरेशन अयशस्वी: ${err.message}`);
     } finally {
       setLoading(false);
+      idIncrement()
+
     }
   };
 
@@ -222,7 +231,7 @@ const SubHeadMasterForm = () => {
   //   (filterParentHead === '' || sh.parentHeadId === filterParentHead)
   // );
 
-    const filteredSubHeadList = subHeadList.filter(sh => {
+  const filteredSubHeadList = subHeadList.filter(sh => {
     const matchesSearch =
       (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (sh.subHeadCode && String(sh.subHeadCode).includes(searchTerm));
@@ -233,7 +242,7 @@ const SubHeadMasterForm = () => {
     return matchesSearch && matchesParentHead;
   });
 
-  
+
   return (
     <div className="container-fluid py-3">
       <div className="row mb-3">
@@ -261,43 +270,6 @@ const SubHeadMasterForm = () => {
           <form onSubmit={handleSubmit} noValidate>
             <div className="row g-3">
               <div className="col-md-4">
-                <label htmlFor="subheadName" className="form-label">
-                  उप-हेड नाव {mandatoryFields()}
-                </label>
-                <input
-                  type="text"
-                  id="subheadName"
-                  name="subheadName"
-                  className={`form-control ${error && error.includes('नाव') ? 'is-invalid' : ''}`}
-                  placeholder="उप-हेड नाव लिहा"
-                  value={formData.subheadName}
-                  onChange={handleInputChange}
-                  maxLength={100}
-                  autoFocus
-                  required
-                />
-                {error && error.includes('नाव') && <div className="invalid-feedback">{error}</div>}
-              </div>
-
-              <div className="col-md-4">
-                <label htmlFor="subHeadCode" className="form-label">
-                  उप-हेड कोड {mandatoryFields()}
-                </label>
-                <input
-                  type="text"
-                  id="subHeadCode"
-                  name="subHeadCode"
-                  className={`form-control ${error && error.includes('कोड') ? 'is-invalid' : ''}`}
-                  placeholder="उदाहरणार्थ, 1000"
-                  value={formData.subHeadCode}
-                  onChange={handleInputChange}
-                  maxLength={10}
-                  required
-                />
-                {error && error.includes('कोड') && <div className="invalid-feedback">{error}</div>}
-              </div>
-
-              <div className="col-md-4">
                 <label htmlFor="parentHeadId" className="form-label">
                   मुख्य हेड {mandatoryFields()}
                 </label>
@@ -316,6 +288,42 @@ const SubHeadMasterForm = () => {
                 </select>
                 {error && error.includes('मुख्य') && <div className="invalid-feedback">{error}</div>}
               </div>
+              <div className="col-md-4">
+                <label htmlFor="subheadName" className="form-label">
+                  उप-हेड नाव {mandatoryFields()}
+                </label>
+                <input
+                  type="text"
+                  id="subheadName"
+                  name="subheadName"
+                  className={`form-control ${error && error.includes('नाव') ? 'is-invalid' : ''}`}
+                  placeholder="उप-हेड नाव लिहा"
+                  value={formData.subheadName}
+                  onChange={handleInputChange}
+                  maxLength={100}
+                  autoFocus
+                  required
+                />
+                {error && error.includes('नाव') && <div className="invalid-feedback">{error}</div>}
+              </div>
+
+              {/* <div className="col-md-4">
+                <label htmlFor="subHeadCode" className="form-label">
+                  उप-हेड कोड {mandatoryFields()}
+                </label>
+                <input
+                  type="text"
+                  id="subHeadCode"
+                  name="subHeadCode"
+                  className={`form-control ${error && error.includes('कोड') ? 'is-invalid' : ''}`}
+                  placeholder="उदाहरणार्थ, 1000"
+                  value={formData.subHeadCode}
+                  onChange={handleInputChange}
+                  maxLength={10}
+                  required
+                />
+                {error && error.includes('कोड') && <div className="invalid-feedback">{error}</div>}
+              </div> */}
             </div>
             <div className="row mt-4">
               <div className="col-md-12">

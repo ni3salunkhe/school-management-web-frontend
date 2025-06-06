@@ -11,7 +11,7 @@ import Developer from './pages/Developer';
 import Account from './modules/Account'
 import { authService } from './services/authService';
 import { jwtDecode } from 'jwt-decode';
-import {getSidebarItems } from './utils/SidebarConfig'
+import { getSidebarItems } from './utils/SidebarConfig'
 
 
 function NavigationBlocker() {
@@ -51,28 +51,27 @@ function NavigationBlocker() {
 
 function App() {
   const location = useLocation();
-  const navigate=useNavigate()
-  useEffect(()=>{
-    const authenticated=authService.isAuthenticated();
-    
-    if(!authenticated){
+  const navigate = useNavigate()
+  useEffect(() => {
+    const authenticated = authService.isAuthenticated();
+
+    if (!authenticated) {
       navigate('/')
     }
+    if (sessionStorage.getItem('token') === null) {
+      navigate('/', { replace: true })
+    }
+  }, [])
 
-  },[])
-  
-  if(!sessionStorage.getItem('token')){
-    navigate('/',{replace:true})
-  }
   const isLoginPage = location.pathname === '/';
-    const componentMap = ['StudentManagement','Account']; // dynamically from backend
+  const componentMap = ['StudentManagement', 'Account']; // dynamically from backend
   const { sidebarItemsHm, sidebarItemsClerk, sidebarItemsTeacher } = getSidebarItems(componentMap);
   return (
     <div>
       {!isLoginPage && <div style={{ minHeight: "45px" }}></div>}
-      
-        <NavigationBlocker />
-       <Routes>
+
+      <NavigationBlocker />
+      <Routes>
 
         <Route path="/" element={<Login />} />
         <Route
@@ -80,11 +79,11 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['DEVELOPER']}>
               <Layout role="DEVELOPER" sidebarItems={sidebarItemsHm} >
-                <Developer/>
+                <Developer />
               </Layout>
             </ProtectedRoute>
           }
-          /> 
+        />
         <Route
           path="/headmaster/*"
           element={
@@ -94,7 +93,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-          />
+        />
         <Route
           path="/clerk/*"
           element={
@@ -104,7 +103,7 @@ function App() {
               </ Layout>
             </ProtectedRoute>
           }
-          />
+        />
         <Route
           path="/teacher/*"
           element={
@@ -116,8 +115,8 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
-          />
-      </Routes> 
+        />
+      </Routes>
     </div>
   );
 }
