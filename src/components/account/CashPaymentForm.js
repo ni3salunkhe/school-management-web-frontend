@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, FileText, XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { data, Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
 import { BiIdCard } from 'react-icons/bi';
@@ -33,9 +33,11 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const [success, setSuccess] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
   const [currentBalance, setCurrentBalance] = useState(null)
-  const [mainHeadBalance, setMainHeadBalance] = useState(null)
+  const [mainHeadBalance, setMainHeadBalance] = useState(0)
   const staffId = jwtDecode(sessionStorage.getItem('token'))?.id;
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+  const [data, setData] = useState([]);
+
 
   const fetchCustomers = async () => {
     const response = await apiService.getdata(`customermaster/getbyudise/${schoolUdise}`);
@@ -45,23 +47,35 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     setParties(filteredParties);
     console.log(response.data)
     const recordedMain = (response.data || []).find(c => c.custName === "कॅश इन हँड")
-    console.log(recordedMain)
     setMainHead({
       headName: recordedMain.custName,
-      headId: recordedMain.custId
+      headId: recordedMain.headId.headId,
+      subHeadId: recordedMain.custId
     })
-    fetchBalanceForHead(recordedMain.custId)
+    const init = async () => {
+      const datas = await apiService.getdata('generalledger/')
+      console.log(datas.data);
+      setData(datas.data);
+      const opnNBalance = (datas.data || []).find(
+        b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+      );
+      console.log(opnNBalance.drAmt)
+      const transBalance = (datas.data || []).filter(
+        b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+      );
+      console.log(transBalance)
+      let transactionAmt = 0;
+      transBalance.map(a => transactionAmt += a.crAmt)
+      console.log();
+      setMainHeadBalance(opnNBalance.drAmt - transactionAmt)
+
+    }
+    init()
   };
 
-  const fetchBalance = async(id) =>{
-    await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b)=>
-    setCurrentBalance(b.data )
-    )
-  }
-
-  const fetchBalanceForHead = async(id) =>{
-    await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b)=>
-    setMainHeadBalance(b.data )
+  const fetchBalance = async (id) => {
+    await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b) =>
+      setCurrentBalance(b.data)
     )
   }
 
@@ -91,10 +105,10 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     };
     fetchInitialData();
     fetchCustomers();
-    
+
+
   }, [isEditMode, transactionId]);
 
-  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -113,7 +127,26 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       paidToHead: selectedParty ? selectedParty.headId.headId : '',
       paidToSubHead: selectedParty ? selectedParty.subheadId.subheadId : ''
     }));
-    fetchBalance(selectedParty ? selectedParty.subheadId.subheadId : '')
+
+    const init = async (selectedParty) => {
+      const datas = await apiService.getdata('generalledger/')
+      console.log(datas.data);
+      setData(datas.data);
+      const opnNBalance = (datas.data || []).find(
+        b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
+      );
+      console.log(opnNBalance.drAmt)
+      const transBalance = (datas.data || []).filter(
+        b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
+      );
+      console.log(transBalance)
+      let transactionAmt = 0;
+      transBalance.map(a => transactionAmt += a.drAmt)
+      console.log();
+      setCurrentBalance(opnNBalance.drAmt - transactionAmt)
+
+    }
+    init(selectedParty)
   };
 
   const handleSubmit = async (e) => {
@@ -148,8 +181,11 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         entryDate: formData.date,
         createDate: formData.date,
         modifieDate: formData.date,
-        status: "dr"
+        mainHead: mainHead.headId,
+        mainSubHead: mainHead.subHeadId,
+        status: "cr" // ✅ because mainSubHead is being credited (Cash is going out)
       };
+
 
       await apiService.postdata("cashpayment/", payload);
       setSuccess(`रोख पेमेंट यशस्वीरित्या जतन झाले! व्हाउचर नं.: ${formData.voucherNo}`);
@@ -214,7 +250,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
                 <div className="col-md-4">
                   <label className="form-label">वर्तमान शिल्लक</label>
-                  <input type="text" className="form-control" value={mainHeadBalance} readOnly disabled />
+                  <input type="Number" className="form-control" value={mainHeadBalance} readOnly disabled />
                 </div>
               </div>
             </div>
