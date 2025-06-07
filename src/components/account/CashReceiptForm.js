@@ -4,10 +4,13 @@ import { Plus, FileText, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import { BiIdCard } from 'react-icons/bi';
 
 const initialFormData = {
   createDate: new Date().toISOString().split('T')[0],
   custId: '',
+  headId:null,
+  subheadId:null,
   amount: '',
   narr: '',
   debitAccountId: 'CASH_IN_HAND',
@@ -15,6 +18,7 @@ const initialFormData = {
 };
 
 const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
+  const [mainHead, setMainHead] = useState({})
   const [formData, setFormData] = useState(initialFormData);
   const [creditAccounts, setCreditAccounts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -36,6 +40,16 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
         const customersData = await apiService.getbyid("customermaster/getbyudise/", schoolUdise);
         setCustomers(customersData.data || []);
+
+        const recordMain = (customersData.data || []).find(c => c.custName === "Cash In Hand") || customersData.data
+
+        console.log(recordMain);
+
+        setMainHead({
+          headName: recordMain.custName,
+          headId: recordMain.headId.headId,
+          subheadId: recordMain.subheadId.subheadId
+        })
 
         if (isEditMode && transactionId) {
           console.log("Edit mode for transaction ID:", transactionId);
@@ -71,7 +85,9 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
     fetchsingalCustomer();
     setFormData(prev => ({
       ...prev,
-      custId: customerId
+      custId: customerId,
+      headId:selectCustomer ? selectCustomer.headId.headId:'',
+      subheadId:selectCustomer ? selectCustomer.subheadId.subheadId:'',
     }));
   };
 
@@ -99,10 +115,10 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         return;
       }
 
-      const payload = { ...formData, amount: parseFloat(formData.amount), schoolUdise: schoolUdise, headId: selectCustomer.headId.headId, subheadId: selectCustomer.subheadId.subheadId, entryDate: formData.createDate };
+      const payload = { ...formData, amount: parseFloat(formData.amount), schoolUdise: schoolUdise, entryDate: formData.createDate };
       const response = await apiService.post("cashreceipt/", payload);
       console.log(response.data);
-      
+
       console.log('Submitting Data:', payload);
       setSuccess(`यशस्वीरित्या ${isEditMode ? 'अपडेट' : 'जतन'} केले!`);
       if (!isEditMode) {
@@ -157,6 +173,58 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
                   type="date" id="createDate" name="createDate" className="form-control"
                   value={(formData.createDate)} onChange={handleInputChange} required
                 />
+              </div>
+            </div>
+
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                देयकर्ता खाते माहिती
+              </h5>
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label htmlFor="custId" className="form-label">पक्षकार *</label>
+                  <select
+                    id="custId" name="custId" className="form-select"
+                    value={formData.custId} onChange={handleCustomerChange} required
+                  >
+                    <option value="">पक्ष/ग्राहक निवडा</option>
+                    {customers.map(cust => <option key={cust.custId} value={cust.custId}>{cust.custName}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-md-2">
+                  <label className="form-label">खाते क्र.</label>
+                  <input type="text" className="form-control" value={formData.custId} name='headId' readOnly disabled />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label">वर्तमान शिल्लक</label>
+                  <input type="text" className="form-control" value={87} readOnly disabled />
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                प्राप्तकर्ता खाते माहिती
+              </h5>
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label className="form-label">जमा खाते</label>
+                  <input type="text" className="form-control" value={mainHead.headName} readOnly disabled />
+                </div>
+
+                <div className="col-md-2">
+                  <label className="form-label">खाते क्र.</label>
+                  <input type="text" className="form-control" value={mainHead.headId} name='headId' readOnly disabled />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label">वर्तमान शिल्लक</label>
+                  <input type="text" className="form-control" value={87} readOnly disabled />
+                </div>
               </div>
             </div>
 

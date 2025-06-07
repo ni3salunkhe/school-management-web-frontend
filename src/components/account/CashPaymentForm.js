@@ -38,13 +38,13 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
   const fetchCustomers = async () => {
-    const response = await apiService.getdata(`customermaster/getbyudise/${schoolUdise}`);
+    const response = await apiService.getdata(`customermaster/getcustomersbyudise/${schoolUdise}`);
     const filteredParties = (response.data || []).filter(
-      party => party.custName !== "कॅश इन हँड"
+      party => party.custName !== "Cash In Hand"
     );
     setParties(filteredParties);
     console.log(response.data)
-    const recordedMain = (response.data || []).find(c => c.custName === "कॅश इन हँड")
+    const recordedMain = (response.data || []).find(c => c.custName === "Cash In Hand") || response.data
     console.log(recordedMain)
     setMainHead({
       headName: recordedMain.custName,
@@ -56,13 +56,15 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const fetchBalance = async(id) =>{
     await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b)=>
     setCurrentBalance(b.data )
-    )
+    ).catch((e=>console.log(e)
+    ))
   }
 
   const fetchBalanceForHead = async(id) =>{
     await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b)=>
     setMainHeadBalance(b.data )
-    )
+    ).catch((e=>console.log(e)
+    ))
   }
 
   useEffect(() => {
