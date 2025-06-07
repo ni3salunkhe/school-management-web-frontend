@@ -40,9 +40,9 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
 
   const fetchCustomers = async () => {
-    const response = await apiService.getdata(`customermaster/getbyudise/${schoolUdise}`);
+    const response = await apiService.getdata(`customermaster/getcustomersbyudise/${schoolUdise}`);
     const filteredParties = (response.data || []).filter(
-      party => party.custName !== "कॅश इन हँड"
+      party => party.custName !== "Cash In Hand"
     );
     setParties(filteredParties);
     console.log(response.data)
