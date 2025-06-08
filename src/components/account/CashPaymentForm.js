@@ -46,7 +46,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     );
     setParties(filteredParties);
     console.log(response.data)
-    const recordedMain = (response.data || []).find(c => c.custName === "कॅश इन हँड")
+    const recordedMain = (response.data || []).find(c => c.custName === "Cash In Hand")
     setMainHead({
       headName: recordedMain.custName,
       headId: recordedMain.headId.headId,
@@ -143,7 +143,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
       console.log();
-      setCurrentBalance(opnNBalance.drAmt - transactionAmt)
+      setCurrentBalance(opnNBalance.crAmt - transactionAmt)
 
     }
     init(selectedParty)
