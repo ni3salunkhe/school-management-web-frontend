@@ -9,8 +9,8 @@ import { BiIdCard } from 'react-icons/bi';
 const initialFormData = {
   createDate: new Date().toISOString().split('T')[0],
   custId: '',
-  headId:null,
-  subheadId:null,
+  headId: null,
+  subheadId: null,
   amount: '',
   narr: '',
   debitAccountId: 'CASH_IN_HAND',
@@ -41,15 +41,35 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         const customersData = await apiService.getbyid("customermaster/getbyudise/", schoolUdise);
         setCustomers(customersData.data || []);
 
-        const recordMain = (customersData.data || []).find(c => c.custName === "Cash In Hand") || customersData.data
+        const recordMain = (customersData.data || []).find(c => c.custName === "कॅश इन हँड") || customersData.data
 
         console.log(recordMain);
 
         setMainHead({
           headName: recordMain.custName,
           headId: recordMain.headId.headId,
-          subheadId: recordMain.subheadId.subheadId
+          subheadId: recordMain.subheadId.custId
         })
+
+        const init = async () => {
+          const datas = await apiService.getdata('generalledger/')
+          console.log(datas.data);
+          // setData(datas.data);
+          const opnNBalance = (datas.data || []).find(
+            b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          );
+          console.log(opnNBalance.drAmt)
+          const transBalance = (datas.data || []).filter(
+            b => b.entryType === "Cash Reciept" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          );
+          console.log(transBalance)
+          let transactionAmt = 0;
+          transBalance.map(a => transactionAmt += a.crAmt)
+          console.log(transactionAmt);
+          // setMainHeadBalance(opnNBalance.drAmt - transactionAmt)
+
+        }
+        init()
 
         if (isEditMode && transactionId) {
           console.log("Edit mode for transaction ID:", transactionId);
@@ -75,20 +95,23 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
     setSuccess(null);
   };
 
-  const handleCustomerChange = (e) => {
+  const handleCustomerChange = async (e) => {
     const customerId = e.target.value;
-    const selectedCustomer = customers.find(c => c.id === customerId);
     const fetchsingalCustomer = async () => {
       const customerData = await apiService.getbyid("customermaster/", customerId);
       setSelectCustomer(customerData.data);
+      setFormData(prev => ({
+        ...prev,
+        custId: customerData.data.custId,
+        headId: customerData ? customerData.data.headId : '',
+        subheadId: customerData ? customerData.data.subheadId : '',
+      }));
     }
+    // const customerData = await apiService.getbyid("customermaster/", customerId);
+    // const selectCustomer = (customerData.data || []).filter(c=> c.custId === Number(customerId))
+    // console.log(customerData);
+
     fetchsingalCustomer();
-    setFormData(prev => ({
-      ...prev,
-      custId: customerId,
-      headId:selectCustomer ? selectCustomer.headId.headId:'',
-      subheadId:selectCustomer ? selectCustomer.subheadId.subheadId:'',
-    }));
   };
 
   const handleSubmit = async (e) => {

@@ -40,13 +40,26 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
 
   const fetchCustomers = async () => {
-    const response = await apiService.getdata(`customermaster/getcustomersbyudise/${schoolUdise}`);
-    const filteredParties = (response.data || []).filter(
-      party => party.custName !== "Cash In Hand"
+    const response = await apiService.getdata(`customermaster/byheadname/${schoolUdise}/Sundry%20Creditors`);
+    const opnBal = await apiService.getdata(`generalledger/${schoolUdise}`)
+    let selectedOpn = []
+
+   
+      for (let i = 0; i < opnBal.data.length - 1; i++) {
+        selectedOpn.push(opnBal.data[i].subhead.subheadId && opnBal.data[i].subhead.subheadId)
+      }
+    
+
+    const filtered = (response.data || []).filter(
+      party => selectedOpn.includes(party.subheadId.subheadId)
     );
-    setParties(filteredParties);
+
+    console.log(filtered)
+    setParties(filtered);
     console.log(response.data)
-    const recordedMain = (response.data || []).find(c => c.custName === "कॅश इन हँड")
+    const response1 = await apiService.getdata(`customermaster/byheadname/${schoolUdise}/Cash%20In%20Hand`);
+
+    const recordedMain = (response1.data || []).find(c => c.custName === "कॅश इन हँड")
     setMainHead({
       headName: recordedMain.custName,
       headId: recordedMain.headId.headId,
@@ -66,18 +79,11 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       console.log(transBalance)
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.crAmt)
-      console.log();
       setMainHeadBalance(opnNBalance.drAmt - transactionAmt)
 
     }
     init()
   };
-
-  const fetchBalance = async (id) => {
-    await apiService.getdata(`generalledger/ledger/balance/${id}`).then((b) =>
-      setCurrentBalance(b.data)
-    )
-  }
 
   useEffect(() => {
     head()
