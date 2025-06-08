@@ -26,6 +26,9 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [selectCustomer, setSelectCustomer] = useState({});
+  const [mainHeadBalance, setMainHeadBalance] = useState(0);
+  const [currentBalance, setCurrentBalance] = useState(null);
+
 
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
@@ -38,38 +41,55 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
           return;
         }
 
-        const customersData = await apiService.getbyid("customermaster/getbyudise/", schoolUdise);
+        const headname = "Sundry Debtors"
+        const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
         setCustomers(customersData.data || []);
 
-        const recordMain = (customersData.data || []).find(c => c.custName === "कॅश इन हँड") || customersData.data
+        const customersData1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
+        const recordMain = (customersData1.data || []).find(c => c.custName === "Cash In Hand") || customersData.data
 
-        console.log(recordMain);
+        // console.log(recordMain);
 
         setMainHead({
           headName: recordMain.custName,
           headId: recordMain.headId.headId,
-          subheadId: recordMain.subheadId.custId
+          subheadId: recordMain.subheadId.subheadId
         })
 
         const init = async () => {
           const datas = await apiService.getdata('generalledger/')
-          console.log(datas.data);
-          // setData(datas.data);
+          console.log(datas.data.filter(
+            b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          ));
           const opnNBalance = (datas.data || []).find(
             b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
           );
-          console.log(opnNBalance.drAmt)
+          // console.log(opnNBalance.drAmt)
           const transBalance = (datas.data || []).filter(
-            b => b.entryType === "Cash Reciept" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+            b => b.entryType === "Cash Receipt" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
           );
-          console.log(transBalance)
-          let transactionAmt = 0;
-          transBalance.map(a => transactionAmt += a.crAmt)
-          console.log(transactionAmt);
-          // setMainHeadBalance(opnNBalance.drAmt - transactionAmt)
+          // console.log(+transBalance)
 
+          const transBalance2 = (datas.data || []).filter(
+            b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          )
+          // console.log( "transaction balance 2"+transBalance2);
+          let trans = 0;
+          transBalance2.map(a => trans += a.crAmt)
+          console.log(trans);
+          // console.log(opnNBalance.drAmt - trans);
+          // setMainHeadBalance(opnNBalance.drAmt - trans)
+          // console.log(mainHeadBalance);
+
+
+          let transactionAmt = 0;
+          transBalance.map(a => transactionAmt += a.drAmt)
+          const amt = (opnNBalance.drAmt + transactionAmt) - trans;
+          setMainHeadBalance(amt)
+          // setMainHeadBalance(opnNBalance.drAmt + transactionAmt)
         }
-        init()
+
+        init();
 
         if (isEditMode && transactionId) {
           console.log("Edit mode for transaction ID:", transactionId);
@@ -97,22 +117,59 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
   const handleCustomerChange = async (e) => {
     const customerId = e.target.value;
-    const fetchsingalCustomer = async () => {
-      const customerData = await apiService.getbyid("customermaster/", customerId);
-      setSelectCustomer(customerData.data);
-      setFormData(prev => ({
-        ...prev,
-        custId: customerData.data.custId,
-        headId: customerData ? customerData.data.headId : '',
-        subheadId: customerData ? customerData.data.subheadId : '',
-      }));
-    }
-    // const customerData = await apiService.getbyid("customermaster/", customerId);
-    // const selectCustomer = (customerData.data || []).filter(c=> c.custId === Number(customerId))
-    // console.log(customerData);
 
-    fetchsingalCustomer();
+    const fetchAndSetCustomer = async () => {
+      try {
+        const customerData = await apiService.getbyid("customermaster/", customerId);
+        const selectedCustomer = customerData.data;
+
+        if (!selectedCustomer || !selectedCustomer.subheadId || !selectedCustomer.subheadId.subheadId) {
+          console.error("Invalid customer data or missing subheadId");
+          setError("निवडलेल्या खात्याची माहिती अपूर्ण आहे.");
+          return;
+        }
+
+        setSelectCustomer(selectedCustomer);
+        setFormData(prev => ({
+          ...prev,
+          custId: customerId,
+          headId: selectedCustomer.headId.headId || '',
+          subheadId: selectedCustomer.subheadId.subheadId || "",
+        }));
+
+        // Now fetch ledger balance
+        const datas = await apiService.getdata('generalledger/');
+
+        const opnNBalance = (datas.data || []).find(
+          b => b.entryType === "Opening Balance" &&
+            b.custId && Number(b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
+        );
+
+        const transBalance = (datas.data || []).filter(
+          b => b.entryType === "Cash Receipt" &&
+            b.custId && Number(b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
+        );
+
+
+        let transactionAmt = 0;
+        transBalance.forEach(a => transactionAmt += a.crAmt || 0);
+
+        const openingAmt = opnNBalance?.drAmt || 0;
+        console.log(openingAmt);
+        
+        const balance = openingAmt - transactionAmt;
+        setCurrentBalance(balance);
+
+
+      } catch (err) {
+        console.error("Error fetching customer or ledger data", err);
+        setError("पक्षाची माहिती किंवा शिल्लक मिळवताना त्रुटी आली.");
+      }
+    };
+
+    fetchAndSetCustomer();
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -194,7 +251,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
                 <label htmlFor="createDate" className="form-label">तारीख *</label>
                 <input
                   type="date" id="createDate" name="createDate" className="form-control"
-                  value={(formData.createDate)} onChange={handleInputChange} required
+                  value={(formData.createDate || '')} onChange={handleInputChange} required
                 />
               </div>
             </div>
@@ -212,18 +269,18 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
                     value={formData.custId} onChange={handleCustomerChange} required
                   >
                     <option value="">पक्ष/ग्राहक निवडा</option>
-                    {customers.map(cust => <option key={cust.custId} value={cust.custId}>{cust.custName}</option>)}
+                    {customers.map(cust => <option key={cust.custId} value={cust.custId || ''}>{cust.custName}</option>)}
                   </select>
                 </div>
 
                 <div className="col-md-2">
                   <label className="form-label">खाते क्र.</label>
-                  <input type="text" className="form-control" value={formData.custId} name='headId' readOnly disabled />
+                  <input type="text" className="form-control" value={formData.custId || ''} name='headId' readOnly disabled />
                 </div>
 
                 <div className="col-md-4">
                   <label className="form-label">वर्तमान शिल्लक</label>
-                  <input type="text" className="form-control" value={87} readOnly disabled />
+                  <input type="text" className="form-control" value={currentBalance || ''} readOnly disabled />
                 </div>
               </div>
             </div>
@@ -246,12 +303,12 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
                 <div className="col-md-4">
                   <label className="form-label">वर्तमान शिल्लक</label>
-                  <input type="text" className="form-control" value={87} readOnly disabled />
+                  <input type="text" className="form-control" value={mainHeadBalance} readOnly disabled />
                 </div>
               </div>
             </div>
 
-            <div className="row g-3 mb-3">
+            {/* <div className="row g-3 mb-3">
               <div className="col-md-6">
                 <label htmlFor="custId" className="form-label">प्राप्तकर्ता (पक्ष) *</label>
                 <select
@@ -267,7 +324,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
                 <label className="form-label">डेबिट खाते</label>
                 <input type="text" className="form-control" value="रोख जमा (डीफॉल्ट)" readOnly disabled />
               </div>
-            </div>
+            </div> */}
 
             <h5 className='fw-bold border-top pt-4'>रोख तपशील</h5>
             <div className="row g-3 mb-3">

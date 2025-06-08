@@ -149,7 +149,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
       console.log();
-      setCurrentBalance(opnNBalance.drAmt - transactionAmt)
+      setCurrentBalance(opnNBalance.crAmt - transactionAmt)
 
     }
     init(selectedParty)
