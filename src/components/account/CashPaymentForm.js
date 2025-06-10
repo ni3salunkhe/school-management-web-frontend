@@ -40,13 +40,14 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
 
   const fetchCustomers = async () => {
-    const response = await apiService.getdata(`customermaster/byheadname/${schoolUdise}/Sundry%20Creditors`);
+    const response = await apiService.getdata(`customermaster/getcustomerbyheadname/Sundry%20Creditors/${schoolUdise}`);
+    console.log(response.data);
+    
     const opnBal = await apiService.getdata(`generalledger/${schoolUdise}`)
     let selectedOpn = []
 
-   
       for (let i = 0; i < opnBal.data.length - 1; i++) {
-        selectedOpn.push(opnBal.data[i].subhead.subheadId && opnBal.data[i].subhead.subheadId)
+        selectedOpn.push(opnBal.data[i].subhead && opnBal.data[i].subhead.subheadId)
       }
     
 
@@ -57,9 +58,9 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     console.log(filtered)
     setParties(filtered);
     console.log(response.data)
-    const response1 = await apiService.getdata(`customermaster/byheadname/${schoolUdise}/Cash%20In%20Hand`);
+    const response1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
 
-    const recordedMain = (response1.data || []).find(c => c.custName === "कॅश इन हँड")
+    const recordedMain = (response1.data || []).find(c => c.custName === "Cash In Hand")
     setMainHead({
       headName: recordedMain.custName,
       headId: recordedMain.headId.headId,

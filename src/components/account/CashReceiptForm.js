@@ -43,13 +43,26 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
         const headname = "Sundry Debtors"
         const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
-        setCustomers(customersData.data || []);
+        // setCustomers(customersData.data || []);
 
         const customersData1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
         const recordMain = (customersData1.data || []).find(c => c.custName === "Cash In Hand") || customersData.data
 
+
+        const leadgerData = await apiService.getdata(`generalledger/${schoolUdise}`)
+
+        let selectedOpn = []
+
+        for (let i = 0; i < leadgerData.data.length - 1; i++) {
+          selectedOpn.push(leadgerData.data[i].subhead && leadgerData.data[i].subhead.subheadId)
+        }
+
+        const filtered = (customersData.data || []).filter(
+          party => selectedOpn.includes(party.subheadId.subheadId)
+        );
         // console.log(recordMain);
 
+        setCustomers(filtered || []);
         setMainHead({
           headName: recordMain.custName,
           headId: recordMain.headId.headId,
@@ -57,10 +70,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         })
 
         const init = async () => {
-          const datas = await apiService.getdata('generalledger/')
-          console.log(datas.data.filter(
-            b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
-          ));
+          const datas = await apiService.getdata('generalledger/');
           const opnNBalance = (datas.data || []).find(
             b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
           );
@@ -75,8 +85,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
           )
           // console.log( "transaction balance 2"+transBalance2);
           let trans = 0;
-          transBalance2.map(a => trans += a.crAmt)
-          console.log(trans);
+          transBalance2.map(a => trans += a.crAmt);
           // console.log(opnNBalance.drAmt - trans);
           // setMainHeadBalance(opnNBalance.drAmt - trans)
           // console.log(mainHeadBalance);
@@ -146,7 +155,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         );
 
         const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Cash Receipt" &&
+          b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt") &&
             b.custId && Number(b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
         );
 
@@ -156,7 +165,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
         const openingAmt = opnNBalance?.drAmt || 0;
         console.log(openingAmt);
-        
+
         const balance = openingAmt - transactionAmt;
         setCurrentBalance(balance);
 
