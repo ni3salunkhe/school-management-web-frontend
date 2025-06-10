@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, DollarSign, Pencil, Trash2, Group } from 'lucide-react';
 import apiService from '../../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 
 const OpeningBalanceForm = () => {
   const [financialYear, setFinancialYear] = useState('2024-2025');
@@ -20,7 +21,7 @@ const OpeningBalanceForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [flag, setFlag] = useState(false)
-
+  const udiseNo= jwtDecode(sessionStorage.getItem('token')).udiseNo
   useEffect(() => {
     fetchOpeningBalances();
   }, []);
@@ -70,6 +71,7 @@ const OpeningBalanceForm = () => {
         Dr_Amt: entry.drAmt,
         Cr_Amt: entry.crAmt,
         narr: 'Opening balance',
+        udiseNo
         // date: `${entry.year.split('-')[0]}-04-01`, // assumes 1st April of start year
         // year: entry.year
       }));

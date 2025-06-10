@@ -67,7 +67,10 @@ const BankMasterForm = () => {
     try {
       const heads = await apiService.getdata("headmaster/");
       console.log(heads.data);
-      setHeads(heads.data);
+      const filter = (heads.data || []).filter(
+        e => e.headName === "Bank OCC A/c" || e.headName === 'Bank OD A/c.' || e.headName === "Bank Accounts"
+      )
+      setHeads(filter);
 
     }
     catch (err) {

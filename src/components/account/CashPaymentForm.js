@@ -4,6 +4,7 @@ import { data, Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
 import { BiIdCard } from 'react-icons/bi';
+import { useNavigate } from 'react-router-dom';
 
 
 const initialFormData = {
@@ -32,34 +33,48 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  const [currentBalance, setCurrentBalance] = useState(null)
+  const [currentBalance, setCurrentBalance] = useState(0)
   const [mainHeadBalance, setMainHeadBalance] = useState(0)
   const staffId = jwtDecode(sessionStorage.getItem('token'))?.id;
   const schoolUdise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
   const [data, setData] = useState([]);
+  const navigate = useNavigate()
 
 
   const fetchCustomers = async () => {
-    const response = await apiService.getdata(`customermaster/byheadname/${schoolUdise}/Sundry%20Creditors`);
-    const opnBal = await apiService.getdata(`generalledger/${schoolUdise}`)
-    let selectedOpn = []
+    const response = await apiService.getdata(`customermaster/getcustomerbyheadname/Sundry%20Creditors/${schoolUdise}`);
+    let selectedOpn = [];
+    try {
+      const opnBal = await apiService.getdata(`generalledger/${schoolUdise}`);
 
-   
-      for (let i = 0; i < opnBal.data.length - 1; i++) {
-        selectedOpn.push(opnBal.data[i].subhead.subheadId && opnBal.data[i].subhead.subheadId)
+      if (opnBal?.data?.length) {
+        for (let i = 0; i < opnBal.data.length - 1; i++) {
+          const subheadId = opnBal.data[i]?.subhead?.subheadId;
+          if (subheadId) {
+            selectedOpn.push(subheadId);
+          }
+        }
+      } else {
+        console.warn("No data found in opening balance.");
+        navigate('/openingbalance',{replace:true})
       }
-    
+
+      console.log("Selected Opening Balances:", selectedOpn);
+    } catch (error) {
+      console.error("Error fetching opening balances:", error.message || error);
+    }
 
     const filtered = (response.data || []).filter(
       party => selectedOpn.includes(party.subheadId.subheadId)
     );
 
-    console.log(filtered)
     setParties(filtered);
-    console.log(response.data)
-    const response1 = await apiService.getdata(`customermaster/byheadname/${schoolUdise}/Cash%20In%20Hand`);
-
-    const recordedMain = (response1.data || []).find(c => c.custName === "कॅश इन हँड")
+    const response1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
+    console.log(response1.data)
+    const recordedMain = (response1.data || []).find(c => c.custName === "Cash In Hand" && selectedOpn.includes(c.subheadId.subheadId))
+    if(recordedMain?.length == 0){
+      navigate('/openingbalance',{replace:true})
+    }
     setMainHead({
       headName: recordedMain.custName,
       headId: recordedMain.headId.headId,
@@ -67,22 +82,36 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     })
     const init = async () => {
       const datas = await apiService.getdata('generalledger/')
-      console.log(datas.data);
-      setData(datas.data);
+      console.log(datas.data.filter(
+        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+      ));
       const opnNBalance = (datas.data || []).find(
         b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
-      console.log(opnNBalance.drAmt)
+      // console.log(opnNBalance.drAmt)
       const transBalance = (datas.data || []).filter(
-        b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+        b => b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
-      console.log(transBalance)
-      let transactionAmt = 0;
-      transBalance.map(a => transactionAmt += a.crAmt)
-      setMainHeadBalance(opnNBalance.drAmt - transactionAmt)
+      // console.log(+transBalance)
 
+      const transBalance2 = (datas.data || []).filter(
+        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+      )
+      // console.log( "transaction balance 2"+transBalance2);
+      let trans = 0;
+      transBalance2.map(a => trans += a.crAmt)
+      console.log(trans);
+      // console.log(opnNBalance.drAmt - trans);
+      // setMainHeadBalance(opnNBalance.drAmt - trans)
+      // console.log(mainHeadBalance);
+      let transactionAmt = 0;
+      transBalance.map(a => transactionAmt += a.drAmt)
+      const amt = (opnNBalance.drAmt + transactionAmt) - trans;
+      setMainHeadBalance(amt)
+      // setMainHeadBalance(opnNBalance.drAmt + transactionAmt)
     }
-    init()
+
+    init();
   };
 
   useEffect(() => {
@@ -143,17 +172,17 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       );
       console.log(opnNBalance.drAmt)
       const transBalance = (datas.data || []).filter(
-        b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
+        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
       );
       console.log(transBalance)
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
       console.log();
-      setCurrentBalance(opnNBalance.crAmt - transactionAmt)
+      setCurrentBalance(opnNBalance.drAmt - transactionAmt)
 
     }
     init(selectedParty)
-  };
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -268,19 +297,19 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
               <div className="row g-3 mb-3">
                 <div className="col-md-4">
                   <label htmlFor="paidToId" className="form-label">पक्षकार *</label>
-                  <select id="paidToId" name="paidToId" className={`form-select ${validationErrors.paidToId ? 'is-invalid' : ''}`} value={formData.paidToId} onChange={handlePartyChange}>
+                  <select id="paidToId" name="paidToId" className={`form-select ${validationErrors.paidToId ? 'is-invalid' : ''}`} value={formData.paidToId || ''} onChange={handlePartyChange}>
                     <option value="">पक्षकार निवडा</option>
-                    {parties.map(p => <option key={p.custId} value={p.custId}>{p.custName}</option>)}
+                    {parties.map(p => <option key={p.custId} value={p.custId || ''}>{p.custName}</option>)}
                   </select>
                   {validationErrors.paidToId && <div className="invalid-feedback">{validationErrors.paidToId}</div>}
                 </div>
                 <div className="col-md-2">
                   <label className="form-label">खाते क्र.</label>
-                  <input type="text" className="form-control" value={formData.paidToId} name='headId' readOnly disabled />
+                  <input type="text" className="form-control" value={formData.paidToId || ''} name='headId' readOnly disabled />
                 </div>
                 <div className="col-md-4">
                   <label className="form-label">वर्तमान शिल्लक</label>
-                  <input type="text" className="form-control" value={currentBalance} readOnly disabled />
+                  <input type="text" className="form-control" value={currentBalance || ''} readOnly disabled />
                 </div>
               </div>
             </div>
