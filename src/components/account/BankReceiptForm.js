@@ -1,16 +1,17 @@
 // src/components/account/Transactions/Forms/BankReceiptForm.js
 import React, { useState, useEffect } from 'react';
 import { Plus, FileText, XCircle, Landmark } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { data, Link, useNavigate } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
+import { BiIdCard } from 'react-icons/bi';
 
 const initialFormData = {
   createDate: new Date().toISOString().split('T')[0],
   entryDate: new Date().toISOString().split('T')[0],
   custId: '',
-  tranType: 'Bank Payment',
+  tranType: 'Bank Receipt',
   amount: '',
   narr: '',
   bankId: '',
@@ -30,9 +31,14 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [customerCurrentBalence, setCustomerCurrentBalence] = useState(null);
+  const [bankCurrentBalance, setBankCurrentBalance] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [generalledgerData, setGeneralledgerData] = useState(null);
 
   const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+
+  const navigate = useNavigate();
 
   // Payment types in Marathi
   const paymentTypes = ["Cheque", "NEFT", "RTGS", "IMPS", "UPI", "Direct Deposit", "Card Swipe"];
@@ -51,22 +57,40 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         }));
 
         const banks = await apiService.getbyid("bank/byudiseno/", udiseNo);
-        console.log(banks);
 
-        const partiesData = await apiService.getbyid("customermaster/getcustomersbyudise/", udiseNo)
-        console.log(parties);
+        const headname = "Sundry Debtors"
+        const partiesData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${udiseNo}`);
+        // setCustomers(customersData.data || []);
 
-        const nextVoucher = `BR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
+        const leadgerDatas = await apiService.getbyid("generalledger/", udiseNo);
 
-        setBankAccounts(banks.data || []);
-        setParties(partiesData.data || []);
+        let selectedOpn = [];
+        for (let i = 0; i < leadgerDatas.data.length - 1; i++) {
+          selectedOpn.push(leadgerDatas.data[i].subhead && leadgerDatas.data[i].subhead.subheadId)
+        }
 
+        const filtered = (partiesData.data || []).filter(party => selectedOpn.includes(party.subheadId.subheadId))
 
+        const filteredBank = (banks.data || []).filter(bank => selectedOpn.includes(bank.custId.custId))
+
+        setBankAccounts(filteredBank || []);
+        setParties(filtered || []);
+        setGeneralledgerData(leadgerDatas.data || []);
+
+        if (bankAccounts.length === 0 || parties.length === 0) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा!",
+          });
+
+          navigate("/clerk/dashboard")
+        }
 
         if (isEditMode && transactionId) {
           console.log("Edit BR ID:", transactionId);
         } else {
-          setFormData(prev => ({ ...prev, voucherNo: nextVoucher }));
+          setFormData(prev => ({ ...prev }));
         }
       } catch (err) {
         setError(`प्रारंभिक डेटा लोड करण्यात अयशस्वी: ${err.message}`);
@@ -77,16 +101,42 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
     fetchInitialData();
   }, [isEditMode, transactionId]);
 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    if (name === "bankId") {
+      const bankAccount = bankAccounts.find(b => Number(b.id) === Number(value));
+
+      const openBalence = generalledgerData.find(b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+
+      const openAmount = openBalence.drAmt;
+
+      const receiptTransBalance = generalledgerData.filter(b => b.entryType === "Bank Receipt" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+
+      const paymentTransBalance = generalledgerData.filter(b => b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+
+      let receiptTransAmt = 0;
+      receiptTransBalance.forEach(a => receiptTransAmt += a.drAmt);
+
+      let paymentTransAmt = 0;
+      paymentTransBalance.map(a => paymentTransAmt += a.crAmt);
+
+      // console.log(receiptTransBalance);
+
+      const balance = (openAmount + receiptTransAmt) - paymentTransAmt;
+      setBankCurrentBalance(balance);
+    }
+
     setError(null);
     setSuccess(null);
   };
 
-  const handlePartyChange = (e) => {
+  const handlePartyChange = async (e) => {
     const partyId = e.target.value;
     const selectedParty = parties.find(p => p.custId === parseInt(partyId));
+
 
     if (selectedParty) {
       setSelectedCustomer(selectedParty);
@@ -105,6 +155,23 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         subheadId: ''
       }));
     }
+
+    // const datas = await apiService.getbyid("generalledger/", udiseNo);
+    // console.log(datas.data);
+
+    const openBalence = (generalledgerData || []).find(b => b.entryType === "Opening Balance" && b.custId && Number(b.custId.custId) === Number(selectedParty.custId));
+
+    const openingAmt = openBalence?.drAmt || 0;
+
+    const transBalence = (generalledgerData || []).filter(b => b.entryType === "Bank Receipt" || b.entryType === "Cash Receipt" && b.custId && Number(b.custId.custId) === Number(selectedParty.custId));
+
+    let transactionAmt = 0;
+    transBalence.forEach(a => transactionAmt += a.crAmt);
+
+    const balance = openingAmt - transactionAmt;
+
+    setCustomerCurrentBalence(balance);
+
   };
 
   const validateForm = () => {
@@ -250,122 +317,177 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="row g-3 mb-3">
-              <div className="col-md-3">
-                <label htmlFor="createDate" className="form-label">दिनांक *</label>
-                <input
-                  type="date"
-                  id="createDate"
-                  name="createDate"
-                  className="form-control"
-                  value={formData.createDate}
-                  onChange={handleInputChange}
-                  required
-                />
+            <div className="mb-4 bg-light p-3 rounded">
+              <div className='row g-3 mb-3'>
+                <div className="col-md-3">
+                  <label htmlFor="createDate" className="form-label">दिनांक *</label>
+                  <input
+                    type="date"
+                    id="createDate"
+                    name="createDate"
+                    className="form-control"
+                    value={formData.createDate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
               </div>
-              <div className="col-md-6">
-                <label htmlFor="bankId" className="form-label">बँक खाते (डेबिट) *</label>
-                <select
-                  id="bankId"
-                  name="bankId"
-                  className="form-select"
-                  value={formData.bankId}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">बँक खाते निवडा</option>
-                  {bankAccounts.map(bank => (
-                    <option key={bank.id} value={bank.id}>
-                      {bank.bankname} ({bank.accountno})
-                    </option>
-                  ))}
-                </select>
+            </div>
+
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                देयकर्ता खाते माहिती
+              </h5>
+              <div className="row g-3 mb-3">
+                <div className="col-md-5">
+                  <label htmlFor="custId" className="form-label">यांच्याकडून प्राप्त (पक्ष) *</label>
+                  <select
+                    id="custId"
+                    name="custId"
+                    className="form-select"
+                    value={formData.custId}
+                    onChange={handlePartyChange}
+                    required
+                  >
+                    <option value="">पक्ष/जमाकर्ता निवडा</option>
+                    {parties.map(p => (
+                      <option key={p.custId} value={p.custId}>
+                        {p.custName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className='col-md-3'>
+                  <label className="form-label">खाते क्र.</label>
+                  <input type="text" className="form-control" value={formData.custId || ''} name='headId' readOnly disabled />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label">वर्तमान शिल्लक</label>
+                  <input type="text" className="form-control" value={customerCurrentBalence || ''} readOnly disabled />
+                </div>
+              </div>
+            </div>
+
+
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                प्राप्तकर्ता खाते माहिती
+              </h5>
+              <div className='row g-3 mb-3'>
+                <div className="col-md-5">
+                  <label htmlFor="bankId" className="form-label">बँक खाते (डेबिट) *</label>
+                  <select
+                    id="bankId"
+                    name="bankId"
+                    className="form-select"
+                    value={formData.bankId}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">बँक खाते निवडा</option>
+                    {bankAccounts.map(bank => (
+                      <option key={bank.id} value={bank.id}>
+                        {bank.bankname} ({bank.accountno})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className='col-md-3'>
+                  <label className="form-label">खाते क्र.</label>
+                  <input type="text" className="form-control" value={formData.bankId || ''} name='headId' readOnly disabled />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label">वर्तमान शिल्लक</label>
+                  <input type="text" className="form-control" value={bankCurrentBalance || ''} readOnly disabled />
+                </div>
+              </div>
+            </div>
+
+
+            <div className="mb-4 bg-light p-3 rounded">
+              <h5 className="border-bottom pb-2 mb-3 fw-bold">
+                <BiIdCard className="me-2" />
+                देय रक्कम व इतर माहिती
+              </h5>
+
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label htmlFor="amount" className="form-label">रक्कम *</label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    className="form-control"
+                    value={formData.amount}
+                    onChange={handleInputChange}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0.01"
+                    required
+                  />
+                </div>
+                <div className="col-md-8">
+                  <label htmlFor="narr" className="form-label">वर्णन/हेतू *</label>
+                  <input
+                    type="text"
+                    id="narr"
+                    name="narr"
+                    className="form-control"
+                    value={formData.narr}
+                    onChange={handleInputChange}
+                    placeholder="उदा., ऑनलाइन फी ट्रान्सफर, अनुदान प्राप्त"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="row g-3 mb-3">
+
+                <div className="col-md-5">
+                  <label htmlFor="paymentType" className="form-label">पेमेंट प्रकार *</label>
+                  <select
+                    id="paymentType"
+                    name="paymentType"
+                    className="form-select"
+                    value={formData.paymentType}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">पेमेंट प्रकार निवडा</option>
+                    {paymentTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-7">
+                  <label htmlFor="img" className="form-label">चेक/स्लीप/पावती प्रत</label>
+                  <input
+                    type="file"
+                    id="img"
+                    name="img"
+                    className="form-control"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                  />
+                  {formData.img && (
+                    <small className="text-muted">निवडले: {formData.img.name}</small>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="row g-3 mb-3">
-              <div className="col-md-4">
-                <label htmlFor="amount" className="form-label">रक्कम *</label>
-                <input
-                  type="number"
-                  id="amount"
-                  name="amount"
-                  className="form-control"
-                  value={formData.amount}
-                  onChange={handleInputChange}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0.01"
-                  required
-                />
-              </div>
-              <div className="col-md-4">
-                <label htmlFor="paymentType" className="form-label">पेमेंट प्रकार *</label>
-                <select
-                  id="paymentType"
-                  name="paymentType"
-                  className="form-select"
-                  value={formData.paymentType}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">पेमेंट प्रकार निवडा</option>
-                  {paymentTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-4">
-                <label htmlFor="img" className="form-label">चेक/स्लीप/पावती प्रत</label>
-                <input
-                  type="file"
-                  id="img"
-                  name="img"
-                  className="form-control"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                />
-                {formData.img && (
-                  <small className="text-muted">निवडले: {formData.img.name}</small>
-                )}
-              </div>
+
+
             </div>
 
-            <div className="row g-3 mb-3">
-              <div className="col-md-6">
-                <label htmlFor="custId" className="form-label">यांच्याकडून प्राप्त (पक्ष) *</label>
-                <select
-                  id="custId"
-                  name="custId"
-                  className="form-select"
-                  value={formData.custId}
-                  onChange={handlePartyChange}
-                  required
-                >
-                  <option value="">पक्ष/जमाकर्ता निवडा</option>
-                  {parties.map(p => (
-                    <option key={p.custId} value={p.custId}>
-                      {p.custName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-6">
-                <label htmlFor="narr" className="form-label">वर्णन/हेतू *</label>
-                <input
-                  type="text"
-                  id="narr"
-                  name="narr"
-                  className="form-control"
-                  value={formData.narr}
-                  onChange={handleInputChange}
-                  placeholder="उदा., ऑनलाइन फी ट्रान्सफर, अनुदान प्राप्त"
-                  required
-                />
-              </div>
-            </div>
+
+
+
 
             <div className="d-flex gap-2 mt-4">
               <button type="submit" className="btn btn-success" disabled={loading}>

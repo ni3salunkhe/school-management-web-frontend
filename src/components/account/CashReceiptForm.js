@@ -40,47 +40,54 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         return;
       }
 
-      const headname = "Sundry Debtors"
-      const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
-      console.log(customersData.data);
-      
-      setCustomers(customersData.data || []);
+        const headname = "Sundry Debtors"
+        const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
+        // setCustomers(customersData.data || []);
 
       const customersData1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
       const recordMain = (customersData1.data || []).find(c => c.custName === "Cash In Hand") || customersData.data
 
-      // console.log(recordMain);
 
-      setMainHead({
-        headName: recordMain.custName,
-        headId: recordMain.headId.headId,
-        subheadId: recordMain.subheadId.subheadId
-      })
+        const leadgerData = await apiService.getdata(`generalledger/${schoolUdise}`)
 
-      const init = async () => {
-        const datas = await apiService.getdata('generalledger/')
-        console.log(datas.data.filter(
-          b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
-        ));
-        const opnNBalance = (datas.data || []).find(
-          b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+        let selectedOpn = []
+
+        for (let i = 0; i < leadgerData.data.length - 1; i++) {
+          selectedOpn.push(leadgerData.data[i].subhead && leadgerData.data[i].subhead.subheadId)
+        }
+
+        const filtered = (customersData.data || []).filter(
+          party => selectedOpn.includes(party.subheadId.subheadId)
         );
-        // console.log(opnNBalance.drAmt)
-        const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Cash Receipt" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
-        );
-        // console.log(+transBalance)
+        // console.log(recordMain);
 
-        const transBalance2 = (datas.data || []).filter(
-          b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
-        )
-        // console.log( "transaction balance 2"+transBalance2);
-        let trans = 0;
-        transBalance2.map(a => trans += a.crAmt)
-        console.log(trans);
-        // console.log(opnNBalance.drAmt - trans);
-        // setMainHeadBalance(opnNBalance.drAmt - trans)
-        // console.log(mainHeadBalance);
+        setCustomers(filtered || []);
+        setMainHead({
+          headName: recordMain.custName,
+          headId: recordMain.headId.headId,
+          subheadId: recordMain.subheadId.subheadId
+        })
+
+        const init = async () => {
+          const datas = await apiService.getdata('generalledger/');
+          const opnNBalance = (datas.data || []).find(
+            b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          );
+          // console.log(opnNBalance.drAmt)
+          const transBalance = (datas.data || []).filter(
+            b => b.entryType === "Cash Receipt" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          );
+          // console.log(+transBalance)
+
+          const transBalance2 = (datas.data || []).filter(
+            b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          )
+          // console.log( "transaction balance 2"+transBalance2);
+          let trans = 0;
+          transBalance2.map(a => trans += a.crAmt);
+          // console.log(opnNBalance.drAmt - trans);
+          // setMainHeadBalance(opnNBalance.drAmt - trans)
+          // console.log(mainHeadBalance);
 
 
         let transactionAmt = 0;
@@ -150,8 +157,8 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         console.log(opnNBalance);
 
         const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Cash Receipt" &&
-            b.custId && Number(b.custId && b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
+          b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt") &&
+            b.custId && Number(b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
         );
 
 
@@ -163,7 +170,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
         const openingAmt = opnNBalance?.drAmt || 0;
         console.log(openingAmt);
-        
+
         const balance = openingAmt - transactionAmt;
         setCurrentBalance(balance);
 
