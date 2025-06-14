@@ -48,7 +48,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const opnBal = await apiService.getdata(`generalledger/${schoolUdise}`);
 
       if (opnBal?.data?.length) {
-        for (let i = 0; i < opnBal.data.length - 1; i++) {
+        for (let i = 0; i < opnBal.data.length; i++) {
           const subheadId = opnBal.data[i]?.subhead?.subheadId;
           if (subheadId) {
             selectedOpn.push(subheadId);
@@ -56,10 +56,9 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         }
       } else {
         console.warn("No data found in opening balance.");
-        navigate('/openingbalance',{replace:true})
+        navigate('/openingbalance', { replace: true })
       }
 
-      console.log("Selected Opening Balances:", selectedOpn);
     } catch (error) {
       console.error("Error fetching opening balances:", error.message || error);
     }
@@ -70,10 +69,10 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
     setParties(filtered);
     const response1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
-    console.log(response1.data)
+
     const recordedMain = (response1.data || []).find(c => c.custName === "Cash In Hand" && selectedOpn.includes(c.subheadId.subheadId))
-    if(recordedMain?.length == 0){
-      navigate('/openingbalance',{replace:true})
+    if (recordedMain?.length == 0) {
+      navigate('/openingbalance', { replace: true })
     }
     setMainHead({
       headName: recordedMain.custName,
@@ -82,23 +81,21 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     })
     const init = async () => {
       const datas = await apiService.getdata('generalledger/')
-      
+
       const opnNBalance = (datas.data || []).find(
         b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
-      // console.log(opnNBalance.drAmt)
       const transBalance = (datas.data || []).filter(
         b => b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
-      console.log("transaction balance 1", transBalance)
+     
 
       const transBalance2 = (datas.data || []).filter(
         b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       )
-      console.log( "transaction balance 2", transBalance2);
+      
       let trans = 0;
       transBalance2.map(a => trans += a.crAmt)
-      console.log(trans);
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
       const amt = (opnNBalance.drAmt + transactionAmt) - trans;
@@ -149,7 +146,6 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const handlePartyChange = (e) => {
     const partyId = e.target.value;
     const selectedParty = parties.find(p => p.custId === Number(partyId));
-    console.log(selectedParty)
     setFormData(prev => ({
       ...prev,
       paidToId: partyId,
@@ -159,20 +155,23 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
     const init = async (selectedParty) => {
       const datas = await apiService.getdata('generalledger/')
-      console.log(datas.data);
-      setData(datas.data);
+
       const opnNBalance = (datas.data || []).find(
         b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
       );
-      console.log(opnNBalance.drAmt)
-      const transBalance = (datas.data || []).filter(
-        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
+      const transBalance = (datas.data || []).filter(b =>
+        ["Cash Payment", "Bank Payment", "Journal Payment"].includes(b.entryType) &&
+        b.subhead &&
+        Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId)
       );
-      console.log(transBalance)
+
+      
       let transactionAmt = 0;
+      let trans = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
-      console.log();
-      setCurrentBalance(opnNBalance.drAmt - transactionAmt)
+      transBalance.map(c=> trans += c.crAmt)
+      const amt = (opnNBalance.crAmt + trans) - transactionAmt
+      setCurrentBalance(amt)
 
     }
     init(selectedParty)
@@ -269,17 +268,17 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
               <div className="row g-3 mb-3">
                 <div className="col-md-4">
                   <label className="form-label">जमा खाते</label>
-                  <input type="text" className="form-control" value={mainHead.headName} readOnly disabled />
+                  <input type="text" className="form-control" value={mainHead.headName || ''} readOnly disabled />
                 </div>
 
                 <div className="col-md-2">
                   <label className="form-label">खाते क्र.</label>
-                  <input type="text" className="form-control" value={mainHead.headId} name='headId' readOnly disabled />
+                  <input type="text" className="form-control" value={mainHead.headId || ''} name='headId' readOnly disabled />
                 </div>
 
                 <div className="col-md-4">
                   <label className="form-label">वर्तमान शिल्लक</label>
-                  <input type="Number" className="form-control" value={mainHeadBalance} readOnly disabled />
+                  <input type="Number" className="form-control" value={mainHeadBalance ?? ''} readOnly disabled />
                 </div>
               </div>
             </div>

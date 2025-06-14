@@ -21,7 +21,7 @@ function JournalForm() {
     const [parties, setParties] = useState([]);
     const [selectedCreditAccount, setSelectedCreditAccount] = useState('');
     const [leadgerData, setLeadgerData] = useState([]);
-    const [currentBalance, setCurrentBalance] = useState(null);
+    const [currentBalance, setCurrentBalance] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -90,7 +90,7 @@ function JournalForm() {
                 setCurrentBalance((Number(opnBalance - sctrans) + crjrtransBal)-drjrtranBal);
             }
             else {
-                setCurrentBalance(opnBalance + crjrtransBal);
+                setCurrentBalance((opnBalance + crjrtransBal)-drjrtranBal);
             }
 
         }
@@ -111,7 +111,7 @@ function JournalForm() {
                 setCurrentBalance(((opnBalance + sdtrans) - crjrtransBal)+drjrtranBal);
             }
             else {
-                setCurrentBalance(opnBalance - crjrtransBal);
+                setCurrentBalance((opnBalance - crjrtransBal)+drjrtranBal);
             }
 
         }

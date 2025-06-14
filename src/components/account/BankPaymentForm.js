@@ -74,7 +74,7 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
           const opnBal = await apiService.getdata(`generalledger/${udiseNo}`);
 
           if (opnBal?.data?.length) {
-            for (let i = 0; i < opnBal.data.length - 1; i++) {
+            for (let i = 0; i < opnBal.data.length; i++) {
               const subheadId = opnBal.data[i]?.subhead?.subheadId;
               if (subheadId) {
                 selectedOpn.push(subheadId);
@@ -218,14 +218,19 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
           b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
         );
         console.log(opnNBalance.drAmt)
-        const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
-        );
-        console.log(transBalance)
-        let transactionAmt = 0;
-        transBalance.map(a => transactionAmt += a.drAmt)
-        console.log();
-        setCurrentBalance(opnNBalance.drAmt - transactionAmt)
+       const transBalance = (datas.data || []).filter(b =>
+        ["Cash Payment", "Bank Payment", "Journal Payment"].includes(b.entryType) &&
+        b.subhead &&
+        Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId)
+      );
+
+      
+      let transactionAmt = 0;
+      let trans = 0;
+      transBalance.map(a => transactionAmt += a.drAmt)
+      transBalance.map(c=> trans += c.crAmt)
+      const amt = (opnNBalance.crAmt + trans) - transactionAmt
+      setCurrentBalance(amt)
 
       }
       init(selectedParty)

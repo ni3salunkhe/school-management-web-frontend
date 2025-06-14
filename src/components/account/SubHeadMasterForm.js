@@ -225,12 +225,6 @@ const SubHeadMasterForm = () => {
 
   console.log(subHeadList);
 
-  // const filteredSubHeadList = subHeadList.filter(sh =>
-  //   (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     (sh.subHeadCode && String(sh.subHeadCode).includes(searchTerm.toLowerCase()))) &&
-  //   (filterParentHead === '' || sh.parentHeadId === filterParentHead)
-  // );
-
   const filteredSubHeadList = subHeadList.filter(sh => {
     const matchesSearch =
       (sh.subheadName && sh.subheadName.toLowerCase().includes(searchTerm.toLowerCase())) ||
