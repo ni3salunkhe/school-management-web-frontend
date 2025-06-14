@@ -141,6 +141,9 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       try {
         const customerData = await apiService.getbyid("customermaster/", customerId);
         const selectedCustomer = customerData.data;
+        console.log(customerData.data);
+        console.log(selectedCustomer);
+        
 
         if (!selectedCustomer || !selectedCustomer.subheadId || !selectedCustomer.subheadId.subheadId) {
           console.error("Invalid customer data or missing subheadId");
@@ -149,6 +152,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         }
 
         setSelectCustomer(selectedCustomer);
+        
         setFormData(prev => ({
           ...prev,
           custId: customerId,
@@ -170,9 +174,18 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
           b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt") &&
             b.custId && Number(b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
         );
+        console.log(datas.data);
+        
+        let crtransactionjournalAmt=0;
+        let drtransactionjournalAmt=0;
+        const journalTrans=(datas.data || []).filter(b=>b.entryType ==="Journal Payment" && Number(b.subhead.subheadId)=== Number(selectedCustomer.subheadId.subheadId));
 
-        const journalTrans=(datas.data || []).filter();
+        journalTrans.map(j=>crtransactionjournalAmt+=j.crAmt);
 
+        journalTrans.map(j=>drtransactionjournalAmt+=j.drAmt);
+
+        console.log(journalTrans);
+        
 
         let transactionAmt = 0;
         transBalance.forEach(a => transactionAmt += a.crAmt || 0);
@@ -183,7 +196,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         const openingAmt = opnNBalance?.drAmt || 0;
         console.log(openingAmt);
 
-        const balance = openingAmt - transactionAmt;
+        const balance = ((openingAmt - transactionAmt)-crtransactionjournalAmt)+drtransactionjournalAmt;
         setCurrentBalance(balance);
 
 

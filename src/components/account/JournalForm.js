@@ -34,13 +34,12 @@ function JournalForm() {
                     item.subheadName !== "Cash In Hand";
             });
             setParties(filtered);
-
-            console.log(filtered);
-
-
             const generalLeadger = await apiService.getdata(`generalledger/${udiseNo}`);
-            // console.log(generalLeadger.data);
-            setLeadgerData(generalLeadger.data)
+            setLeadgerData(generalLeadger.data);
+
+            const transactionKey=await apiService.getdata("journal/transactionkey");
+            console.log(transactionKey.data);
+            
         };
         fetchData();
     }, [udiseNo]);
@@ -62,8 +61,6 @@ function JournalForm() {
         setSelectedCreditAccount(value);
 
         const data = parties.find(p => p.subheadId === Number(value));
-        console.log(data);
-        console.log(leadgerData);
 
         const openingbalence = leadgerData.find(b => b.entryType === "Opening Balance" && b.subhead.subheadId === data.subheadId);
 
@@ -74,10 +71,8 @@ function JournalForm() {
         let crjrtransBal = 0;
         jrtransbalance.map(a => crjrtransBal += a.crAmt);
 
-        let drjrtranBal=0;
-        jrtransbalance.map(a=>drjrtranBal+=a.drAmt);
-
-        console.log(crjrtransBal);
+        let drjrtranBal = 0;
+        jrtransbalance.map(a => drjrtranBal += a.drAmt);
 
 
         if (data.headId.bookSideMaster.booksideName === "Liabilities") {
@@ -87,10 +82,10 @@ function JournalForm() {
                 const transbal = leadgerData.filter(b => (b.entryType === "Cash Payment" || b.entryType === "Bank Payment") && b.subhead.subheadId === data.subheadId)
 
                 transbal.map(a => sctrans += a.drAmt);
-                setCurrentBalance((Number(opnBalance - sctrans) + crjrtransBal)-drjrtranBal);
+                setCurrentBalance((Number(opnBalance - sctrans) + crjrtransBal) - drjrtranBal);
             }
             else {
-                setCurrentBalance((opnBalance + crjrtransBal)-drjrtranBal);
+                setCurrentBalance((opnBalance + crjrtransBal) - drjrtranBal);
             }
 
         }
@@ -102,16 +97,12 @@ function JournalForm() {
             if (data.headId.headName === "Sundry Debtors") {
                 const tranbal = leadgerData.filter(b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt") && b.subhead.subheadId === data.subheadId)
 
-                console.log(tranbal);
-                
-
                 tranbal.map(a => sdtrans += a.crAmt);
-                console.log(opnBalance + sdtrans);
-                
-                setCurrentBalance(((opnBalance + sdtrans) - crjrtransBal)+drjrtranBal);
+
+                setCurrentBalance(((opnBalance + sdtrans) - crjrtransBal) + drjrtranBal);
             }
             else {
-                setCurrentBalance((opnBalance - crjrtransBal)+drjrtranBal);
+                setCurrentBalance((opnBalance - crjrtransBal) + drjrtranBal);
             }
 
         }
@@ -121,8 +112,6 @@ function JournalForm() {
             setCurrentBalance(opnBalance - crjrtransBal);
         }
 
-        console.log(opnBalance);
-        
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -180,11 +169,15 @@ function JournalForm() {
             alert('Debit and Credit totals must be equal!');
             return;
         }
+        if (formData.entries.some(entry => !entry.debitaccount || !entry.amount)) {
+            alert('Please fill all debit entries');
+            return;
+        }
         const payload = { ...formData, schoolUdise: udiseNo }
         const response = await apiService.post("journal/", payload);
-        console.log(response.data);
 
-        console.log('Journal Voucher Data:', payload);
+        resetForm();
+
         alert('Journal Voucher saved successfully!');
     };
 
@@ -202,9 +195,13 @@ function JournalForm() {
         });
         setSelectedCreditAccount('');
         setTotals(0);
+        setCurrentBalance(0);
     };
 
     const isBalanced = parseFloat(formData.cramount) === totals && totals > 0;
+
+    const areEntriesValid = formData.entries.every(entry => entry.debitaccount && entry.amount);
+    const isFormSubmittable = isBalanced && areEntriesValid;
 
     return (
         <div className="container mt-4">
@@ -387,7 +384,7 @@ function JournalForm() {
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
-                                        disabled={!isBalanced}
+                                        disabled={!isFormSubmittable}
                                     >
                                         <i className="fas fa-check me-1"></i>
                                         Post Entry
