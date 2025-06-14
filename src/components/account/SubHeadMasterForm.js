@@ -369,8 +369,6 @@ const SubHeadMasterForm = () => {
                 <th>उप-हेड नाव</th>
                 <th>उप-हेड कोड</th>
                 <th>मुख्य हेड</th>
-                <th>आर्थिक विवरण</th>
-                <th>स्थिती</th>
                 <th>क्रिया</th>
               </tr>
             </thead>
@@ -385,11 +383,6 @@ const SubHeadMasterForm = () => {
                     <td>{sh.subheadName}</td>
                     <td>{sh.subHeadCode}</td>
                     <td>{sh.parentHeadName}</td>
-                    <td>
-                      {sh.isProfitLossItem && <span className="badge bg-success me-1">लाभ-तोटा</span>}
-                      {sh.isBalanceSheetItem && <span className="badge bg-primary">बॅलन्स शीट</span>}
-                    </td>
-                    <td>{sh.status}</td>
                     <td>
                       <button
                         className="btn btn-sm btn-info"
