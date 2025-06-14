@@ -17,6 +17,7 @@ import BankReceiptForm from '../components/account/BankReceiptForm';
 import BankPaymentForm from '../components/account/BankPaymentForm';
 import TransactionList from '../components/account/TransactionList';
 import AccountTypeMasterForm from '../components/account/AccountTypeMasterForm';
+import JournalForm from '../components/account/JournalForm';
 // import ReportsDashboard from '../components/account/Reports/ReportsDashboard'; // The overview page for reports
 // import GeneralLedgerReport from '../components/account/Reports/GeneralLedgerReport';
 // import DayBookReport from '../components/account/Reports/DayBookReport';
@@ -50,6 +51,7 @@ function Account({ role }) {
             <Route path="dashboard/cash-payment" element={<CashPaymentForm />} />
             <Route path="dashboard/bank-receipt" element={<BankReceiptForm />} />
             <Route path="dashboard/bank-payment" element={<BankPaymentForm />} />
+            <Route path="dashboard/journal" element={<JournalForm/>}/>
             {/* Example for editing a specific transaction */}
             {/* <Route path="transactions/cash-receipt/:id/edit" element={<CashReceiptForm isEditMode={true} />} /> */}
 

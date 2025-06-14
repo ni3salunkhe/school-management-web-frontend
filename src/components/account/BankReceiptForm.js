@@ -61,13 +61,21 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         const headname = "Sundry Debtors"
         const partiesData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${udiseNo}`);
         // setCustomers(customersData.data || []);
+        console.log(partiesData.data);
+        
 
         const leadgerDatas = await apiService.getbyid("generalledger/", udiseNo);
 
+        console.log(leadgerDatas.data);
+        
+
         let selectedOpn = [];
-        for (let i = 0; i < leadgerDatas.data.length - 1; i++) {
+        for (let i = 0; i < leadgerDatas.data.length; i++) {
           selectedOpn.push(leadgerDatas.data[i].subhead && leadgerDatas.data[i].subhead.subheadId)
         }
+
+        // console.log(selectedOpn);
+        
 
         const filtered = (partiesData.data || []).filter(party => selectedOpn.includes(party.subheadId.subheadId))
 
@@ -77,8 +85,13 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         setParties(filtered || []);
         setGeneralledgerData(leadgerDatas.data || []);
 
-        if (bankAccounts.length === 0 || parties.length === 0) {
-          Swal.fire({
+        // if (bankAccounts.length === 0 || parties.length === 0) {
+         
+        // }
+
+        if(!bankAccounts || !parties)
+        {
+           Swal.fire({
             icon: "error",
             title: "Oops...",
             text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा!",
