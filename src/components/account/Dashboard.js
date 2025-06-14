@@ -182,7 +182,7 @@ const Dashboard = () => {
             </div>
             <div className="card-body">
               {
-                creditAmount !== debitAmount ? <div className="list-group">
+                creditAmount === debitAmount ? <div className="list-group">
                   <Link to="cash-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
                     <Plus size={20} className="me-3 text-primary" /> Create Cash Receipt
                   </Link>
@@ -198,7 +198,10 @@ const Dashboard = () => {
                   <Link to="contra-payment" className="list-group-item list-group-item-action d-flex align-items-center">
                     <Plus size={20} className="me-3 text-warning" /> Create Contra Payment
                   </Link>
-                  <Link to="" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
+                  <Link to="Journal" className="list-group-item list-group-item-action d-flex align-items-center">
+                    <Plus size={20} className="me-3 text-warning" /> Create Journal Payment
+                  </Link>
+                  <Link to="/account/masters/sub-head" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
                     <Plus size={20} className="me-3 text-secondary" /> Manage Account Heads
                   </Link>
                 </div> : <div>First Balance the credit amount and debit amount</div>
