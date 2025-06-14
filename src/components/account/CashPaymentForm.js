@@ -82,33 +82,27 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     })
     const init = async () => {
       const datas = await apiService.getdata('generalledger/')
-      console.log(datas.data.filter(
-        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
-      ));
+      
       const opnNBalance = (datas.data || []).find(
         b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
       // console.log(opnNBalance.drAmt)
       const transBalance = (datas.data || []).filter(
-        b => b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+        b => b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
-      // console.log(+transBalance)
+      console.log("transaction balance 1", transBalance)
 
       const transBalance2 = (datas.data || []).filter(
-        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       )
-      // console.log( "transaction balance 2"+transBalance2);
+      console.log( "transaction balance 2", transBalance2);
       let trans = 0;
       transBalance2.map(a => trans += a.crAmt)
       console.log(trans);
-      // console.log(opnNBalance.drAmt - trans);
-      // setMainHeadBalance(opnNBalance.drAmt - trans)
-      // console.log(mainHeadBalance);
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
       const amt = (opnNBalance.drAmt + transactionAmt) - trans;
       setMainHeadBalance(amt)
-      // setMainHeadBalance(opnNBalance.drAmt + transactionAmt)
     }
 
     init();

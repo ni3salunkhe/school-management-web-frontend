@@ -182,23 +182,26 @@ const Dashboard = () => {
             </div>
             <div className="card-body">
               {
-                creditAmount === debitAmount ? <div className="list-group">
-                <Link to="cash-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
-                  <Plus size={20} className="me-3 text-primary" /> Create Cash Receipt
-                </Link>
-                <Link to="cash-payment" className="list-group-item list-group-item-action d-flex align-items-center">
-                  <Plus size={20} className="me-3 text-success" /> Create Cash Payment
-                </Link>
-                <Link to="bank-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
-                  <Plus size={20} className="me-3 text-info" /> Create Bank Receipt
-                </Link>
-                <Link to="bank-payment" className="list-group-item list-group-item-action d-flex align-items-center">
-                  <Plus size={20} className="me-3 text-warning" /> Create Bank Payment
-                </Link>
-                <Link to="/account/masters/sub-head" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
-                  <Plus size={20} className="me-3 text-secondary" /> Manage Account Heads
-                </Link>
-              </div>:<div>First Balance the credit amount and debit amount</div>
+                creditAmount !== debitAmount ? <div className="list-group">
+                  <Link to="cash-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
+                    <Plus size={20} className="me-3 text-primary" /> Create Cash Receipt
+                  </Link>
+                  <Link to="cash-payment" className="list-group-item list-group-item-action d-flex align-items-center">
+                    <Plus size={20} className="me-3 text-success" /> Create Cash Payment
+                  </Link>
+                  <Link to="bank-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
+                    <Plus size={20} className="me-3 text-info" /> Create Bank Receipt
+                  </Link>
+                  <Link to="bank-payment" className="list-group-item list-group-item-action d-flex align-items-center">
+                    <Plus size={20} className="me-3 text-warning" /> Create Bank Payment
+                  </Link>
+                  <Link to="contra-payment" className="list-group-item list-group-item-action d-flex align-items-center">
+                    <Plus size={20} className="me-3 text-warning" /> Create Contra Payment
+                  </Link>
+                  <Link to="" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
+                    <Plus size={20} className="me-3 text-secondary" /> Manage Account Heads
+                  </Link>
+                </div> : <div>First Balance the credit amount and debit amount</div>
               }
             </div>
           </div>
