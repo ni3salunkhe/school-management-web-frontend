@@ -196,10 +196,10 @@ const Dashboard = () => {
                     <Plus size={20} className="me-3 text-warning" /> Create Bank Payment
                   </Link>
                   <Link to="contra-payment" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-warning" /> Create Contra Payment
+                    <Plus size={20} className="me-3 text-danger" /> Create Contra Payment
                   </Link>
                   <Link to="Journal" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-warning" /> Create Journal Payment
+                    <Plus size={20} className="me-3 text-info" /> Create Journal Payment
                   </Link>
                   <Link to="/account/masters/sub-head" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
                     <Plus size={20} className="me-3 text-secondary" /> Manage Account Heads

@@ -216,7 +216,7 @@ function JournalForm() {
                         <div className="card-header bg-primary text-white">
                             <h3 className="card-title mb-0">
                                 <i className="fas fa-file-invoice me-2"></i>
-                                Journal Voucher
+                                जर्नल व्हाउचर
                             </h3>
                         </div>
 
@@ -226,7 +226,7 @@ function JournalForm() {
                                     <div className="col-md-6">
                                         <div className="mb-3">
                                             <label htmlFor="date" className="form-label fw-bold">
-                                                Date <span className="text-danger">*</span>
+                                                तारीख <span className="text-danger">*</span>
                                             </label>
                                             <input
                                                 type="date"
@@ -247,7 +247,7 @@ function JournalForm() {
                                     </h5>
                                     <div className="row g-3 mb-3">
                                         <div className="col-md-5">
-                                            <label htmlFor="creditAccount" className="form-label">यांच्याकडून प्राप्त (पक्ष) *</label>
+                                            <label htmlFor="creditAccount" className="form-label">क्रेडिट खाते (पक्ष) *</label>
                                             <select
                                                 id="creditAccount"
                                                 name="creditAccount"
@@ -256,7 +256,7 @@ function JournalForm() {
                                                 onChange={handlePartyChange}
                                                 required
                                             >
-                                                <option value="">पक्ष/जमाकर्ता निवडा</option>
+                                                <option value="">पक्ष निवडा</option>
                                                 {parties.map(p => (
                                                     <option key={p.subheadId} value={p.subheadId}>
                                                         {p.subheadName}
@@ -278,7 +278,7 @@ function JournalForm() {
                                         </div>
 
                                         <div className="col-md-4">
-                                            <label className="form-label">वर्तमान शिल्लक</label>
+                                            <label className="form-label">चालू शिल्लक</label>
                                             <input type="text" className="form-control" value={currentBalance} readOnly disabled />
                                         </div>
                                     </div>
@@ -286,14 +286,14 @@ function JournalForm() {
 
                                 <div className="mb-4">
                                     <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 className="mb-0">Journal Entries</h5>
+                                        <h5 className="mb-0">डेबिट नोंदी</h5>
                                         <button
                                             type="button"
                                             className="btn btn-success btn-sm"
                                             onClick={addEntry}
                                         >
                                             <i className="fas fa-plus me-1"></i>
-                                            Add Entry
+                                            नोंद जोडा
                                         </button>
                                     </div>
 
@@ -301,9 +301,9 @@ function JournalForm() {
                                         <table className="table table-bordered table-hover">
                                             <thead className="table-light">
                                                 <tr>
-                                                    <th style={{ width: '50%' }}>Account</th>
-                                                    <th style={{ width: '25%' }}>Amount</th>
-                                                    <th style={{ width: '25%' }}>Action</th>
+                                                    <th style={{ width: '50%' }}>खाते</th>
+                                                    <th style={{ width: '25%' }}>रक्कम</th>
+                                                    <th style={{ width: '25%' }}>क्रिया</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -315,7 +315,7 @@ function JournalForm() {
                                                                 value={entry.debitaccount}
                                                                 onChange={(e) => handleEntryChange(index, 'debitaccount', e.target.value)}
                                                             >
-                                                                <option value="">पक्ष/जमाकर्ता निवडा</option>
+                                                                <option value="">खाते निवडा</option>
                                                                 {getAvailableSubheadsForEntry(index).map(p => (
                                                                     <option key={p.subheadId} value={p.subheadId}>
                                                                         {p.subheadName}
@@ -328,7 +328,7 @@ function JournalForm() {
                                                             <input
                                                                 type="number"
                                                                 className="form-control form-control-sm text-end"
-                                                                placeholder="0.00"
+                                                                placeholder="०.००"
                                                                 step="0.01"
                                                                 value={entry.amount}
                                                                 onChange={(e) => handleEntryChange(index, 'amount', e.target.value)}
@@ -340,10 +340,10 @@ function JournalForm() {
                                                                     type="button"
                                                                     className="btn btn-danger btn-sm"
                                                                     onClick={() => removeEntry(index)}
-                                                                    title="Remove entry"
+                                                                    title="ही नोंद काढून टाका"
                                                                 >
-                                                                    delete
-                                                                    <i className="fas fa-trash"></i>
+                                                                    <i className="fas fa-trash me-1"></i>
+                                                                    काढून टाका
                                                                 </button>
                                                             )}
                                                         </td>
@@ -352,7 +352,7 @@ function JournalForm() {
                                             </tbody>
                                             <tfoot className="table-secondary">
                                                 <tr>
-                                                    <td className="fw-bold text-end">Total:</td>
+                                                    <td className="fw-bold text-end">एकूण:</td>
                                                     <td className="fw-bold text-end">₹{totals.toFixed(2)}</td>
                                                     <td></td>
                                                 </tr>
@@ -363,7 +363,7 @@ function JournalForm() {
 
                                 <div className="mb-4">
                                     <label htmlFor="narr" className="form-label fw-bold">
-                                        Narration
+                                        स्पष्टीकरण
                                     </label>
                                     <textarea
                                         className="form-control"
@@ -372,7 +372,7 @@ function JournalForm() {
                                         rows="3"
                                         value={formData.narr}
                                         onChange={handleInputChange}
-                                        placeholder="Enter narration or explanation for this journal entry..."
+                                        placeholder="या जर्नल नोंदीसाठी स्पष्टीकरण प्रविष्ट करा..."
                                     />
                                 </div>
 
@@ -383,7 +383,7 @@ function JournalForm() {
                                         onClick={resetForm}
                                     >
                                         <i className="fas fa-undo me-1"></i>
-                                        Reset
+                                        रीसेट करा
                                     </button>
 
                                     <button
@@ -392,7 +392,7 @@ function JournalForm() {
                                         disabled={!isFormSubmittable}
                                     >
                                         <i className="fas fa-check me-1"></i>
-                                        Post Entry
+                                        नोंद जतन करा
                                     </button>
                                 </div>
                             </form>
