@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 function JournalForm() {
     const [formData, setFormData] = useState({
@@ -37,9 +38,9 @@ function JournalForm() {
             const generalLeadger = await apiService.getdata(`generalledger/${udiseNo}`);
             setLeadgerData(generalLeadger.data);
 
-            const transactionKey=await apiService.getdata("journal/transactionkey");
+            const transactionKey = await apiService.getdata("journal/transactionkey");
             console.log(transactionKey.data);
-            
+
         };
         fetchData();
     }, [udiseNo]);
@@ -177,8 +178,12 @@ function JournalForm() {
         const response = await apiService.post("journal/", payload);
 
         resetForm();
-
-        alert('Journal Voucher saved successfully!');
+        Swal.fire({
+            icon: "success",
+            title: "Journal Voucher saved successfully!",
+            showConfirmButton: false,
+            timer: 1500
+        });
     };
 
     const resetForm = () => {

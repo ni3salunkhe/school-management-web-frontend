@@ -182,7 +182,7 @@ const Dashboard = () => {
             </div>
             <div className="card-body">
               {
-                creditAmount !== debitAmount ? <div className="list-group">
+                creditAmount === debitAmount ? <div className="list-group">
                   <Link to="cash-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
                     <Plus size={20} className="me-3 text-primary" /> Create Cash Receipt
                   </Link>

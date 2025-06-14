@@ -139,9 +139,9 @@ const CustomerMasterForm = () => {
     setLoading(true);
     setError(null);
     try {
-      const customerData = await apiService.getbyid("customermaster/getbyudise/", schoolUdise);
-      // console.log(customerData.data);
-      setCustomers(customerData.data || []); // Ensure customers is an array
+      const customerData = await apiService.getbyid("customermaster/getcustomersbyudise/", schoolUdise);
+      
+      setCustomers((customerData.data).filter(b=>b.custName!=="Cash In Hand") || []); // Ensure customers is an array
     } catch (err) {
       setError(`Failed to fetch customers: ${err.message}`);
       setCustomers([]); // Ensure customers is an array on error
