@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const AccountReports = () => {
     const [activeReport, setActiveReport] = useState('balance-sheet');
     const [dateRange, setDateRange] = useState({ from: '2024-01-01', to: '2024-12-31' });
-
-
-    useEffect(() => {
-
-    })
-
-    const fetchInitiealData= async() =>{
-        
-    }
-
 
     // Sample data for demonstration
     const balanceSheetData = {
