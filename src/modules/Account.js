@@ -19,6 +19,7 @@ import TransactionList from '../components/account/TransactionList';
 import AccountTypeMasterForm from '../components/account/AccountTypeMasterForm';
 import ContraMasterForm from '../components/account/ContraMasterForm';
 import JournalForm from '../components/account/JournalForm';
+import AccountReports from '../components/account/AccountReports';
 // import ReportsDashboard from '../components/account/Reports/ReportsDashboard'; // The overview page for reports
 // import GeneralLedgerReport from '../components/account/Reports/GeneralLedgerReport';
 // import DayBookReport from '../components/account/Reports/DayBookReport';
@@ -46,7 +47,7 @@ function Account({ role }) {
             <Route path="subhead" element={<SubHeadMasterForm />} />
             <Route path="openingbalance" element={<OpeningBalanceForm />} />
             <Route path="accounttype" element={<AccountTypeMasterForm />} />
-
+            <Route path='accountreports' element={<AccountReports/>}/>
             {/* Transactions - Entry Forms */}
             <Route path="dashboard/cash-receipt" element={<CashReceiptForm />} />
             <Route path="dashboard/cash-payment" element={<CashPaymentForm />} />
@@ -54,6 +55,7 @@ function Account({ role }) {
             <Route path="dashboard/bank-payment" element={<BankPaymentForm />} />
             <Route path='dashboard/contra-payment' element={<ContraMasterForm/>} />
             <Route path="dashboard/journal" element={<JournalForm/>}/>
+            
             {/* Example for editing a specific transaction */}
             {/* <Route path="transactions/cash-receipt/:id/edit" element={<CashReceiptForm isEditMode={true} />} /> */}
 

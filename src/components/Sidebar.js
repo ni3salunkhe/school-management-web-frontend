@@ -6,7 +6,8 @@ import {
   FiBarChart2, FiUserPlus, FiGrid, FiCalendar,
   FiClipboard, FiTrendingUp, FiMapPin, FiMap, FiLayout, FiTarget,
   FiCreditCard, FiBookOpen, FiUserX, FiChevronDown, FiChevronRight, FiMenu, FiSettings,
-  FiChevronsLeft, FiChevronsRight
+  FiChevronsLeft, FiChevronsRight,
+  FiFilePlus
 } from 'react-icons/fi';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authService } from "../services/authService"; // Assuming this path is correct
@@ -200,6 +201,7 @@ const Sidebar = ({ sidebarItems = [], role }) => {
       case 'transactionslist': IconComponent = FiCreditCard; name = "व्यवहार सूची"; break;
       case 'subhead': IconComponent = FiUserX; name = "उप-शीर्ष (Sub Head)"; break;
       case 'accounttype': IconComponent = FiBookOpen; name="खाते प्रकार मास्टर"; break;
+      case 'accountreports':IconComponent=FiFilePlus;name="हिशोब अहवाल";break;
       default:
         name = item.replace(/([A-Z](?=[a-z]))/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
     }
