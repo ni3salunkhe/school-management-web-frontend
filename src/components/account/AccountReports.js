@@ -12,7 +12,7 @@ const AccountReports = () => {
         { account: 'Accounts Receivable', debit: 35000, credit: 0 },
         { account: 'Inventory', debit: 25000, credit: 0 },
         { account: 'Accounts Payable', debit: 0, credit: 20000 },
-        { account: 'Sales Revenue', debit: 0, credit: 150000 },
+        { account: 'Sales Revenue', debit: 0, credit: 150000 }, 
         { account: 'Cost of Goods Sold', debit: 90000, credit: 0 },
         { account: 'Operating Expenses', debit: 35000, credit: 0 },
         { account: 'Share Capital', debit: 0, credit: 100000 }
