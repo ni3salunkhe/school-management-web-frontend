@@ -5,53 +5,54 @@ import Swal from 'sweetalert2';
 
 function JournalForm() {
     const [formData, setFormData] = useState({
-        creditAccount: '',
+        debitaccount: '',
         tranType: 'Journal Payment',
         date: new Date().toISOString().split('T')[0],
         createDate: new Date().toISOString().split('T')[0],
         entryDate: new Date().toISOString().split('T')[0],
-        cramount: '',
+        dramount: '',
         narr: '',
         entries: [
-            { debitaccount: '', amount: '' }
+            { creditAccount: '', amount: '' }
         ]
     });
 
     const [totals, setTotals] = useState(0);
     const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [parties, setParties] = useState([]);
-    const [selectedCreditAccount, setSelectedCreditAccount] = useState('');
+    const [selectedDebitAccount, setSelecteddebitAccount] = useState('');
     const [leadgerData, setLeadgerData] = useState([]);
     const [currentBalance, setCurrentBalance] = useState(0);
 
     useEffect(() => {
-        const fetchData = async () => {
-            const response = await apiService.getdata(`subheadmaster/getbyudise/${udiseNo}`);
-            const filtered = response.data.filter(item => {
-                const headName = item.headId?.headName;
-                return headName !== "Bank Accounts" &&
-                    headName !== "Bank OCC A/c" &&
-                    headName !== "Bank OD A/c." &&
-                    item.subheadName !== "Cash In Hand";
-            });
-            setParties(filtered);
-            const generalLeadger = await apiService.getdata(`generalledger/${udiseNo}`);
-            setLeadgerData(generalLeadger.data);
 
-            const transactionKey = await apiService.getdata("journal/transactionkey");
-            console.log(transactionKey.data);
-
-        };
         fetchData();
     }, [udiseNo]);
+    const fetchData = async () => {
+        const response = await apiService.getdata(`subheadmaster/getbyudise/${udiseNo}`);
+        const filtered = response.data.filter(item => {
+            const headName = item.headId?.headName;
+            return headName !== "Bank Accounts" &&
+                headName !== "Bank OCC A/c" &&
+                headName !== "Bank OD A/c." &&
+                item.subheadName !== "Cash In Hand";
+        });
+        setParties(filtered);
+        const generalLeadger = await apiService.getdata(`generalledger/${udiseNo}`);
+        setLeadgerData(generalLeadger.data);
 
-    const filteredParties = parties.filter(p => String(p.subheadId) !== String(selectedCreditAccount));
+        const transactionKey = await apiService.getdata("journal/transactionkey");
+        console.log(transactionKey.data);
+
+    };
+
+    const filteredParties = parties.filter(p => String(p.subheadId) !== String(selectedDebitAccount));
 
     const getAvailableSubheadsForEntry = (index) => {
         return filteredParties.filter(p => {
             const subheadIdStr = String(p.subheadId);
             const isAlreadySelected = formData.entries.some((ent, i) =>
-                i !== index && String(ent.debitaccount) === subheadIdStr
+                i !== index && String(ent.creditAccount) === subheadIdStr
             );
             return !isAlreadySelected;
         });
@@ -59,7 +60,7 @@ function JournalForm() {
 
     const handlePartyChange = (e) => {
         const { name, value } = e.target;
-        setSelectedCreditAccount(value);
+        setSelecteddebitAccount(value);
 
         const data = parties.find(p => p.subheadId === Number(value));
 
@@ -166,16 +167,18 @@ function JournalForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (parseFloat(formData.cramount) !== totals) {
+        if (parseFloat(formData.dramount) !== totals) {
             alert('Debit and Credit totals must be equal!');
             return;
         }
-        if (formData.entries.some(entry => !entry.debitaccount || !entry.amount)) {
+        if (formData.entries.some(entry => !entry.creditAccount || !entry.amount)) {
             alert('Please fill all debit entries');
             return;
         }
         const payload = { ...formData, schoolUdise: udiseNo }
         const response = await apiService.post("journal/", payload);
+
+        fetchData();
 
         resetForm();
         Swal.fire({
@@ -188,24 +191,23 @@ function JournalForm() {
 
     const resetForm = () => {
         setFormData({
-            creditAccount: '',
+            debitaccount: '',
             createDate: new Date().toISOString().split('T')[0],
             entryDate: new Date().toISOString().split('T')[0],
-            cramount: '',
+            dramount: '',
             narr: '',
             entries: [
-                { debitaccount: '', amount: '' },
-                { debitaccount: '', amount: '' }
+                { creditAccount: '', amount: '' }
             ]
         });
-        setSelectedCreditAccount('');
+        setSelecteddebitAccount('');
         setTotals(0);
         setCurrentBalance(0);
     };
 
-    const isBalanced = parseFloat(formData.cramount) === totals && totals > 0;
+    const isBalanced = parseFloat(formData.dramount) === totals && totals > 0;
 
-    const areEntriesValid = formData.entries.every(entry => entry.debitaccount && entry.amount);
+    const areEntriesValid = formData.entries.every(entry => entry.creditAccount && entry.amount);
     const isFormSubmittable = isBalanced && areEntriesValid;
 
     return (
@@ -247,12 +249,12 @@ function JournalForm() {
                                     </h5>
                                     <div className="row g-3 mb-3">
                                         <div className="col-md-5">
-                                            <label htmlFor="creditAccount" className="form-label">क्रेडिट खाते (पक्ष) *</label>
+                                            <label htmlFor="debitaccount" className="form-label">क्रेडिट खाते (पक्ष) *</label>
                                             <select
-                                                id="creditAccount"
-                                                name="creditAccount"
+                                                id="debitaccount"
+                                                name="debitaccount"
                                                 className="form-select"
-                                                value={formData.creditAccount}
+                                                value={formData.debitaccount}
                                                 onChange={handlePartyChange}
                                                 required
                                             >
@@ -269,9 +271,9 @@ function JournalForm() {
                                             <label className='form-label'>रक्कम</label>
                                             <input
                                                 type='number'
-                                                name='cramount'
+                                                name='dramount'
                                                 className='form-control'
-                                                value={formData.cramount}
+                                                value={formData.dramount}
                                                 onChange={handleInputChange}
                                                 required
                                             />
@@ -312,8 +314,8 @@ function JournalForm() {
                                                         <td>
                                                             <select
                                                                 className="form-select"
-                                                                value={entry.debitaccount}
-                                                                onChange={(e) => handleEntryChange(index, 'debitaccount', e.target.value)}
+                                                                value={entry.creditAccount}
+                                                                onChange={(e) => handleEntryChange(index, 'creditAccount', e.target.value)}
                                                             >
                                                                 <option value="">खाते निवडा</option>
                                                                 {getAvailableSubheadsForEntry(index).map(p => (
