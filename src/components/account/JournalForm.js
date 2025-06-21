@@ -42,7 +42,7 @@ function JournalForm() {
         setLeadgerData(generalLeadger.data);
 
         const transactionKey = await apiService.getdata("journal/transactionkey");
-        console.log(transactionKey.data);
+        // console.log(transactionKey.data);
 
     };
 
@@ -64,11 +64,16 @@ function JournalForm() {
 
         const data = parties.find(p => p.subheadId === Number(value));
 
+        console.log(data);
+
         const openingbalence = leadgerData.find(b => b.entryType === "Opening Balance" && b.subhead.subheadId === data.subheadId);
 
         let opnBalance = 0;
 
-        const jrtransbalance = leadgerData.filter(b => b.entryType === "Journal Payment" && b.subhead.subheadId === data.subheadId);
+        const jrtransbalance = leadgerData.filter(b =>
+            (["Journal Payment", "Bank Payment", "Cash Payment", "Cash Receipt", "Bank Receipt"].includes(b.entryType)) &&
+            b.subhead.subheadId === data.subheadId
+        );
 
         let crjrtransBal = 0;
         jrtransbalance.map(a => crjrtransBal += a.crAmt);
@@ -79,15 +84,11 @@ function JournalForm() {
 
         if (data.headId.bookSideMaster.booksideName === "Liabilities") {
             opnBalance = openingbalence.crAmt;
-            let sctrans = 0;
             if (data.headId.headName === "Sundry Creditors") {
-                const transbal = leadgerData.filter(b => (b.entryType === "Cash Payment" || b.entryType === "Bank Payment") && b.subhead.subheadId === data.subheadId)
-
-                transbal.map(a => sctrans += a.drAmt);
-                setCurrentBalance((Number(opnBalance - sctrans) + crjrtransBal) - drjrtranBal);
+                setCurrentBalance(Number((opnBalance + crjrtransBal) - drjrtranBal))
             }
             else {
-                setCurrentBalance((opnBalance + crjrtransBal) - drjrtranBal);
+                setCurrentBalance(Number((opnBalance + crjrtransBal) - drjrtranBal))
             }
 
         }
@@ -95,16 +96,12 @@ function JournalForm() {
         if (data.headId.bookSideMaster.booksideName === "Asset") {
             opnBalance = openingbalence.drAmt;
 
-            let sdtrans = 0;
             if (data.headId.headName === "Sundry Debtors") {
-                const tranbal = leadgerData.filter(b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt") && b.subhead.subheadId === data.subheadId)
-
-                tranbal.map(a => sdtrans += a.crAmt);
-
-                setCurrentBalance(((opnBalance + sdtrans) - crjrtransBal) + drjrtranBal);
+                setCurrentBalance(Number((opnBalance + drjrtranBal) - crjrtransBal))
             }
             else {
-                setCurrentBalance((opnBalance - crjrtransBal) + drjrtranBal);
+                setCurrentBalance(Number((opnBalance + drjrtranBal) - crjrtransBal))
+
             }
 
         }
@@ -192,6 +189,7 @@ function JournalForm() {
     const resetForm = () => {
         setFormData({
             debitaccount: '',
+            tranType: 'Journal Payment',
             createDate: new Date().toISOString().split('T')[0],
             entryDate: new Date().toISOString().split('T')[0],
             dramount: '',
