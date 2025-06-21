@@ -45,6 +45,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       const headname = "Sundry Debtors"
       const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);      
       const leadgerData = await apiService.getdata(`generalledger/${schoolUdise}`)
+
       let selectedOpn = []
 
       for (let i = 0; i < leadgerData.data.length; i++) {
@@ -76,7 +77,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
       const init = async () => {
         const datas = await apiService.getdata('generalledger/');
-        const opnNBalance = (datas.data || []).find(
+        const openBalance = (datas.data || []).find(
           b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
         );
         // console.log(opnNBalance.drAmt)
@@ -88,19 +89,20 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
           b => b.entryType === "Cash Payment" ||
             b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
         )
-        // console.log( "transaction balance 2"+transBalance2);
         let trans = 0;
         transBalance2.map(a => trans += a.crAmt);
-        // console.log(opnNBalance.drAmt - trans);
-        // setMainHeadBalance(opnNBalance.drAmt - trans)
-        // console.log(mainHeadBalance);
 
+        const transAmt = (datas.data || []).filter(b => b.entryType === "Cash Payment" || b.entryType === "Cash Receipt" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId));
 
-        let transactionAmt = 0;
-        transBalance.map(a => transactionAmt += a.drAmt)
-        const amt = (opnNBalance.drAmt + transactionAmt) - trans;
-        setMainHeadBalance(amt)
-        // setMainHeadBalance(opnNBalance.drAmt + transactionAmt)
+        let drTransaction=0;
+        let crTransaction=0;
+
+        transAmt.forEach(a=>{
+          drTransaction+=a.drAmt ||0;
+          crTransaction+=a.crAmt ||0;
+        });
+
+        setMainHeadBalance((openBalance.drAmt+drTransaction)-crTransaction);
       }
 
       init();
@@ -139,7 +141,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         const selectedCustomer = customerData.data;
         console.log(customerData.data);
         console.log(selectedCustomer);
-        
+
 
         if (!selectedCustomer || !selectedCustomer.subheadId || !selectedCustomer.subheadId.subheadId) {
           console.error("Invalid customer data or missing subheadId");
@@ -148,7 +150,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         }
 
         setSelectCustomer(selectedCustomer);
-        
+
         setFormData(prev => ({
           ...prev,
           custId: customerId,
@@ -164,35 +166,44 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
             b.custId && Number(b.custId && b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
         );
 
-        console.log(opnNBalance);
+        // console.log(opnNBalance);
+
+
+        // console.log(datas.data);
+
+        // console.log(transBalance);
+
+        // let crtransactionjournalAmt = 0;
+        // let drtransactionjournalAmt = 0;
+        // const journalTrans = (datas.data || []).filter(b => b.entryType === "Journal Payment" && Number(b.subhead.subheadId) === Number(selectedCustomer.subheadId.subheadId));
+
+        // journalTrans.map(j => crtransactionjournalAmt += j.crAmt);
+
+        // journalTrans.map(j => drtransactionjournalAmt += j.drAmt);
+
+        // console.log(journalTrans);
+
+        // console.log(transBalance);
+
 
         const transBalance = (datas.data || []).filter(
-          b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt") &&
-            b.custId && Number(b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
+          b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt" || b.entryType === "Journal Payment") &&
+            b.subhead && Number(b.subhead.subheadId) === Number(selectedCustomer.subheadId.subheadId)
         );
-        console.log(datas.data);
-        
-        let crtransactionjournalAmt=0;
-        let drtransactionjournalAmt=0;
-        const journalTrans=(datas.data || []).filter(b=>b.entryType ==="Journal Payment" && Number(b.subhead.subheadId)=== Number(selectedCustomer.subheadId.subheadId));
-
-        journalTrans.map(j=>crtransactionjournalAmt+=j.crAmt);
-
-        journalTrans.map(j=>drtransactionjournalAmt+=j.drAmt);
-
-        console.log(journalTrans);
-        
-
-        let transactionAmt = 0;
-        transBalance.forEach(a => transactionAmt += a.crAmt || 0);
-
-        console.log(transBalance);
-
 
         const openingAmt = opnNBalance?.drAmt || 0;
         console.log(openingAmt);
 
-        const balance = ((openingAmt - transactionAmt)-crtransactionjournalAmt)+drtransactionjournalAmt;
+        // const balance = ((openingAmt - transactionAmt) - crtransactionjournalAmt) + drtransactionjournalAmt;
+        // setCurrentBalance(balance);
+
+        let transactionAmt = 0;
+        transBalance.forEach(a => transactionAmt += a.crAmt || 0);
+
+        let drtransaction = 0;
+        transBalance.forEach(a => drtransaction += a.drAmt || 0);
+
+        const balance = (openingAmt - transactionAmt) + drtransaction;
         setCurrentBalance(balance);
 
 
@@ -224,33 +235,57 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       return;
     }
 
+    const payload = {
+      ...formData,
+      amount: parseFloat(formData.amount),
+      schoolUdise: schoolUdise,
+      entryDate: formData.createDate,
+    };
+
     setLoading(true);
+
     try {
-      if (!formData.custId) {
-        return;
+      // Check if balance is less than amount
+      if (payload.amount > currentBalance) {
+        const result = await Swal.fire({
+          title: "रक्कम उपलब्ध शिल्लकीपेक्षा जास्त आहे. तरीही स्वीकारायची आहे का?",
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: "होय, जतन करा",
+          denyButtonText: "नको, बदल जतन करू नका"
+        });
+
+        if (result.isConfirmed) {
+          await apiService.post("cashreceipt/", payload);
+          handleClear();
+          Swal.fire("जतन झाले!", "", "success");
+          fetchInitialData();
+        } else if (result.isDenied) {
+          Swal.fire("बदल जतन केले गेले नाहीत.", "", "info");
+          handleClear();
+        }
+
+        return; // prevent continuing to the default save logic
       }
 
-      const payload = { ...formData, amount: parseFloat(formData.amount), schoolUdise: schoolUdise, entryDate: formData.createDate };
-      const response = await apiService.post("cashreceipt/", payload);
-      console.log(response.data);
-
-      console.log('Submitting Data:', payload);
-      setSuccess(`यशस्वीरित्या ${isEditMode ? 'अपडेट' : 'जतन'} केले!`);
-      if (!isEditMode) {
-        const nextVoucher = `CR-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-      }
+      // Normal save (if amount is not > balance)
+      await apiService.post("cashreceipt/", payload);
+      Swal.fire("यशस्वी", "यशस्वीरीत्या जतन केले!", "success");
+      handleClear();
+      fetchInitialData();
 
     } catch (err) {
-      setError(`ऑपरेशन अयशस्वी: ${err.message}`);
       console.error(err);
+      setError(`ऑपरेशन अयशस्वी: ${err.message}`);
     } finally {
       setLoading(false);
-      fetchInitialData();
     }
   };
 
+
   const handleClear = () => {
     setFormData(prev => ({ ...initialFormData, voucherNo: isEditMode ? prev.voucherNo : prev.voucherNo, date: new Date().toISOString().split('T')[0] }));
+    setCurrentBalance(null)
     setError(null);
     setSuccess(null);
   };

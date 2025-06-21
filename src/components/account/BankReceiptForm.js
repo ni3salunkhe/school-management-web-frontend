@@ -44,76 +44,75 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
   const paymentTypes = ["Cheque", "NEFT", "RTGS", "IMPS", "UPI", "Direct Deposit", "Card Swipe"];
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      try {
-        if (!udiseNo) {
-          return;
-        }
-
-        setFormData(prev => ({
-          ...prev,
-          schoolUdise: udiseNo,
-        }));
-
-        const banks = await apiService.getbyid("bank/byudiseno/", udiseNo);
-
-        const headname = "Sundry Debtors"
-        const partiesData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${udiseNo}`);
-        // setCustomers(customersData.data || []);
-        console.log(partiesData.data);
-        
-
-        const leadgerDatas = await apiService.getbyid("generalledger/", udiseNo);
-
-        console.log(leadgerDatas.data);
-        
-
-        let selectedOpn = [];
-        for (let i = 0; i < leadgerDatas.data.length; i++) {
-          selectedOpn.push(leadgerDatas.data[i].subhead && leadgerDatas.data[i].subhead.subheadId)
-        }
-
-        // console.log(selectedOpn);
-        
-
-        const filtered = (partiesData.data || []).filter(party => selectedOpn.includes(party.subheadId.subheadId))
-
-        const filteredBank = (banks.data || []).filter(bank => selectedOpn.includes(bank.custId.custId))
-
-        setBankAccounts(filteredBank || []);
-        setParties(filtered || []);
-        setGeneralledgerData(leadgerDatas.data || []);
-
-        // if (bankAccounts.length === 0 || parties.length === 0) {
-         
-        // }
-
-        if(!bankAccounts || !parties)
-        {
-           Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा!",
-          });
-
-          navigate("/clerk/dashboard")
-        }
-
-        if (isEditMode && transactionId) {
-          console.log("Edit BR ID:", transactionId);
-        } else {
-          setFormData(prev => ({ ...prev }));
-        }
-      } catch (err) {
-        setError(`प्रारंभिक डेटा लोड करण्यात अयशस्वी: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchInitialData();
   }, [isEditMode, transactionId]);
 
+  const fetchInitialData = async () => {
+    setLoading(true);
+    try {
+      if (!udiseNo) {
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        schoolUdise: udiseNo,
+      }));
+
+      const banks = await apiService.getbyid("bank/byudiseno/", udiseNo);
+
+      const headname = "Sundry Debtors"
+      const partiesData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${udiseNo}`);
+      // setCustomers(customersData.data || []);
+      console.log(partiesData.data);
+
+
+      const leadgerDatas = await apiService.getbyid("generalledger/", udiseNo);
+
+      console.log(leadgerDatas.data);
+
+
+      let selectedOpn = [];
+      for (let i = 0; i < leadgerDatas.data.length; i++) {
+        selectedOpn.push(leadgerDatas.data[i].subhead && leadgerDatas.data[i].subhead.subheadId)
+      }
+
+      // console.log(selectedOpn);
+
+
+      const filtered = (partiesData.data || []).filter(party => selectedOpn.includes(party.subheadId.subheadId))
+
+      const filteredBank = (banks.data || []).filter(bank => selectedOpn.includes(bank.custId.custId))
+
+      setBankAccounts(filteredBank || []);
+      setParties(filtered || []);
+      setGeneralledgerData(leadgerDatas.data || []);
+
+      // if (bankAccounts.length === 0 || parties.length === 0) {
+
+      // }
+
+      if (!bankAccounts || !parties) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा!",
+        });
+
+        navigate("/clerk/dashboard")
+      }
+
+      if (isEditMode && transactionId) {
+        console.log("Edit BR ID:", transactionId);
+      } else {
+        setFormData(prev => ({ ...prev }));
+      }
+    } catch (err) {
+      setError(`प्रारंभिक डेटा लोड करण्यात अयशस्वी: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -121,26 +120,28 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
     if (name === "bankId") {
       const bankAccount = bankAccounts.find(b => Number(b.id) === Number(value));
-
+      const bankHead = bankAccount.headId?.bookSideMaster?.booksideName;
       const openBalence = generalledgerData.find(b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
 
-      const openAmount = openBalence.drAmt;
+      const transactionBalance = generalledgerData.filter(b => (b.entryType === "Bank Receipt" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment") && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId))
+      let drTransAmt = 0;
+      let crTransAmt = 0;
+      transactionBalance.forEach(a => {
+        drTransAmt += a.drAmt || 0;
+        crTransAmt += a.crAmt || 0;
+      });
 
-      const receiptTransBalance = generalledgerData.filter(b => b.entryType === "Bank Receipt" ||
-            b.entryType === "Expense Payment" ||b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+      let openAmount = 0;
+      let balance = 0;
 
-      const paymentTransBalance = generalledgerData.filter(b => b.entryType === "Bank Payment" ||
-            b.entryType === "Expense Payment" ||b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+      if (bankHead === "Liabilities") {
+        openAmount = openBalence?.crAmt || 0;
+        balance = (openAmount + crTransAmt) - drTransAmt;
+      } else {
+        openAmount = openBalence?.drAmt || 0;
+        balance = (openAmount + drTransAmt) - crTransAmt;
+      }
 
-      let receiptTransAmt = 0;
-      receiptTransBalance.forEach(a => receiptTransAmt += a.drAmt);
-
-      let paymentTransAmt = 0;
-      paymentTransBalance.map(a => paymentTransAmt += a.crAmt);
-
-      // console.log(receiptTransBalance);
-
-      const balance = (openAmount + receiptTransAmt) - paymentTransAmt;
       setBankCurrentBalance(balance);
     }
 
@@ -178,12 +179,22 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
     const openingAmt = openBalence?.drAmt || 0;
 
-    const transBalence = (generalledgerData || []).filter(b => b.entryType === "Bank Receipt" || b.entryType === "Cash Receipt" && b.custId && Number(b.custId.custId) === Number(selectedParty.custId));
+    console.log(selectedParty.custId);
+    console.log(generalledgerData[2]);
 
-    let transactionAmt = 0;
-    transBalence.forEach(a => transactionAmt += a.crAmt);
 
-    const balance = openingAmt - transactionAmt;
+    const transBalence = (generalledgerData || []).filter(b => (b.entryType === "Bank Receipt" || b.entryType === "Cash Receipt" || b.entryType === "Journal Payment") && Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId));
+
+    console.log(transBalence);
+
+
+    let crtransactionAmt = 0;
+    transBalence.forEach(a => crtransactionAmt += a.crAmt);
+
+    let drtransactionAmt = 0;
+    transBalence.forEach(a => drtransactionAmt += a.drAmt);
+
+    const balance = (openingAmt - crtransactionAmt) + drtransactionAmt;
 
     setCustomerCurrentBalence(balance);
 
@@ -251,17 +262,45 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         });
         Swal.fire('यशस्वी', 'बँक पावती यशस्वीरीत्या संपादित केली!', 'success');
       } else {
+
+        if (formData.amount > customerCurrentBalence) {
+          const result = await Swal.fire({
+            title: "रक्कम उपलब्ध शिल्लकीपेक्षा जास्त आहे. तरीही स्वीकारायची आहे का?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "होय, जतन करा",
+            denyButtonText: "नको, बदल जतन करू नका"
+          });
+
+          if (result.isConfirmed) {
+            response = await apiService.post("bankreceipt/", formDataToSend, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            Swal.fire("जतन झाले!", "", "success");
+            handleClear();
+            fetchInitialData();
+          }
+          else {
+            Swal.fire("बदल जतन केले गेले नाहीत.", "", "info");
+            handleClear();
+          }
+
+          return;
+        }
+
         response = await apiService.post("bankreceipt/", formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        console.log(response.data);
-        console.log(formData);
 
+        handleClear();
+        fetchInitialData();
         Swal.fire('यशस्वी', 'बँक पावती यशस्वीरीत्या जतन केली!', 'success');
       }
 
-      setSuccess(`बँक पावती ${isEditMode ? 'अपडेट' : 'जतन'} यशस्वीरीत्या झाली!`);
+      // setSuccess(`बँक पावती ${isEditMode ? 'अपडेट' : 'जतन'} यशस्वीरीत्या झाली!`);
 
+      handleClear();
+      fetchInitialData();
       if (!isEditMode) {
         setFormData(prev => ({
           ...initialFormData,
@@ -288,6 +327,8 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       schoolUdise: currentUdise,
       img: null
     });
+    setBankCurrentBalance(null);
+    setCustomerCurrentBalence(null);
     setSelectedCustomer(null);
     setError(null);
     setSuccess(null);
