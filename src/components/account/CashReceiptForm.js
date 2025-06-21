@@ -43,7 +43,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       }
 
       const headname = "Sundry Debtors"
-      const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);      
+      const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
       const leadgerData = await apiService.getdata(`generalledger/${schoolUdise}`)
 
       let selectedOpn = []
@@ -92,17 +92,23 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         let trans = 0;
         transBalance2.map(a => trans += a.crAmt);
 
-        const transAmt = (datas.data || []).filter(b => b.entryType === "Cash Payment" || b.entryType === "Cash Receipt" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId));
+        console.log(recordMain.custId);
 
-        let drTransaction=0;
-        let crTransaction=0;
+        console.log(datas.data);
 
-        transAmt.forEach(a=>{
-          drTransaction+=a.drAmt ||0;
-          crTransaction+=a.crAmt ||0;
+        const transAmt = (datas.data || []).filter(b => (b.entryType === "Cash Payment" || b.entryType === "Cash Receipt" || b.entryType === "Contra Payment") && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId));
+
+        let drTransaction = 0;
+        let crTransaction = 0;
+
+        console.log(transAmt);
+
+        transAmt.forEach(a => {
+          drTransaction += a.drAmt || 0;
+          crTransaction += a.crAmt || 0;
         });
 
-        setMainHeadBalance((openBalance.drAmt+drTransaction)-crTransaction);
+        setMainHeadBalance((openBalance.drAmt + drTransaction) - crTransaction);
       }
 
       init();

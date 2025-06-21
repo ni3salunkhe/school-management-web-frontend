@@ -39,94 +39,95 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   const [currentBalance, setCurrentBalance] = useState(0)
   const navigate = useNavigate()
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      try {
-        const token = sessionStorage.getItem('token');
-        if (!token) {
-          setError('प्रमाणीकरण टोकन सापडले नाही');
-          return;
-        }
-
-        const decodedToken = jwtDecode(token);
-        const udiseNo = decodedToken?.udiseNo;
-
-        if (!udiseNo) {
-          setError('टोकन मध्ये UDISE क्रमांक सापडला नाही');
-          return;
-        }
-
-        // प्रारंभिक शाळा UDISE सेट करा
-        setFormData(prev => ({
-          ...prev,
-          schoolUdise: udiseNo,
-        }));
-
-        // बँक आणि ग्राहक आणा
-        const [banksResponse, partiesResponse] = await Promise.all([
-          apiService.getbyid("bank/byudiseno/", udiseNo),
-          apiService.getbyid("customermaster/getcustomersbyudise/", udiseNo)
-        ]);
-
-        setBankAccounts(banksResponse.data || []);
-        let selectedOpn = [];
-        try {
-          const opnBal = await apiService.getdata(`generalledger/${udiseNo}`);
-
-          if (opnBal?.data?.length) {
-            for (let i = 0; i < opnBal.data.length; i++) {
-              const subheadId = opnBal.data[i]?.subhead?.subheadId;
-              if (subheadId) {
-                selectedOpn.push(subheadId);
-              }
-            }
-          } else {
-            console.warn("No data found in opening balance.");
-            navigate('/openingbalance', { replace: true })
-          }
-
-          console.log("Selected Opening Balances:", selectedOpn);
-        } catch (error) {
-          console.error("Error fetching opening balances:", error.message || error);
-        }
-
-
-        const filtered = (partiesResponse.data || []).filter(
-          party => selectedOpn.includes(party.subheadId.subheadId) && party.custName !== "Cash In Hand"
-        );
-
-        console.log(filtered)
-
-        // const filter = filtered.filter(
-        //   party =>  
-        // )
-
-        setParties(filtered || []);
-
-        console.log(partiesResponse.data);
-
-        if (isEditMode && transactionId) {
-          // विद्यमान व्यवहार डेटा आणा
-          const existingData = await apiService.getbyid("bankpayment/", transactionId);
-          if (existingData.data) {
-            setFormData(prev => ({
-              ...prev,
-              ...existingData.data,
-              entryDate: existingData.data.entryDate || prev.entryDate,
-              createDate: existingData.data.createDate || prev.createDate
-            }));
-          }
-        }
-      } catch (err) {
-        console.error('प्रारंभिक डेटा आणण्यात त्रुटी:', err);
-        setError(`प्रारंभिक डेटा लोड करण्यात अयशस्वी: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchInitialData();
   }, [isEditMode, transactionId]);
+
+  const fetchInitialData = async () => {
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        setError('प्रमाणीकरण टोकन सापडले नाही');
+        return;
+      }
+
+      const decodedToken = jwtDecode(token);
+      const udiseNo = decodedToken?.udiseNo;
+
+      if (!udiseNo) {
+        setError('टोकन मध्ये UDISE क्रमांक सापडला नाही');
+        return;
+      }
+
+      // प्रारंभिक शाळा UDISE सेट करा
+      setFormData(prev => ({
+        ...prev,
+        schoolUdise: udiseNo,
+      }));
+
+      // बँक आणि ग्राहक आणा
+      const [banksResponse, partiesResponse] = await Promise.all([
+        apiService.getbyid("bank/byudiseno/", udiseNo),
+        apiService.getbyid("customermaster/getcustomerbyheadname/Sundry%20Creditors/", udiseNo)
+      ]);
+
+      setBankAccounts(banksResponse.data || []);
+      let selectedOpn = [];
+      try {
+        const opnBal = await apiService.getdata(`generalledger/${udiseNo}`);
+
+        if (opnBal?.data?.length) {
+          for (let i = 0; i < opnBal.data.length; i++) {
+            const subheadId = opnBal.data[i]?.subhead?.subheadId;
+            if (subheadId) {
+              selectedOpn.push(subheadId);
+            }
+          }
+        } else {
+          console.warn("No data found in opening balance.");
+          navigate('/openingbalance', { replace: true })
+        }
+
+        console.log("Selected Opening Balances:", selectedOpn);
+      } catch (error) {
+        console.error("Error fetching opening balances:", error.message || error);
+      }
+
+
+      const filtered = (partiesResponse.data || []).filter(
+        party => selectedOpn.includes(party.subheadId.subheadId) && party.custName !== "Cash In Hand"
+      );
+
+      console.log(filtered)
+
+      // const filter = filtered.filter(
+      //   party =>  
+      // )
+
+      setParties(filtered || []);
+
+      console.log(partiesResponse.data);
+
+      if (isEditMode && transactionId) {
+        // विद्यमान व्यवहार डेटा आणा
+        const existingData = await apiService.getbyid("bankpayment/", transactionId);
+        if (existingData.data) {
+          setFormData(prev => ({
+            ...prev,
+            ...existingData.data,
+            entryDate: existingData.data.entryDate || prev.entryDate,
+            createDate: existingData.data.createDate || prev.createDate
+          }));
+        }
+      }
+    } catch (err) {
+      console.error('प्रारंभिक डेटा आणण्यात त्रुटी:', err);
+      setError(`प्रारंभिक डेटा लोड करण्यात अयशस्वी: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -170,18 +171,18 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         /*Bank balance logic*/
         const head = bank.headId && bank.headId.bookSideMaster.booksideName
         console.log(head);
-        
+
         if (head === "Liabilities") {
           const transBalance = (datas.data || []).filter(
-            b =>b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+            b => b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
+              b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
           );
 
           console.log("transaction balance 2", transBalance)
 
           const transBalance2 = (datas.data || []).filter(
             b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" ||
-            b.entryType === "Expense Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+              b.entryType === "Expense Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
           )
 
           let trans = 0;
@@ -190,7 +191,7 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
           let transactionAmt = 0;
           transBalance.map(a => transactionAmt += a.drAmt)
 
-          const amt = (opnNBalance.crAmt +trans ) - transactionAmt;
+          const amt = (opnNBalance.crAmt + trans) - transactionAmt;
           return setMainHeadBalance(amt)
         }
         const amt = (opnNBalance.drAmt + transactionAmt) - trans;
@@ -221,20 +222,20 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         const opnNBalance = (datas.data || []).find(
           b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
         );
-        console.log(opnNBalance.drAmt)
-       const transBalance = (datas.data || []).filter(b =>
-        ["Cash Payment", "Bank Payment", "Journal Payment"].includes(b.entryType) &&
-        b.subhead &&
-        Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId)
-      );
+        // console.log(opnNBalance.drAmt)
+        const transBalance = (datas.data || []).filter(b =>
+          ["Cash Payment", "Bank Payment", "Journal Payment"].includes(b.entryType) &&
+          b.subhead &&
+          Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId)
+        );
 
-      
-      let transactionAmt = 0;
-      let trans = 0;
-      transBalance.map(a => transactionAmt += a.drAmt)
-      transBalance.map(c=> trans += c.crAmt)
-      const amt = (opnNBalance.crAmt + trans) - transactionAmt
-      setCurrentBalance(amt)
+
+        let transactionAmt = 0;
+        let trans = 0;
+        transBalance.map(a => transactionAmt += a.drAmt)
+        transBalance.map(c => trans += c.crAmt)
+        const amt = (opnNBalance.crAmt + trans) - transactionAmt
+        setCurrentBalance(amt)
 
       }
       init(selectedParty)
@@ -310,16 +311,38 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       formDataToSend.append('bankSubheadId', mainSubheadId)
       let response;
       if (isEditMode && transactionId) {
+        if (formData.amount > mainHeadBalance) {
+          Swal.fire({
+            icon: "error",
+            title: "पेमेंट अयशस्वी...",
+            text: "निवडलेल्या पक्षासाठी पुरेशी शिल्लक उपलब्ध नाही. कृपया रक्कम तपासा!",
+          });
+          handleClear();
+          return;
+        }
         response = await apiService.put(`bankpayment/${transactionId}`, formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
+        fetchInitialData();
         Swal.fire('यशस्वी', 'बँक पेमेंट यशस्वीरीत्या संपादित केले!', 'success');
 
       } else {
+
+        console.log(" formdata amount" + formData.amount + "currentBalance" + currentBalance);
+
+        if (formData.amount > mainHeadBalance) {
+          Swal.fire({
+            icon: "error",
+            title: "पेमेंट अयशस्वी...",
+            text: "निवडलेल्या पक्षासाठी पुरेशी शिल्लक उपलब्ध नाही. कृपया रक्कम तपासा!",
+          });
+          handleClear();
+          return;
+        }
         response = await apiService.post("bankpayment/", formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        console.log(response.data);
+        fetchInitialData();
         Swal.fire('यशस्वी', 'बँक पेमेंट यशस्वीरीत्या जतन केले!', 'success');
       }
 
@@ -541,19 +564,6 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
                 </div>
               </div>
             </div>
-
-            {selectedCustomer && (
-              <div className="row g-3 mb-3">
-                <div className="col-12">
-                  <div className="alert alert-info">
-                    <strong>निवडलेल्या ग्राहकाचे तपशील:</strong><br />
-                    नाव: {selectedCustomer.custName}<br />
-                    {selectedCustomer.headId && `मुख्य: ${selectedCustomer.headId.headName}`}<br />
-                    {selectedCustomer.subheadId && `उपमुख्य: ${selectedCustomer.subheadId.subheadName}`}
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="d-flex gap-2 mt-4">
               <button type="submit" className="btn btn-danger" disabled={loading}>
