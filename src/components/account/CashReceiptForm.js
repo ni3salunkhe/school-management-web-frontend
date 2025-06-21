@@ -43,10 +43,8 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       }
 
       const headname = "Sundry Debtors"
-      const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
-
+      const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);      
       const leadgerData = await apiService.getdata(`generalledger/${schoolUdise}`)
-      
       let selectedOpn = []
 
       for (let i = 0; i < leadgerData.data.length; i++) {
@@ -54,10 +52,8 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       }
 
       const filtered = (customersData.data || []).filter(
-        party => selectedOpn.includes(party.subheadId.subheadId)
+        party => selectedOpn.includes(party.custId)
       );
-      // console.log(recordMain);
-
       const customersData1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
       const recordMain = (customersData1.data || []).find(c => c.custName === "Cash In Hand" && selectedOpn.includes(c.subheadId.subheadId));
 
@@ -85,12 +81,12 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         );
         // console.log(opnNBalance.drAmt)
         const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Cash Receipt" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          b => b.entryType === "Cash Receipt" ||
+            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
         );
-        // console.log(+transBalance)
-
         const transBalance2 = (datas.data || []).filter(
-          b => b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          b => b.entryType === "Cash Payment" ||
+            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
         )
         // console.log( "transaction balance 2"+transBalance2);
         let trans = 0;

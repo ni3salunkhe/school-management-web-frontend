@@ -126,9 +126,11 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
       const openAmount = openBalence.drAmt;
 
-      const receiptTransBalance = generalledgerData.filter(b => b.entryType === "Bank Receipt" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+      const receiptTransBalance = generalledgerData.filter(b => b.entryType === "Bank Receipt" ||
+            b.entryType === "Expense Payment" ||b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
 
-      const paymentTransBalance = generalledgerData.filter(b => b.entryType === "Bank Payment" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
+      const paymentTransBalance = generalledgerData.filter(b => b.entryType === "Bank Payment" ||
+            b.entryType === "Expense Payment" ||b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
 
       let receiptTransAmt = 0;
       receiptTransBalance.forEach(a => receiptTransAmt += a.drAmt);

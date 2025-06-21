@@ -148,12 +148,14 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         );
         // console.log(opnNBalance.drAmt)
         const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+          b => b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
         );
         // console.log(+transBalance)
 
         const transBalance2 = (datas.data || []).filter(
-          b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+          b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
         )
         // console.log( "transaction balance 2"+transBalance2);
         let trans = 0;
@@ -171,13 +173,15 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         
         if (head === "Liabilities") {
           const transBalance = (datas.data || []).filter(
-            b =>b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+            b =>b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
           );
 
           console.log("transaction balance 2", transBalance)
 
           const transBalance2 = (datas.data || []).filter(
-            b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+            b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" ||
+            b.entryType === "Expense Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
           )
 
           let trans = 0;
