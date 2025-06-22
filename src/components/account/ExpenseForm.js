@@ -280,7 +280,13 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
 
     // Check if sufficient balance
     if (parseFloat(formData.amount) > sourceAccountBalance) {
-      setError("अपुरी शिल्लक! रक्कम उपलब्ध शिल्लकपेक्षा जास्त आहे");
+      // setError("अपुरी शिल्लक! रक्कम उपलब्ध शिल्लकपेक्षा जास्त आहे");
+      Swal.fire({
+        icon: "error",
+        title: "पेमेंट अयशस्वी...",
+        text: "अपुरी शिल्लक! रक्कम उपलब्ध शिल्लकपेक्षा जास्त आहे",
+      });
+      handleClear();
       return false;
     }
 
@@ -305,7 +311,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         subheadId: parseInt(formData.custId),
         narr: formData.narr,
         billNo: formData.billNo || "",
-        schoolUdise:formData.schoolUdise
+        schoolUdise: formData.schoolUdise
       };
 
       // Find head ID
@@ -326,7 +332,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
           (b) => b.id === Number(formData.bankId)
         );
         // return console.log(selectedBank);
-        
+
         if (selectedBank && selectedBank.custId) {
           jsonData.custId = selectedBank.custId.custId;
           jsonData.tranType = "Expense Payment";
@@ -629,8 +635,8 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
                     ? "अपडेट करत आहे..."
                     : "नोंदवत आहे..."
                   : isEditMode
-                  ? "खर्च अपडेट करा"
-                  : "खर्च नोंदवा"}
+                    ? "खर्च अपडेट करा"
+                    : "खर्च नोंदवा"}
               </button>
               <button
                 type="button"
