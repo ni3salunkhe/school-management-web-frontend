@@ -323,6 +323,20 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       if (formData.img) {
         formDataToSend.append("img", formData.img);
       }
+
+      const balance = await fetchAccountBalance(payerAccount.subheadId, payerAccount.headId);
+
+      if (formData.amount > balance) {
+        Swal.fire({
+          icon: "error",
+          title: "पेमेंट अयशस्वी...",
+          text: "निवडलेल्या पक्षासाठी पुरेशी शिल्लक उपलब्ध नाही. कृपया रक्कम तपासा!",
+        });
+        handleClear();
+        return;
+      }
+
+
       await apiService.post("contrapayment/", formDataToSend);
       Swal.fire("यशस्वी", "परस्पर व्यवहार यशस्वीरीत्या जतन केले!", "success");
       handleClear();

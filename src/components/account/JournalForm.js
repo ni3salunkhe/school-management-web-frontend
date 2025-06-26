@@ -172,8 +172,19 @@ function JournalForm() {
             alert('Please fill all debit entries');
             return;
         }
+
+        if (formData.dramount > currentBalance) {
+            Swal.fire({
+                icon: "error",
+                title: "पेमेंट अयशस्वी...",
+                text: "निवडलेल्या पक्षासाठी पुरेशी शिल्लक उपलब्ध नाही. कृपया रक्कम तपासा!",
+            });
+            resetForm();
+            return;
+        }
+
         const payload = { ...formData, schoolUdise: udiseNo }
-        const response = await apiService.post("journal/", payload);
+        await apiService.post("journal/", payload);
 
         fetchData();
 

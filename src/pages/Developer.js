@@ -10,6 +10,9 @@ import TehsilForm from '../components/TehsilForm'
 import VillageOrCityForm from '../components/VillageOrCityForm'
 import ViewUsers from '../components/ViewUsers'
 import YearMaster from '../components/account/YearMaster'
+import DeveloperSubscription from '../components/DeveloperSubScription'
+import ExpirationAlert from '../components/ExpirationAlert'
+import QrCodeAndNumberSetForm from '../components/QrCodeAndNumberSetForm'
 
 function Developer() {
   return (
@@ -24,6 +27,9 @@ function Developer() {
         <Route path='village' element={<VillageOrCityForm />} />
         <Route path='view-users' element={<ViewUsers />} />
         <Route path='year' element={<YearMaster/>}/>
+        <Route path='developer-subscription' element={<DeveloperSubscription/>}/>
+        <Route path='expiry' element={<ExpirationAlert/>}/>
+        <Route path='updateqrcodeandnumber' element={<QrCodeAndNumberSetForm/>}/>
       </Routes>
     </Container>
   )

@@ -5,6 +5,7 @@ import apiService from '../../services/api.service';
 import { jwtDecode } from 'jwt-decode';
 import { BiIdCard } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 
 const initialFormData = {
@@ -91,19 +92,23 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" || b.entryType === "Contra Payment" ||
             b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
-     
+
 
       const transBalance2 = (datas.data || []).filter(
         b => (b.entryType === "Cash Payment" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment" ||
             b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       )
-      
+
       let trans = 0;
       transBalance2.map(a => trans += a.crAmt)
+      console.log(transBalance2);
+
       let transactionAmt = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
       const amt = (opnNBalance.drAmt + transactionAmt) - trans;
       setMainHeadBalance(amt)
+      console.log(amt);
+
     }
 
     init();
@@ -169,11 +174,11 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId)
       );
 
-      
+
       let transactionAmt = 0;
       let trans = 0;
       transBalance.map(a => transactionAmt += a.drAmt)
-      transBalance.map(c=> trans += c.crAmt)
+      transBalance.map(c => trans += c.crAmt)
       const amt = (opnNBalance.crAmt + trans) - transactionAmt
       setCurrentBalance(amt)
 
@@ -218,12 +223,23 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         status: "cr" // ✅ because mainSubHead is being credited (Cash is going out)
       };
 
+      if (formData.amount > mainHeadBalance) {
+        Swal.fire({
+          icon: "error",
+          title: "पेमेंट अयशस्वी...",
+          text: "निवडलेल्या पक्षासाठी पुरेशी शिल्लक उपलब्ध नाही. कृपया रक्कम तपासा!",
+        });
+        handleClear();
+        setCurrentBalance(null);
+        return;
+      }
 
       await apiService.postdata("cashpayment/", payload);
-      setSuccess(`रोख पेमेंट यशस्वीरित्या जतन झाले! व्हाउचर नं.: ${formData.voucherNo}`);
+       Swal.fire('यशस्वी', 'यशस्वीरीत्या जतन केले!', 'success');
+      // setSuccess(`रोख पेमेंट यशस्वीरित्या जतन झाले! व्हाउचर नं.: ${formData.voucherNo}`);
       setCurrentBalance(null)
-      const nextVoucher = `CP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
-      setFormData({ ...initialFormData, voucherNo: nextVoucher, date: new Date().toISOString().split('T')[0] });
+      // const nextVoucher = `CP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
+      setFormData({ ...initialFormData, date: new Date().toISOString().split('T')[0] });
     } catch (err) {
       setError(`ऑपरेशन अयशस्वी: ${err.message}`);
     } finally {
@@ -233,7 +249,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
   };
 
   const handleClear = () => {
-    setFormData(prev => ({ ...initialFormData, voucherNo: prev.voucherNo, date: new Date().toISOString().split('T')[0] }));
+    setFormData(prev => ({ ...initialFormData, date: new Date().toISOString().split('T')[0] }));
     setError(null);
     setSuccess(null);
     setValidationErrors({});
