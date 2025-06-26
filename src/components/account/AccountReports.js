@@ -10,13 +10,13 @@ const AccountReports = () => {
     from: "2024-01-01",
     to: "2025-12-31",
   });
-  const [profitnlossDiff, setProfitnLossDiff] = useState(0)
+  const [profitnlossDiff, setProfitnLossDiff] = useState(0);
   const udise = jwtDecode(sessionStorage.getItem("token"))?.udiseNo;
   const [assteData, setAssetData] = useState([]);
   const [liabilityData, setLiabilityData] = useState([]);
   const [profitnLossData, setProfitnLossData] = useState({
-    expense:[],
-    income:[]
+    expense: [],
+    income: [],
   });
   const [isConsolidated, setIsConsolidated] = useState(false);
   const [sampleLedgerData, setSampleLedgerData] = useState([]);
@@ -24,6 +24,7 @@ const AccountReports = () => {
   const [subhead, setSubhead] = useState([]);
   const [ledgSubhead, setLedgSubhead] = useState("");
   const [companyName1, setCompanyName] = useState("");
+  const [plDiff, setPlDiff] = useState(0);
   useEffect(() => {
     fetchInitiealData();
     fetchSubheadsData();
@@ -35,6 +36,46 @@ const AccountReports = () => {
       setIsDropdownActive(false);
     }
   }, [activeReport]);
+
+  function convertToHeadBasedFormat(data) {
+    if (!Array.isArray(data)) return [];
+
+    const result = {};
+
+    data.forEach((entry) => {
+      const headName = entry.headId.headName || "Unknown Head";
+      const subheadName = entry.subHeadId.subheadName || "Unknown Subhead";
+      const amount = Math.abs((entry.drAmt || 0) - (entry.crAmt || 0));
+
+      if (!result[headName]) {
+        result[headName] = {
+          name: headName,
+          amount: 0,
+          subItems: [],
+        };
+      }
+
+      // Check if subhead already exists
+      const existingSubhead = result[headName].subItems.find(
+        (item) => item.name === subheadName
+      );
+
+      if (existingSubhead) {
+        existingSubhead.amount += amount;
+        existingSubhead.subItems.push({ name: subheadName, amount });
+      } else {
+        result[headName].subItems.push({
+          name: subheadName,
+          amount,
+          subItems: [{ name: subheadName, amount }],
+        });
+      }
+
+      result[headName].amount += amount;
+    });
+
+    return Object.values(result);
+  }
 
   const fetchSubheadsData = async () => {
     const response = await apiService.getdata(
@@ -59,12 +100,6 @@ const AccountReports = () => {
     const profitnloss = await apiService.getdata(
       `generalledger/getvalue/Profit%20And%20Loss/shop/${udise}/date/${dateRange.to}`
     );
-    console.log(profitnloss.data);
-    const formattedAsset = convertToDisplayFormat(asset.data, "Assets");
-    const formattedLiability = convertToDisplayFormat(
-      liabilities.data,
-      "Liabilities"
-    );
     const expense = convertToDisplayFormat(
       extractPLHeads(profitnloss.data, "expense"),
       "ProfitnLoss"
@@ -73,18 +108,71 @@ const AccountReports = () => {
       extractPLHeads(profitnloss.data, "income"),
       "ProfitnLoss"
     );
+    const diff = calculateTotal(income) + calculateTotal(expense);
+    setPlDiff(diff);
+    const udpdatePl = async (diff) => {
+      const plDiffNew = Math.abs(diff);
+      let payload = {
+        Cr_Amt: 0,
+        Dr_Amt: 0,
+      };
+      if (diff > 0) {
+        payload = {
+          Cr_Amt: 0,
+          Dr_Amt: plDiffNew,
+        };
+      } else if (diff < 0) {
+        payload = {
+          Cr_Amt: plDiffNew,
+          Dr_Amt: 0,
+        };
+      }
+      await apiService.put(
+        `generalledger/profit-loss/Current%20Period/${udise}`,
+        payload
+      );
+      const response = await apiService.getdata(
+        `generalledger/get-profit-loss/Profit%20&%20Loss/${udise}`
+      );
+      console.log(convertToHeadBasedFormat(response.data));
+      return convertToHeadBasedFormat(response.data);
+    };
+    const formattedData = await udpdatePl(diff);
+    console.log(formattedData);
+
+    const formattedAsset = convertToDisplayFormat(
+      asset.data,
+      "Assets",
+      diff,
+      formattedData
+    );
+    const formattedLiability = convertToDisplayFormat(
+      liabilities.data,
+      "Liabilities",
+      diff,
+      formattedData
+    );
+
+    if (diff > 0) {
+      expense.push(...formattedData); // show loss in expense
+    } else if (diff < 0) {
+      income.push(...formattedData); // show profit in income
+    }
+
+   
     setAssetData(formattedAsset);
     setLiabilityData(formattedLiability);
     setProfitnLossData({
-      expense:expense,
-      income:income
+      expense: expense,
+      income: income,
     });
-    setProfitnLossDiff(calculateTotal(income)-calculateTotal(expense))
+
+    console.log(formattedAsset);
   };
 
   const calculateTotal = (items) => {
     if (!items || items.length === 0) return 0;
-    let base=0;
+    let base = 0;
     items.map((item) => {
       base += parseFloat(item.amount) || 0;
     });
@@ -100,7 +188,7 @@ const AccountReports = () => {
     });
   };
 
-  const convertToDisplayFormat = (rawData, mainHead) => {
+  const convertToDisplayFormat = (rawData, mainHead, diff, formattedData) => {
     const result = [];
 
     // Define head-specific priority orders
@@ -115,6 +203,7 @@ const AccountReports = () => {
         "Investments",
         "Misc. Expenses (ASSET)",
         "Branch / Divisions",
+        "Manual Head",
       ],
       Liabilities: [
         "Capital Account",
@@ -175,6 +264,16 @@ const AccountReports = () => {
           subItems,
         });
       }
+    }
+    console.log(diff);
+
+    if (diff > 0 && mainHead === "Assets") {
+      console.log(formattedData);
+
+      result.push(...formattedData);
+    } else if (diff < 0 && mainHead === "Liabilities") {
+      console.log(formattedData);
+      result.push(...formattedData);
     }
 
     return result;

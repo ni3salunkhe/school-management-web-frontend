@@ -85,15 +85,17 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const opnNBalance = (datas.data || []).find(
         b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
+      console.log(datas.data);
+      
       const transBalance = (datas.data || []).filter(
-        b => b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+        b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
      
 
       const transBalance2 = (datas.data || []).filter(
-        b => b.entryType === "Cash Payment" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+        b => (b.entryType === "Cash Payment" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       )
       
       let trans = 0;

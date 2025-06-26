@@ -19,8 +19,18 @@ const ReportDashboard = ({
 }) => {
   const calculateTotal = (items) => {
     if (!items || items.length === 0) return 0;
-    let base=0;
+    let base = 0;
     items.map((item) => {
+      const name = item.name?.toLowerCase();
+
+      // Skip profit/loss entry in non-P&L reports
+      if (
+        reportType === "profit-loss" &&
+        (name === "profit" || name === "loss" || name === "profit & loss")
+      ) {
+        return;
+      }
+
       base += parseFloat(item.amount) || 0;
     });
     return base;
@@ -46,20 +56,26 @@ const ReportDashboard = ({
       case "balance-sheet":
         return `as at ${asAtDate}`;
       case "trial-balance":
-        return dateRange ? `From ${dateRange.from} to ${dateRange.to}` : `as at ${asAtDate}`;
+        return dateRange
+          ? `From ${dateRange.from} to ${dateRange.to}`
+          : `as at ${asAtDate}`;
       case "profit-loss":
-        return dateRange ? `For the period ${dateRange.from} to ${dateRange.to}` : `as at ${asAtDate}`;
+        return dateRange
+          ? `For the period ${dateRange.from} to ${dateRange.to}`
+          : `as at ${asAtDate}`;
       case "ledger":
-        return dateRange ? `From ${dateRange.from} to ${dateRange.to}` : `as at ${asAtDate}`;
+        return dateRange
+          ? `From ${dateRange.from} to ${dateRange.to}`
+          : `as at ${asAtDate}`;
       default:
         return `as at ${asAtDate}`;
     }
   };
 
   const formatAmount = (amount) => {
-    if (amount === null || amount === undefined || amount === "") return "-";
+    if (amount === null || amount === undefined || amount === "") return 0;
     const num = parseFloat(amount);
-    if (isNaN(num)) return "-";
+    if (isNaN(num)) return 0;
     return new Intl.NumberFormat("en-IN", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -77,13 +93,13 @@ const ReportDashboard = ({
 
     // Calculate running balance
     let runningBalance = 0;
-    const entriesWithBalance = ledgerData.map(entry => {
+    const entriesWithBalance = ledgerData.map((entry) => {
       const debit = parseFloat(entry.drAmt) || 0;
       const credit = parseFloat(entry.crAmt) || 0;
       runningBalance += debit - credit;
       return {
         ...entry,
-        balance: runningBalance
+        balance: runningBalance,
       };
     });
 
@@ -92,39 +108,60 @@ const ReportDashboard = ({
         {/* Ledger Header */}
         <div className="d-flex justify-content-between align-items-center py-2 px-3 fw-bold border-bottom border-light border-opacity-25 print-section-header ledger-header">
           <span style={{ width: "12%" }}>Date</span>
-          <span style={{ width: "10%" }}>Voucher No.</span>
+          <span style={{ width: "10%" }}>Reciever</span>
           <span style={{ width: "8%" }}>Type</span>
           <span style={{ width: "30%" }}>Particulars</span>
-          <span style={{ width: "15%" }} className="text-end">Debit (₹)</span>
-          <span style={{ width: "15%" }} className="text-end">Credit (₹)</span>
-          <span style={{ width: "15%" }} className="text-end">Balance (₹)</span>
+          <span style={{ width: "15%" }} className="text-end">
+            Debit (₹)
+          </span>
+          <span style={{ width: "15%" }} className="text-end">
+            Credit (₹)
+          </span>
+          <span style={{ width: "15%" }} className="text-end">
+            Balance (₹)
+          </span>
         </div>
-        
+
         {/* Ledger Entries */}
         {entriesWithBalance.map((entry, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="d-flex justify-content-between align-items-center py-1 px-3 border-bottom border-light border-opacity-10 ledger-entry"
           >
             <span style={{ width: "12%" }} className="small">
-              {entry.entrydate ? new Date(entry.entrydate).toLocaleDateString('en-IN') : '-'}
+              {entry.entrydate
+                ? new Date(entry.entrydate).toLocaleDateString("en-IN")
+                : "-"}
             </span>
             <span style={{ width: "10%" }} className="small">
-              {entry.entryNo || '-'}
+              {entry.entryNo || "-"}
             </span>
             <span style={{ width: "8%" }} className="small">
-              {entry.entryType || '-'}
+              {entry.entryType || "-"}
             </span>
             <span style={{ width: "30%" }} className="small">
-              {entry.narr || '-'}
+              {entry.narr || "-"}
             </span>
-            <span style={{ width: "15%" }} className="text-end small font-monospace">
+            <span
+              style={{ width: "15%" }}
+              className="text-end small font-monospace"
+            >
               {formatAmount(entry.drAmt)}
             </span>
-            <span style={{ width: "15%" }} className="text-end small font-monospace">
+            <span
+              style={{ width: "15%" }}
+              className="text-end small font-monospace"
+            >
               {formatAmount(entry.crAmt)}
             </span>
-            <span style={{ width: "15%" }} className={`text-end small font-monospace ${index === entriesWithBalance.length - 1 ? 'fw-bold ledger-balance' : ''}`}>
+            <span
+              style={{ width: "15%" }}
+              className={`text-end small font-monospace ${
+                index === entriesWithBalance.length - 1
+                  ? "fw-bold ledger-balance"
+                  : ""
+              }`}
+            >
               {formatAmount(entry.balance)}
             </span>
           </div>
@@ -146,8 +183,7 @@ const ReportDashboard = ({
       const totalAmount = consolidated
         ? (parseFloat(item.amount) || 0) +
           (item.subItems?.reduce(
-            (sum, sub) => sum + (parseFloat(sub.amount) || 0,
-            0)
+            (sum, sub) => sum + (parseFloat(sub.amount) || 0, 0)
           ) || 0)
         : parseFloat(item.amount) || 0;
 
@@ -155,9 +191,14 @@ const ReportDashboard = ({
         <div key={index} className="print-item">
           <div className="d-flex justify-content-between align-items-center py-1 px-3 border-bottom border-light border-opacity-25">
             <span className="fw-medium text-dark">
-              {item.accountCode && reportType === "trial-balance" ? `${item.accountCode} - ${item.name}` : item.name}
+              {item.accountCode && reportType === "trial-balance"
+                ? `${item.accountCode} - ${item.name}`
+                : item.name}
             </span>
-            <span className="text-end font-monospace" style={{ minWidth: "120px" }}>
+            <span
+              className="text-end font-monospace"
+              style={{ minWidth: "120px" }}
+            >
               {formatAmount(item.amount)}
             </span>
           </div>
@@ -168,9 +209,14 @@ const ReportDashboard = ({
                 className="d-flex justify-content-between align-items-center py-1 px-4 ps-5 border-bottom border-light border-opacity-10"
               >
                 <span className="text-dark opacity-75 small">
-                  {subItem.accountCode && reportType === "trial-balance" ? `${subItem.accountCode} - ${subItem.name}` : subItem.name}
+                  {subItem.accountCode && reportType === "trial-balance"
+                    ? `${subItem.accountCode} - ${subItem.name}`
+                    : subItem.name}
                 </span>
-                <span className="text-end small font-monospace" style={{ minWidth: "120px" }}>
+                <span
+                  className="text-end small font-monospace"
+                  style={{ minWidth: "120px" }}
+                >
                   {formatAmount(subItem.amount)}
                 </span>
               </div>
@@ -180,18 +226,22 @@ const ReportDashboard = ({
     });
   };
 
-  const renderTrialBalanceItems = (debitItems, creditItems, consolidated = false) => {
+  const renderTrialBalanceItems = (
+    debitItems,
+    creditItems,
+    consolidated = false
+  ) => {
     const allAccounts = [];
-    
+
     // Process debit items
-    debitItems.forEach(item => {
+    debitItems.forEach((item) => {
       if (consolidated) {
         allAccounts.push({
           name: item.name,
           accountCode: item.accountCode,
           debit: item.amount,
           credit: 0,
-          isParent: true
+          isParent: true,
         });
       } else {
         allAccounts.push({
@@ -199,28 +249,30 @@ const ReportDashboard = ({
           accountCode: item.accountCode,
           debit: parseFloat(item.amount) || 0,
           credit: 0,
-          isParent: true
+          isParent: true,
         });
-        
+
         if (item.subItems && item.subItems.length > 0) {
-          item.subItems.forEach(subItem => {
+          item.subItems.forEach((subItem) => {
             allAccounts.push({
               name: subItem.name,
               accountCode: subItem.accountCode,
               debit: parseFloat(subItem.amount) || 0,
               credit: 0,
               isParent: false,
-              isSubItem: true
+              isSubItem: true,
             });
           });
         }
       }
     });
-    
+
     // Process credit items
-    creditItems.forEach(item => {
+    creditItems.forEach((item) => {
       if (consolidated) {
-        const existingAccount = allAccounts.find(acc => acc.name === item.name);
+        const existingAccount = allAccounts.find(
+          (acc) => acc.name === item.name
+        );
         if (existingAccount) {
           existingAccount.credit = item.amount;
         } else {
@@ -229,11 +281,13 @@ const ReportDashboard = ({
             accountCode: item.accountCode,
             debit: 0,
             credit: item.amount,
-            isParent: true
+            isParent: true,
           });
         }
       } else {
-        const existingAccount = allAccounts.find(acc => acc.name === item.name && acc.isParent);
+        const existingAccount = allAccounts.find(
+          (acc) => acc.name === item.name && acc.isParent
+        );
         if (existingAccount) {
           existingAccount.credit = parseFloat(item.amount) || 0;
         } else {
@@ -242,13 +296,15 @@ const ReportDashboard = ({
             accountCode: item.accountCode,
             debit: 0,
             credit: parseFloat(item.amount) || 0,
-            isParent: true
+            isParent: true,
           });
         }
-        
+
         if (item.subItems && item.subItems.length > 0) {
-          item.subItems.forEach(subItem => {
-            const existingSubAccount = allAccounts.find(acc => acc.name === subItem.name && acc.isSubItem);
+          item.subItems.forEach((subItem) => {
+            const existingSubAccount = allAccounts.find(
+              (acc) => acc.name === subItem.name && acc.isSubItem
+            );
             if (existingSubAccount) {
               existingSubAccount.credit = parseFloat(subItem.amount) || 0;
             } else {
@@ -258,7 +314,7 @@ const ReportDashboard = ({
                 debit: 0,
                 credit: parseFloat(subItem.amount) || 0,
                 isParent: false,
-                isSubItem: true
+                isSubItem: true,
               });
             }
           });
@@ -267,26 +323,34 @@ const ReportDashboard = ({
     });
 
     return allAccounts.map((account, index) => (
-      <div 
-        key={index} 
+      <div
+        key={index}
         className={`d-flex justify-content-between align-items-center py-1 border-bottom border-light border-opacity-25 ${
-          account.isSubItem ? 'px-4 ps-5' : 'px-3'
+          account.isSubItem ? "px-4 ps-5" : "px-3"
         }`}
       >
-        <span 
-          className={`text-dark ${account.isSubItem ? 'opacity-75 small' : 'fw-medium'}`} 
+        <span
+          className={`text-dark ${
+            account.isSubItem ? "opacity-75 small" : "fw-medium"
+          }`}
           style={{ flex: "1" }}
         >
-          {account.accountCode ? `${account.accountCode} - ${account.name}` : account.name}
+          {account.accountCode
+            ? `${account.accountCode} - ${account.name}`
+            : account.name}
         </span>
-        <span 
-          className={`text-end font-monospace ${account.isSubItem ? 'small' : ''}`} 
+        <span
+          className={`text-end font-monospace ${
+            account.isSubItem ? "small" : ""
+          }`}
           style={{ minWidth: "120px" }}
         >
           {formatAmount(account.debit)}
         </span>
-        <span 
-          className={`text-end font-monospace ${account.isSubItem ? 'small' : ''}`} 
+        <span
+          className={`text-end font-monospace ${
+            account.isSubItem ? "small" : ""
+          }`}
           style={{ minWidth: "120px" }}
         >
           {formatAmount(account.credit)}
@@ -446,11 +510,25 @@ const ReportDashboard = ({
                   <div className="w-100">
                     <div className="d-flex justify-content-between align-items-center py-2 px-3 fw-bold border-bottom border-light border-opacity-25 print-section-header">
                       <span style={{ flex: "1" }}>Account Name</span>
-                      <span className="text-center" style={{ minWidth: "120px" }}>Debit</span>
-                      <span className="text-center" style={{ minWidth: "120px" }}>Credit</span>
+                      <span
+                        className="text-center"
+                        style={{ minWidth: "120px" }}
+                      >
+                        Debit
+                      </span>
+                      <span
+                        className="text-center"
+                        style={{ minWidth: "120px" }}
+                      >
+                        Credit
+                      </span>
                     </div>
                     <div className="print-content">
-                      {renderTrialBalanceItems(debitData, creditData, isConsolidated)}
+                      {renderTrialBalanceItems(
+                        debitData,
+                        creditData,
+                        isConsolidated
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -480,34 +558,53 @@ const ReportDashboard = ({
               <div className="card-footer text-center border-0">
                 {reportType === "ledger" ? (
                   <div className="d-flex justify-content-between align-items-center px-3">
-                    <span className="fw-bold" style={{ flex: "1" }}>Closing Balance:</span>
-                    <span className="fw-bold font-monospace" style={{ minWidth: "120px" }}>
-                      {ledgerData.length > 0 ? formatAmount(
-                        ledgerData.reduce((sum, entry) => {
-                          const debit = parseFloat(entry.drAmt) || 0;
-                          const credit = parseFloat(entry.crAmt) || 0;
-                          return sum + (debit - credit);
-                        }, 0)
-                      ) : '0.00'}
+                    <span className="fw-bold" style={{ flex: "1" }}>
+                      Closing Balance:
+                    </span>
+                    <span
+                      className="fw-bold font-monospace"
+                      style={{ minWidth: "120px" }}
+                    >
+                      {ledgerData.length > 0
+                        ? formatAmount(
+                            ledgerData.reduce((sum, entry) => {
+                              const debit = parseFloat(entry.drAmt) || 0;
+                              const credit = parseFloat(entry.crAmt) || 0;
+                              return sum + (debit - credit);
+                            }, 0)
+                          )
+                        : "0.00"}
                     </span>
                   </div>
                 ) : reportType === "trial-balance" ? (
                   <div className="d-flex justify-content-between align-items-center px-3">
-                    <span className="fw-bold" style={{ flex: "1" }}>Total:</span>
-                    <span className="fw-bold font-monospace" style={{ minWidth: "120px" }}>
+                    <span className="fw-bold" style={{ flex: "1" }}>
+                      Total:
+                    </span>
+                    <span
+                      className="fw-bold font-monospace"
+                      style={{ minWidth: "120px" }}
+                    >
                       {formatAmount(calculateTotal(debitData))}
                     </span>
-                    <span className="fw-bold font-monospace" style={{ minWidth: "120px" }}>
+                    <span
+                      className="fw-bold font-monospace"
+                      style={{ minWidth: "120px" }}
+                    >
                       {formatAmount(calculateTotal(creditData))}
                     </span>
                   </div>
                 ) : (
                   <div className="row m-0">
                     <div className="col-6 border-end border-light border-opacity-25">
-                      <strong>Total: {formatAmount(calculateTotal(liabilities))}</strong>
+                      <strong>
+                        Total: {formatAmount(calculateTotal(liabilities))}
+                      </strong>
                     </div>
                     <div className="col-6">
-                      <strong>Total: {formatAmount(calculateTotal(assets))}</strong>
+                      <strong>
+                        Total: {formatAmount(calculateTotal(assets))}
+                      </strong>
                     </div>
                   </div>
                 )}

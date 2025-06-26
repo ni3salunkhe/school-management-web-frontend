@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Save, DollarSign, Pencil, Trash2, Group } from "lucide-react";
+import {
+  Save,
+  DollarSign,
+  Pencil,
+  Trash2,
+  Group,
+  X,
+  Check,
+} from "lucide-react";
 import apiService from "../../services/api.service";
 import { jwtDecode } from "jwt-decode";
 
@@ -21,6 +29,15 @@ const OpeningBalanceForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [flag, setFlag] = useState(false);
+
+  // Edit functionality states
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    drAmt: "",
+    crAmt: "",
+    year: "",
+  });
+
   const udiseNo = jwtDecode(sessionStorage.getItem("token")).udiseNo;
   const today = new Date();
   const entrydate = today.toISOString().split("T")[0];
@@ -44,10 +61,71 @@ const OpeningBalanceForm = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this entry?")) return;
     try {
-      await apiService.deletedata(`openingbal/${id}`);
+      await apiService.deleteById(`openingbal/${id}`);
       fetchOpeningBalances();
+      fetchSumofCrDr();
     } catch (err) {
       alert("Delete failed: " + err.message);
+    }
+  };
+
+  // Edit functionality functions
+  const handleEdit = (balance) => {
+    setEditingId(balance.id);
+    setEditForm({
+      drAmt: balance.drAmt || "",
+      crAmt: balance.crAmt || "",
+      year: balance.year || "",
+    });
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditForm({
+      drAmt: "",
+      crAmt: "",
+      year: "",
+    });
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditForm((prev) => ({
+      ...prev,
+      [field]: value,
+      // Clear the opposite field when one is entered (like in your original logic)
+      ...(field === "drAmt" ? { crAmt: "" } : {}),
+      ...(field === "crAmt" ? { drAmt: "" } : {}),
+    }));
+  };
+
+  const handleEditSave = async () => {
+    try {
+      const updateData = {
+        ...editForm,
+        drAmt: parseFloat(editForm.drAmt) || 0,
+        crAmt: parseFloat(editForm.crAmt) || 0,
+        year: editForm.year,
+      };
+
+      // Validate that at least one amount is provided
+      if (updateData.drAmt === 0 && updateData.crAmt === 0) {
+        alert("Please enter either a debit or credit amount");
+        return;
+      }
+
+      await apiService.put(`openingbal/${editingId}`, updateData);
+
+      setEditingId(null);
+      setEditForm({ drAmt: "", crAmt: "", year: "" });
+      fetchOpeningBalances();
+      fetchSumofCrDr();
+      setSuccess("Record updated successfully!");
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(`Update failed: ${err.message}`);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -78,8 +156,6 @@ const OpeningBalanceForm = () => {
         narr: "Opening balance",
         udiseNo,
         entrydate,
-        // date: `${entry.year.split('-')[0]}-04-01`, // assumes 1st April of start year
-        // year: entry.year
       }));
 
       console.log("Submitting to General Ledger:", ledgerPayload);
@@ -87,7 +163,7 @@ const OpeningBalanceForm = () => {
       await apiService.postdata("generalledger/bulk", ledgerPayload);
 
       alert("Successfully added to General Ledger!");
-      setSelectedRows([]); // Reset selection
+      setSelectedRows([]);
     } catch (error) {
       console.error("Ledger submission failed:", error);
       alert(`Failed to submit to General Ledger: ${error.message}`);
@@ -98,10 +174,11 @@ const OpeningBalanceForm = () => {
     if (!window.confirm("Delete selected records?")) return;
     try {
       await Promise.all(
-        selectedRows.map((id) => apiService.deletedata(`openingbal/${id}`))
+        selectedRows.map((id) => apiService.deleteById(`openingbal/${id}`))
       );
       setSelectedRows([]);
       fetchOpeningBalances();
+      fetchSumofCrDr();
     } catch (err) {
       alert("Batch delete failed: " + err.message);
     }
@@ -146,7 +223,7 @@ const OpeningBalanceForm = () => {
         headName: headMap[sh.headId.headId],
         debit: "",
         credit: "",
-        bookType:sh.headId.bookSideMaster.booksideName
+        bookType: sh.headId.bookSideMaster.booksideName,
       }));
 
       setAllHeads(heads);
@@ -174,11 +251,11 @@ const OpeningBalanceForm = () => {
       const response = await apiService.getdata(`openingbal/`);
       const existingSubHeadIds = (response.data || []).map(
         (item) => item.subHeadId.subheadId
-      ); // Get IDs from nested object
+      );
 
       const filteredData = allSubHeads.filter(
         (h) => !existingSubHeadIds.includes(h.subHeadId)
-      ); // Exclude existing ones
+      );
       console.log(response.data);
 
       setSubheadEntries(filteredData);
@@ -224,6 +301,7 @@ const OpeningBalanceForm = () => {
     setSuccess(null);
   };
 
+  
   const calculateTotal = (type) =>
     filteredEntries.reduce(
       (sum, entry) => sum + (parseFloat(entry[type]) || 0),
@@ -252,11 +330,6 @@ const OpeningBalanceForm = () => {
     const totalDebit = calculateTotal("debit");
     const totalCredit = calculateTotal("credit");
 
-    // if (totalDebit !== totalCredit) {
-    //   setError(`Mismatch: Debit ₹${totalDebit} ≠ Credit ₹${totalCredit}`);
-    //   return;
-    // }
-
     try {
       setSaving(true);
       const payload = { financialYear, balances: validEntries };
@@ -274,6 +347,7 @@ const OpeningBalanceForm = () => {
       fetchOpeningBalances();
     }
   };
+
   if (flag === true) {
     console.log(selectedRows);
   }
@@ -283,12 +357,10 @@ const OpeningBalanceForm = () => {
         (entry) => entry.headId === parseInt(selectedHeadId)
       )
     : [];
-
+    
   const totalDebit = calculateTotal("debit");
   const totalCredit = calculateTotal("credit");
   const difference = creditAmount - debitAmount;
-
-  const readOnly = () => {};
 
   return (
     <div className="container-fluid py-3">
@@ -395,10 +467,9 @@ const OpeningBalanceForm = () => {
                   </thead>
                   <tbody>
                     {filteredEntries.map((entry) => {
-                      const bookType = entry.bookType?.toLowerCase(); // normalize case
+                      const bookType = entry.bookType?.toLowerCase();
                       console.log(entry.bookType);
-                      
-                      // Determine which field should be editable
+
                       const isDebitEditable =
                         bookType === "asset" || bookType === "profit and loss";
                       const isCreditEditable = bookType === "liabilities";
@@ -420,7 +491,6 @@ const OpeningBalanceForm = () => {
                                 )
                               }
                               step="0.01"
-                              readOnly={!isDebitEditable}
                             />
                           </td>
 
@@ -437,7 +507,6 @@ const OpeningBalanceForm = () => {
                                 )
                               }
                               step="0.01"
-                              readOnly={!isCreditEditable}
                             />
                           </td>
                         </tr>
@@ -464,11 +533,7 @@ const OpeningBalanceForm = () => {
               </div>
 
               <div className="d-flex justify-content-end">
-                <button
-                  type="submit"
-                  className="btn btn-success"
-                  // disabled={saving || difference !== 0}
-                >
+                <button type="submit" className="btn btn-success">
                   <Save size={16} className="me-1" />
                   {saving ? "Saving..." : "Save Opening Balances"}
                 </button>
@@ -492,22 +557,24 @@ const OpeningBalanceForm = () => {
       <div className="card mt-4">
         <div className="card-header d-flex justify-content-between bg-primary text-white">
           <h5 className="mb-0">Opening Balance Records</h5>
-          {selectedRows.length > 0 && (
-            <button
-              className="btn btn-danger btn-sm float-end"
-              onClick={deleteSelected}
-            >
-              Delete Selected ({selectedRows.length})
-            </button>
-          )}
-          {selectedRows.length > 0 && (
-            <button
-              className="btn btn-success btn-sm "
-              onClick={selectedLedger}
-            >
-              Add to general ledger ({selectedRows.length})
-            </button>
-          )}
+          <div className="d-flex gap-2">
+            {selectedRows.length > 0 && (
+              <button
+                className="btn btn-success btn-sm"
+                onClick={selectedLedger}
+              >
+                Add to general ledger ({selectedRows.length})
+              </button>
+            )}
+            {selectedRows.length > 0 && (
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={deleteSelected}
+              >
+                Delete Selected ({selectedRows.length})
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="card-body table-responsive">
@@ -529,16 +596,16 @@ const OpeningBalanceForm = () => {
                 </th>
                 <th>Subhead</th>
                 <th>Head</th>
-                <th>Type</th>
-                <th>Amount</th>
+                <th>Debit Amount</th>
+                <th>Credit Amount</th>
                 <th>Year</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {balances.map((b) => {
-                const type = b.drAmt > 0 ? "Debit" : "Credit";
-                const amount = b.drAmt > 0 ? b.drAmt : b.crAmt;
+                const isEditing = editingId === b.id;
+
                 return (
                   <tr key={b.id}>
                     <td>
@@ -546,26 +613,94 @@ const OpeningBalanceForm = () => {
                         type="checkbox"
                         checked={selectedRows.includes(b.id)}
                         onChange={() => toggleSelectRow(b.id)}
+                        disabled={isEditing}
                       />
                     </td>
                     <td>{b.subHeadId?.subheadName}</td>
                     <td>{b.headId?.headName}</td>
-                    <td>{type}</td>
-                    <td>₹{amount.toLocaleString()}</td>
-                    <td>{b.year}</td>
                     <td>
-                      <button
-                        className="btn btn-outline-primary btn-sm me-1"
-                        onClick={() => alert("Edit not implemented")}
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => handleDelete(b.id)}
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          className="form-control form-control-sm"
+                          value={editForm.drAmt}
+                          onChange={(e) =>
+                            handleEditChange("drAmt", e.target.value)
+                          }
+                          step="0.01"
+                          placeholder="0.00"
+                        />
+                      ) : (
+                        `₹${(b.drAmt || 0).toLocaleString()}`
+                      )}
+                    </td>
+                    <td>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          className="form-control form-control-sm"
+                          value={editForm.crAmt}
+                          onChange={(e) =>
+                            handleEditChange("crAmt", e.target.value)
+                          }
+                          step="0.01"
+                          placeholder="0.00"
+                        />
+                      ) : (
+                        `₹${(b.crAmt || 0).toLocaleString()}`
+                      )}
+                    </td>
+                    <td>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={editForm.year}
+                          onChange={(e) =>
+                            handleEditChange("year", e.target.value)
+                          }
+                          placeholder="2024-2025"
+                        />
+                      ) : (
+                        b.year
+                      )}
+                    </td>
+                    <td>
+                      {isEditing ? (
+                        <div className="d-flex gap-1">
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={handleEditSave}
+                            title="Save changes"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={handleEditCancel}
+                            title="Cancel edit"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="d-flex gap-1">
+                          <button
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={() => handleEdit(b)}
+                            title="Edit record"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => handleDelete(b.id)}
+                            title="Delete record"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );

@@ -279,10 +279,10 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
     }
 
     // Check if sufficient balance
-    if (parseFloat(formData.amount) > sourceAccountBalance) {
-      setError("अपुरी शिल्लक! रक्कम उपलब्ध शिल्लकपेक्षा जास्त आहे");
-      return false;
-    }
+    // if (parseFloat(formData.amount) > sourceAccountBalance) {
+    //   setError("अपुरी शिल्लक! रक्कम उपलब्ध शिल्लकपेक्षा जास्त आहे");
+    //   return false;
+    // }
 
     return true;
   };

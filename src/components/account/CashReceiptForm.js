@@ -166,36 +166,12 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
             b.custId && Number(b.custId && b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
         );
 
-        // console.log(opnNBalance);
-
-
-        // console.log(datas.data);
-
-        // console.log(transBalance);
-
-        // let crtransactionjournalAmt = 0;
-        // let drtransactionjournalAmt = 0;
-        // const journalTrans = (datas.data || []).filter(b => b.entryType === "Journal Payment" && Number(b.subhead.subheadId) === Number(selectedCustomer.subheadId.subheadId));
-
-        // journalTrans.map(j => crtransactionjournalAmt += j.crAmt);
-
-        // journalTrans.map(j => drtransactionjournalAmt += j.drAmt);
-
-        // console.log(journalTrans);
-
-        // console.log(transBalance);
-
-
         const transBalance = (datas.data || []).filter(
           b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt" || b.entryType === "Journal Payment") &&
             b.subhead && Number(b.subhead.subheadId) === Number(selectedCustomer.subheadId.subheadId)
         );
 
         const openingAmt = opnNBalance?.drAmt || 0;
-        console.log(openingAmt);
-
-        // const balance = ((openingAmt - transactionAmt) - crtransactionjournalAmt) + drtransactionjournalAmt;
-        // setCurrentBalance(balance);
 
         let transactionAmt = 0;
         transBalance.forEach(a => transactionAmt += a.crAmt || 0);
