@@ -320,6 +320,7 @@ const OpeningBalanceForm = () => {
         subHeadId: e.subHeadId,
         amount: parseFloat(e.debit || e.credit),
         balanceType: e.debit ? "Debit" : "Credit",
+        udiseNo
       }));
 
     if (validEntries.length === 0) {
@@ -357,7 +358,7 @@ const OpeningBalanceForm = () => {
         (entry) => entry.headId === parseInt(selectedHeadId)
       )
     : [];
-    
+
   const totalDebit = calculateTotal("debit");
   const totalCredit = calculateTotal("credit");
   const difference = creditAmount - debitAmount;
