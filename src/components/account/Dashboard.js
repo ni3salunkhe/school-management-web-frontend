@@ -1,220 +1,274 @@
-// src/components/account/Dashboard/Dashboard.js
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Building2, Users, CreditCard, Plus } from 'lucide-react';
+import { Plus, DollarSign, CreditCard, Building, FileText, TrendingUp, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
-// import { getDashboardSummary } from '../../../services/accountApi'; // Your API service
 
-const Dashboard = () => {
-  const [summary, setSummary] = useState({
-    totalCash: 0,
-    bankBalance: 0,
-    receivables: 0,
-    payables: 0,
-  });
-  const [recentTransactions, setRecentTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [creditAmount, setCreditAmount] = useState(null)
-  const [debitAmount, setDebitAmount] = useState(null)
+const AccountingDashboard = () => {
+  const [creditAmount, setCreditAmount] = useState(5000);
+  const [debitAmount, setDebitAmount] = useState(5000);
+  // const [isBalanced, setIsBalanced] = useState(true);
 
+  // Simulate balance check
   useEffect(() => {
-
     const fetchSumofCrDr = async () => {
       const response = await apiService.getdata(`openingbal/sum`);
       setCreditAmount(response.data.totalCr)
       setDebitAmount(response.data.totalDr)
     }
 
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        // const data = await getDashboardSummary();
-        // setSummary(data.summary);
-        // setRecentTransactions(data.recentTransactions);
+    fetchSumofCrDr();
+  }, [creditAmount, debitAmount]);
 
-        // --- MOCK DATA (Remove when API is ready) ---
-        setSummary({
-          totalCash: 245000,
-          bankBalance: 567890,
-          receivables: 123450,
-          payables: 89750,
-        });
-        setRecentTransactions([
-          { id: 1, date: '2024-07-28', type: 'Fee Collection', amount: 15000, status: 'Completed' },
-          { id: 2, date: '2024-07-27', type: 'Salary Payment', amount: 45000, status: 'Pending' },
-          { id: 3, date: '2024-07-26', type: 'Utility Bill', amount: 8500, status: 'Completed' },
-        ]);
-        // --- END MOCK DATA ---
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-        // You might want to set an error state here to display to the user
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDashboardData();
-    fetchSumofCrDr()
-  }, []);
+  // Mock Link component for demonstration
 
-  const formatCurrency = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 200px)' }}> {/* Adjust minHeight as needed */}
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
-  }
+  const quickActions = [
+    {
+      to: "cash-receipt",
+      icon: <DollarSign size={20} />,
+      text: "Create Cash Receipt",
+      color: "text-primary",
+      bgColor: "bg-primary-subtle"
+    },
+    {
+      to: "cash-payment",
+      icon: <DollarSign size={20} />,
+      text: "Create Cash Payment",
+      color: "text-success",
+      bgColor: "bg-success-subtle"
+    },
+    {
+      to: "bank-receipt",
+      icon: <Building size={20} />,
+      text: "Create Bank Receipt",
+      color: "text-info",
+      bgColor: "bg-info-subtle"
+    },
+    {
+      to: "bank-payment",
+      icon: <Building size={20} />,
+      text: "Create Bank Payment",
+      color: "text-warning",
+      bgColor: "bg-warning-subtle"
+    },
+    {
+      to: "contra-payment",
+      icon: <CreditCard size={20} />,
+      text: "Create Contra Payment",
+      color: "text-danger",
+      bgColor: "bg-danger-subtle"
+    },
+    {
+      to: "Journal",
+      icon: <FileText size={20} />,
+      text: "Create Journal Payment",
+      color: "text-info",
+      bgColor: "bg-info-subtle"
+    },
+    {
+      to: "expense",
+      icon: <TrendingUp size={20} />,
+      text: "Create Expenses Payment",
+      color: "text-purple",
+      bgColor: "bg-light"
+    }
+  ];
 
   return (
-    // The container-fluid can stay if you want this component to manage its own fluid width
-    // or remove it if the parent <Container> in AccountModulePage.js handles it.
-    // p-0 could be added if AccountModulePage's Container has padding you want to negate here.
-    <div className="container-fluid py-3">
-      <div className="row mb-4">
-        <div className="col-12">
-          <h2 className="mb-0">Accounting Dashboard</h2>
-          <p className="text-muted">School Management System</p>
+    <div className="container-fluid bg-light min-vh-100 py-4">
+      <div className="container">
+        {/* Dashboard Header */}
+        <div className="row mb-4">
+          <div className="col-12">
+            <div className="d-flex align-items-center justify-content-between flex-wrap">
+              <div>
+                <h1 className="display-6 fw-bold text-primary mb-2">
+                  <i className="bi bi-speedometer2 me-2"></i>
+                  Accounting Dashboard
+                </h1>
+                <p className="lead text-muted mb-0">School Management System</p>
+              </div>
+              {/* <div className="d-none d-md-block">
+                <div className="badge bg-primary fs-6 px-3 py-2">
+                  <i className="bi bi-calendar-check me-1"></i>
+                  {new Date().toLocaleDateString()}
+                </div>
+              </div> */}
+            </div>
+          </div>
         </div>
+
+        {/* Balance Status Alert */}
+        <div className="row mb-4">
+          <div className="col-12">
+            {creditAmount === debitAmount ? (
+              <div className="alert alert-success d-flex align-items-center shadow-sm border-0" role="alert">
+                <div className="alert-icon me-3">
+                  <i className="bi bi-check-circle-fill fs-4"></i>
+                </div>
+                <div className="flex-grow-1">
+                  <h6 className="alert-heading mb-1">Accounts Balanced</h6>
+                  <small className="mb-0">Credit: ₹{creditAmount.toLocaleString('en-IN')} | Debit: ₹{debitAmount.toLocaleString('en-IN')}</small>
+                </div>
+              </div>
+            ) : (
+              <div className="alert alert-warning d-flex align-items-center shadow-sm border-0" role="alert">
+                <div className="alert-icon me-3">
+                  <i className="bi bi-exclamation-triangle-fill fs-4"></i>
+                </div>
+                <div className="flex-grow-1">
+                  <h6 className="alert-heading mb-1">Balance Required</h6>
+                  <small className="mb-0">Please balance credit and debit amounts before proceeding</small>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="row">
+          <div className="col-12">
+            <div className="card shadow-sm border-0 h-100">
+              <div className="card-header bg-white border-bottom">
+                <div className="d-flex align-items-center justify-content-between">
+                  <h5 className="card-title mb-0 d-flex align-items-center">
+                    <i className="bi bi-lightning-charge-fill text-warning me-2"></i>
+                    Quick Actions
+                  </h5>
+                  <span className="badge bg-light text-dark">
+                    {creditAmount === debitAmount ? 'Ready' : 'Locked'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="card-body p-4">
+                {creditAmount === debitAmount ? (
+                  <div className="row g-3">
+                    {quickActions.map((action, index) => (
+                      <div key={index} className="col-12 col-sm-6 col-lg-4">
+                        <Link
+                          to={action.to}
+                          className="text-decoration-none"
+                        >
+                          <div className="card h-100 border-0 shadow-sm action-card position-relative overflow-hidden">
+                            <div className="card-body d-flex align-items-center p-3">
+                              <div className={`rounded-circle p-2 me-3 ${action.bgColor}`}>
+                                <span className={action.color}>
+                                  {action.icon}
+                                </span>
+                              </div>
+                              <div className="flex-grow-1">
+                                <h6 className="card-title mb-0 text-dark">
+                                  {action.text}
+                                </h6>
+                              </div>
+                              <div className="ms-2">
+                                <i className="bi bi-arrow-right text-muted"></i>
+                              </div>
+                            </div>
+                            <div className="position-absolute top-0 end-0 w-100 h-100 opacity-0 bg-primary transition-opacity"></div>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+
+
+                  </div>
+                ) : (
+                  <div>First Balance the credit amount and debit amount</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Demo Controls */}
+        {/* <div className="row mt-4">
+          <div className="col-12">
+            <div className="card bg-dark text-white">
+              <div className="card-body">
+                <h6 className="card-title">Demo Controls</h6>
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label">Credit Amount</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={creditAmount}
+                      onChange={(e) => setCreditAmount(Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Debit Amount</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={debitAmount}
+                      onChange={(e) => setDebitAmount(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> */}
       </div>
 
-      <div className="row mb-4">
-        <div className="col-md-6 col-xl-3 mb-3">
-          <div className="card bg-primary text-white h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <DollarSign size={40} className="me-3" />
-                <div>
-                  <h5 className="card-title mb-0">Total Cash</h5>
-                  <h3 className="mb-0">{formatCurrency(summary.totalCash)}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-xl-3 mb-3">
-          <div className="card bg-success text-white h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <Building2 size={40} className="me-3" />
-                <div>
-                  <h5 className="card-title mb-0">Bank Balance</h5>
-                  <h3 className="mb-0">{formatCurrency(summary.bankBalance)}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-xl-3 mb-3">
-          <div className="card bg-warning text-dark h-100"> {/* Ensure text contrast */}
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <Users size={40} className="me-3" />
-                <div>
-                  <h5 className="card-title mb-0">Receivables</h5>
-                  <h3 className="mb-0">{formatCurrency(summary.receivables)}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-xl-3 mb-3">
-          <div className="card bg-info text-white h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <CreditCard size={40} className="me-3" />
-                <div>
-                  <h5 className="card-title mb-0">Payables</h5>
-                  <h3 className="mb-0">{formatCurrency(summary.payables)}</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="row">
-        <div className="col-lg-7 mb-4">
-          <div className="card h-100">
-            <div className="card-header">
-              <h5 className="mb-0">Recent Transactions</h5>
-            </div>
-            <div className="card-body">
-              {recentTransactions.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="table table-sm table-hover">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th className="text-end">Amount</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentTransactions.map((tx) => (
-                        <tr key={tx.id}>
-                          <td>{new Date(tx.date).toLocaleDateString()}</td>
-                          <td>{tx.type}</td>
-                          <td className="text-end">{formatCurrency(tx.amount)}</td>
-                          <td>
-                            <span className={`badge ${tx.status === 'Completed' ? 'bg-success' : tx.status === 'Pending' ? 'bg-warning text-dark' : 'bg-danger'}`}>
-                              {tx.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-muted text-center mt-3">No recent transactions found.</p>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-5 mb-4">
-          <div className="card h-100">
-            <div className="card-header">
-              <h5 className="mb-0">Quick Actions</h5>
-            </div>
-            <div className="card-body">
-              {
-                creditAmount === debitAmount ? <div className="list-group">
-                  <Link to="cash-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-primary" /> Create Cash Receipt
-                  </Link>
-                  <Link to="cash-payment" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-success" /> Create Cash Payment
-                  </Link>
-                  <Link to="bank-receipt" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-info" /> Create Bank Receipt
-                  </Link>
-                  <Link to="bank-payment" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-warning" /> Create Bank Payment
-                  </Link>
-                  <Link to="contra-payment" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-danger" /> Create Contra Payment
-                  </Link>
-                  <Link to="Journal" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-info" /> Create Journal Payment
-                  </Link>
-                  <Link to="expense" className="list-group-item list-group-item-action d-flex align-items-center">
-                    <Plus size={20} className="me-3 text-info" /> Create Expenses Payment
-                  </Link>
-                  <Link to="/account/masters/sub-head" className="list-group-item list-group-item-action d-flex align-items-center mt-2 border-top pt-3">
-                    <Plus size={20} className="me-3 text-secondary" /> Manage Account Heads
-                  </Link>
-                </div> : <div>First Balance the credit amount and debit amount</div>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
+      <style jsx>{`
+        .action-card {
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+        
+        .action-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .action-card:hover .position-absolute {
+          opacity: 0.05;
+        }
+        
+        .transition-opacity {
+          transition: opacity 0.3s ease;
+        }
+        
+        .text-purple {
+          color: #6f42c1 !important;
+        }
+        
+        .bg-primary-subtle {
+          background-color: rgba(13, 110, 253, 0.1) !important;
+        }
+        
+        .bg-success-subtle {
+          background-color: rgba(25, 135, 84, 0.1) !important;
+        }
+        
+        .bg-info-subtle {
+          background-color: rgba(13, 202, 240, 0.1) !important;
+        }
+        
+        .bg-warning-subtle {
+          background-color: rgba(255, 193, 7, 0.1) !important;
+        }
+        
+        .bg-danger-subtle {
+          background-color: rgba(220, 53, 69, 0.1) !important;
+        }
+        
+        @media (max-width: 576px) {
+          .display-6 {
+            font-size: 1.75rem;
+          }
+          
+          .lead {
+            font-size: 1rem;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default Dashboard;
+export default AccountingDashboard;

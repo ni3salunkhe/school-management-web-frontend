@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Container, Row, Col, Card, Form, Button, Alert, Modal,
   InputGroup, Spinner, Badge, OverlayTrigger, Tooltip
 } from 'react-bootstrap';
@@ -8,7 +8,8 @@ import apiService from '../services/api.service';
 import { authService } from '../services/authService';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
-import '../styling/LoginStyles.css'; 
+import '../styling/LoginStyles.css';
+import Swal from 'sweetalert2';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -34,11 +35,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     // Trigger the form appearance animation after component mounts
     setTimeout(() => setFormAppear(true), 300);
-    
+
     // Set animation complete after animations finish
     setTimeout(() => setAnimationComplete(true), 1500);
 
@@ -68,13 +69,13 @@ const Login = () => {
           opacity: { value: 0.6, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
           size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1, sync: false } },
           line_linked: { enable: true, distance: 150, color: '#4680ff', opacity: 0.3, width: 1 },
-          move: { 
-            enable: true, 
-            speed: 1.5, 
-            direction: 'none', 
-            random: false, 
-            straight: false, 
-            out_mode: 'out', 
+          move: {
+            enable: true,
+            speed: 1.5,
+            direction: 'none',
+            random: false,
+            straight: false,
+            out_mode: 'out',
             bounce: false,
             attract: { enable: false, rotateX: 600, rotateY: 1200 }
           }
@@ -147,7 +148,6 @@ const Login = () => {
 
       if (token) {
         const decoded = jwtDecode(token);
-
         // If user is developer, allow login without subscription check
         if (decoded.role?.toLowerCase() === 'developer') {
           navigate(getTargetPath(decoded.role), { replace: true });
@@ -159,9 +159,19 @@ const Login = () => {
 
         if (!isSubscriptionValid) {
           // Subscription is valid, proceed with login
-          navigate(getTargetPath(decoded.role), { replace: true });
+          if (decoded.status === "left") {
+            Swal.fire({
+              icon: "error",
+              title: "क्षमस्व...",
+              text: "आपल्याला ही सेवा वापरण्याची परवानगी नाही."
+            })
+          }
+          else {
+            navigate(getTargetPath(decoded.role), { replace: true });
+          }
         } else {
           setError('सॉफ्टवेअर लायसन्स वैध नाही. कृपया डेवलपरशी संपर्क साधा.');
+          navigate()
           setCredentials({ username: '', password: '', userType: '' });
         }
       }
@@ -290,7 +300,7 @@ const Login = () => {
         const payload = {
           headMasterPassword: newPassword
         }
-        const res = await axios.put(`http://localhost:8080/school/resetpassword/${isAvailable.id}`,payload);
+        const res = await axios.put(`http://localhost:8080/school/resetpassword/${isAvailable.id}`, payload);
         console.log(res);
       }
 
@@ -324,7 +334,7 @@ const Login = () => {
     <div className="login-wrapper">
       {/* Particles background */}
       <div id="particles-js" className="particles-container"></div>
-      
+
       {/* App Logo */}
       <div className="position-absolute top-0 start-0 p-4">
         <div className="logo-container">
@@ -333,7 +343,7 @@ const Login = () => {
           </h3>
         </div>
       </div>
-      
+
       <Container fluid className="login-container min-vh-100 d-flex align-items-center justify-content-center py-5">
         <Row className="w-100 justify-content-center">
           <Col xs={12} sm={10} md={8} lg={5} xl={4}>
@@ -346,7 +356,7 @@ const Login = () => {
                   <i className="bi bi-mortarboard-fill"></i>
                 </div>
               </div>
-              
+
               <Card.Body className="p-4">
                 {error && (
                   <Alert variant="danger" className="mb-4 text-center py-2 small fade-in-fast">
@@ -371,7 +381,7 @@ const Login = () => {
                         required
                         className="py-2 border-start-0 form-control-elevated"
                       />
-                      
+
                     </InputGroup>
                   </Form.Group>
 
@@ -390,18 +400,18 @@ const Login = () => {
                         required
                         className="py-2 border-start-0 form-control-elevated pe-5"
                       />
-                      <Button 
-                        variant="link" 
+                      <Button
+                        variant="link"
                         className="password-toggle-btn"
                         onClick={togglePasswordVisibility}
                         type="button"
                       >
                         <i className={`bi bi-eye${showPassword ? '-slash' : ''} text-muted`}></i>
                       </Button>
-                      
+
                     </InputGroup>
                   </Form.Group>
-                  
+
                   <Form.Group className="mb-4 floating-label-group" controlId="userRole">
                     <InputGroup className="input-group-custom">
                       <InputGroup.Text className="bg-light border-end-0">
@@ -420,10 +430,10 @@ const Login = () => {
                         <option value="STAFF">शिक्षक / लिपिक</option>
                         <option value="DEVELOPER">डेवलपर</option>
                       </Form.Select>
-                      
+
                     </InputGroup>
                   </Form.Group>
-                  
+
                   <Button
                     type="submit"
                     variant="primary"
@@ -444,9 +454,9 @@ const Login = () => {
                   </Button>
 
                   <div className='text-end mt-3'>
-                    <Button 
-                      variant="link" 
-                      className='text-decoration-none p-0 text-primary forgot-password-link' 
+                    <Button
+                      variant="link"
+                      className='text-decoration-none p-0 text-primary forgot-password-link'
                       onClick={() => setShowModal(true)}
                     >
                       <i className="bi bi-question-circle me-1"></i>
@@ -465,9 +475,9 @@ const Login = () => {
         </Row>
       </Container>
 
-      <Modal 
-        show={showModal} 
-        onHide={resetModal} 
+      <Modal
+        show={showModal}
+        onHide={resetModal}
         centered
         backdrop="static"
         className="custom-modal"
@@ -488,7 +498,7 @@ const Login = () => {
                     कृपया आपला नोंदणीकृत ई-मेल आणि मोबाईल नंबर प्रविष्ट करा.
                   </span>
                 </div>
-              
+
                 <Form.Group className="mb-3 floating-label-group" controlId="userRole">
                   <InputGroup className="input-group-custom">
                     <InputGroup.Text className="bg-light border-end-0">
@@ -524,7 +534,7 @@ const Login = () => {
                       required
                       className="py-2 border-start-0 form-control-elevated"
                     />
-                    
+
                   </InputGroup>
                   {resetFormError.email && (
                     <div className="text-danger small mt-1 error-message">
@@ -533,7 +543,7 @@ const Login = () => {
                     </div>
                   )}
                 </Form.Group>
-                
+
                 <Form.Group className="mb-3 floating-label-group">
                   <InputGroup className="input-group-custom">
                     <InputGroup.Text className="bg-light border-end-0">
@@ -549,7 +559,7 @@ const Login = () => {
                       required
                       className="py-2 border-start-0 form-control-elevated"
                     />
-                    
+
                   </InputGroup>
                   {resetFormError.mobile && (
                     <div className="text-danger small mt-1 error-message">
@@ -568,7 +578,7 @@ const Login = () => {
                   </Alert.Heading>
                   <p className="mb-0 small">कृपया आपला नवीन पासवर्ड सेट करा.</p>
                 </Alert>
-                
+
                 <Form.Group className="mb-3 floating-label-group">
                   <InputGroup className="input-group-custom">
                     <InputGroup.Text className="bg-light border-end-0">
@@ -584,24 +594,24 @@ const Login = () => {
                       required
                       className="py-2 border-start-0 form-control-elevated pe-5"
                     />
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="password-toggle-btn"
                       onClick={togglePasswordVisibility}
                       type="button"
                     >
                       <i className={`bi bi-eye${showPassword ? '-slash' : ''} text-muted`}></i>
                     </Button>
-                    
+
                   </InputGroup>
-                  
+
                   <div className="password-info mt-2">
-                    <i className="bi bi-info-circle me-1 text-primary"></i>  
+                    <i className="bi bi-info-circle me-1 text-primary"></i>
                     <span className="text-muted small">
                       पासवर्ड ८ अक्षरांचा असावा आणि फक्त इंग्रजी अक्षरे, अंक किंवा फक्त एकच चिन्ह असावीत.
                     </span>
                   </div>
-                  
+
                   {newPasswordError && (
                     <div className="text-danger small mt-1 error-message">
                       <i className="bi bi-exclamation-circle me-1"></i>
@@ -612,7 +622,7 @@ const Login = () => {
               </>
             )}
           </Modal.Body>
-          
+
           <Modal.Footer className="border-top-0">
             <Button variant="outline-secondary" onClick={resetModal} className="btn-cancel">
               <i className="bi bi-x-circle me-1"></i>
