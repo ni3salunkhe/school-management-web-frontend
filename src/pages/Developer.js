@@ -27,8 +27,6 @@ function Developer() {
         <Route path='village' element={<VillageOrCityForm />} />
         <Route path='view-users' element={<ViewUsers />} />
         <Route path='year' element={<YearMaster/>}/>
-        <Route path='developer-subscription' element={<DeveloperSubscription/>}/>
-        <Route path='expiry' element={<ExpirationAlert/>}/>
         <Route path='updateqrcodeandnumber' element={<QrCodeAndNumberSetForm/>}/>
       </Routes>
     </Container>

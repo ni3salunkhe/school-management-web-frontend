@@ -12,6 +12,9 @@ const apiService = {
     }
   })
   ,
+  get(endpoint){
+    return axios.get(`${this.url}${endpoint}`)
+  },
   postlogin(endpoint, data) {
     return axios.post(`${this.url}${endpoint}`, data)
   },

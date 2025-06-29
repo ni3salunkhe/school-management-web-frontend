@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../services/api.service';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { decodeId, encodeId } from '../utils/idEncoder';
 
 function ReportsShows() {
-    const { id } = useParams();
+    const { id:encodedId } = useParams();
+    const id = decodeId(encodedId)
     const navigate = useNavigate();
 
     const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
@@ -79,13 +81,13 @@ function ReportsShows() {
                 const dataCheckResponse = await apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise);
 
                 if (dataCheckResponse.data === true) {
-                    navigate(`/clerk/reports/download/${id}`);
+                    navigate(`/clerk/reports/download/${encodeId(id)}`);
                 } else {
-                    navigate(`/clerk/reports/${reportType}/${id}`);
+                    navigate(`/clerk/reports/${reportType}/${encodeId(id)}`);
                 }
             } catch (error) {
                 console.error("Error while checking LC data:", error);
-                navigate(`/clerk/reports/${reportType}/${id}`);
+                navigate(`/clerk/reports/${reportType}/${encodeId(id)}`);
             }
         }
         else if (reportType === "lc-new") {
@@ -102,23 +104,23 @@ function ReportsShows() {
                 const dataCheckResponse = await apiService.getbyid(`leavinginfo/checkingisdatapresent/${id}/udise/`, udise);
 
                 if (dataCheckResponse.data === true) {
-                    navigate(`/clerk/reports/lcnewdownload/${id}`);
+                    navigate(`/clerk/reports/lcnewdownload/${encodeId(id)}`);
                 } else {
-                    navigate(`/clerk/reports/${reportType}/${id}`);
+                    navigate(`/clerk/reports/${reportType}/${encodeId(id)}`);
                 }
             } catch (error) {
                 console.error("Error while checking LC data:", error);
-                navigate(`/clerk/reports/${reportType}/${id}`);
+                navigate(`/clerk/reports/${reportType}/${encodeId(id)}`);
             }
         }
         else if (reportType === "bonafide") {
-            navigate(`/clerk/reports/bonfide/${id}`);
+            navigate(`/clerk/reports/bonfide/${encodeId(id)}`);
         }
         else if (reportType === "attendance") {
-            navigate(`/clerk/reports/prsenty/${id}`);
+            navigate(`/clerk/reports/prsenty/${encodeId(id)}`);
         }
         else {
-            navigate(`/clerk/reports/${reportType}/${id}`);
+            navigate(`/clerk/reports/${reportType}/${encodeId(id)}`);
         }
     };
 

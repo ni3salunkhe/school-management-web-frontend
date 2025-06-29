@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import apiService from '../services/api.service';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { decodeId, encodeId } from '../utils/idEncoder';
 
 function LColdForm() {
-    const { id } = useParams();
+    const { id:encodedId } = useParams();
+    const id=decodeId(encodedId)
     const navigate = useNavigate();
     const udise = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
 
@@ -159,7 +161,7 @@ function LColdForm() {
         try {
             const payload = { ...formData, schoolUdise: udise, studentId: id };
             await apiService.post("leavinginfo/", payload);
-            navigate(`/clerk/reports/download/${id}`);
+            navigate(`/clerk/reports/download/${encodeId(id)}`);
         } catch (error) {
             setError('फॉर्म सबमिट करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
             console.error("Submission error:", error);

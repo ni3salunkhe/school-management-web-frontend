@@ -139,7 +139,13 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             headName: cashAccount.headId.bookSideMaster.booksideName,
           });
         } else {
-          console.warn("No 'Cash In Hand' account found. Please create one.");
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा किंवा Cash In Hand हा ग्राहक आपल्या सिस्टम मध्ये असल्याची खात्री करा!",
+          });
+          navigate("/clerk/dashboard");
+          return; 
         }
         console.log(cashAccount);
 
@@ -324,7 +330,10 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         formDataToSend.append("img", formData.img);
       }
 
-      const balance = await fetchAccountBalance(payerAccount.subheadId, payerAccount.headId);
+      const balance = await fetchAccountBalance(
+        payerAccount.subheadId,
+        payerAccount.headId
+      );
 
       if (formData.amount > balance) {
         Swal.fire({
@@ -335,7 +344,6 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         handleClear();
         return;
       }
-
 
       await apiService.post("contrapayment/", formDataToSend);
       Swal.fire("यशस्वी", "परस्पर व्यवहार यशस्वीरीत्या जतन केले!", "success");

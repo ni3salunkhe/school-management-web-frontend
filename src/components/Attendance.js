@@ -7,6 +7,7 @@ import apiService from '../services/api.service'
 
 const Attendance = () => {
     
+    
     const udiseno=jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
     const [udiseNo] = useState(udiseno)
     const id=jwtDecode(sessionStorage.getItem('token')).id;
@@ -15,7 +16,29 @@ const Attendance = () => {
     const [errors, setErrors] = useState({})
     const [isDataPresent,setIsDataPresent]=useState(true)
     const [teacherName, setTeacherName] = useState('')
-    
+    const today = new Date();
+
+  // Define start and end dates
+  const start = new Date(today.getFullYear(), 4, 1);  // May 1 (Month is 0-indexed)
+  const end = new Date(today.getFullYear(), 6, 31);   // July 31
+
+  // Check if today is between May 1 and July 31
+  const isWithinRange = today >= start && today <= end;
+
+  if (isWithinRange) {
+    return (<>
+    <div className="not-available-container">
+      <div className="not-available-content">
+        <svg className="not-available-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+          <path d="M0 0h24v24H0z" fill="none" />
+        </svg>
+        <h2>Content Currently Unavailable</h2>
+        <p>This section is only visible between May 1st and May 31st.</p>
+      </div>
+    </div></>
+    ) 
+  }
 
     const classTeacher = async () => {
         try {
@@ -102,7 +125,7 @@ const Attendance = () => {
                 </Card.Body>
             </Card>
         </Container>):(<div className='mt-5'>
-            <h1  className='text-center'>लिपिकाशी संपर्क साधा . सध्या कोणतीही माहिती नाही </h1>
+            <h1  className='text-center'>आपली नियुक्ती कोणत्याही वर्गासाठी करण्यात आलेली नाही कृपया लिपिकांशी संपर्क साधा.  </h1>
         </div>)}
         </>
     )

@@ -4,7 +4,7 @@ import apiService from '../services/api.service';
 
 
 
-function ExpirationAlert({ contactNumber = "9889283902", userName = "वापरकर्ता" }) {
+function ExpirationAlert() {
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -82,7 +82,7 @@ function ExpirationAlert({ contactNumber = "9889283902", userName = "वाप�
                 // href={`tel:${contactNumber}`}
                 className="text-primary fw-bold fs-5 text-decoration-none hover-underline"
               >
-                {data.phone || contactNumber}
+                {data.phone || "xxxx454543"}
               </a>
             </div>
           </div>

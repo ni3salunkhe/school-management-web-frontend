@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // 1. Cleaned up imports - removed unused icons
 import { Lock, ArrowLeft, Send, Check, LoaderCircle, CalendarDays } from 'lucide-react';
+import apiService from '../services/api.service';
+import axios from 'axios';
+import showAlert from '../services/alert';
+import helper from '../services/helper.service';
 
 function DeveloperSubscription() {
     // State for authentication and form data
@@ -9,6 +13,15 @@ function DeveloperSubscription() {
     const [passwordError, setPasswordError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const expiryDate = async() =>{
+        const accountExpiryDate = await apiService.get(`developer/expiry-date-by-name/Developer96`)
+        console.log(accountExpiryDate.data);
+        setFormData({accountExpiryDate:accountExpiryDate.data})
+        return accountExpiryDate.data
+    }
+    useEffect(()=>{
+        expiryDate()
+    },[])
     // 2. Corrected formData state to only include the field that is actually in the form
     const [formData, setFormData] = useState({
         accountExpiryDate: '', // Only 'accountExpiryDate' is needed now
@@ -57,7 +70,7 @@ function DeveloperSubscription() {
     };
 
     // 3. Fixed submission logic
-    const handleSubscriptionSubmit = (e) => {
+    const handleSubscriptionSubmit = async(e) => {
         e.preventDefault();
         // Removed the check for 'terms' as it no longer exists
         if (!formData.accountExpiryDate) {
@@ -65,9 +78,11 @@ function DeveloperSubscription() {
 
             return;
         }
+        await axios.put(`http://localhost:8080/developer/renew/1/${formData.accountExpiryDate}`)
         // The expiryDate will now be included in the submitted data
         console.log("Submitting form data:", formData);
-        alert('Subscription date set successfully!');
+        const date=await expiryDate();
+        showAlert.sweetAlert("Success",`Subscription untill ${helper.formatISODateToDMY(date,"/")}`,"success")
     };
 
     const handleGoBackToLogin = () => {
@@ -80,7 +95,7 @@ function DeveloperSubscription() {
     // If the user is NOT authenticated, show the full-page login form.
     if (!isAuthenticated) {
         return (
-            <div className="bg-dark text-light min-vh-100 d-flex align-items-center justify-content-center p-3" data-bs-theme="dark">
+            <div className="bg-dark text-light min-vh-100 d-flex align-items-center justify-content-center" data-bs-theme="dark">
                 <div className="col-11 col-sm-8 col-md-6 col-lg-4 col-xl-3">
                     <div className="card border-secondary shadow-lg">
                         <div className="card-header text-center p-4">

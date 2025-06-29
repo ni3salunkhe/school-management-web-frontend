@@ -84,8 +84,13 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             }
           }
         } else {
-          console.warn("No data found in opening balance.");
-          navigate('/openingbalance', { replace: true })
+          Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा!",
+                  });
+                  navigate("/clerk/dashboard");
+                  return;
         }
 
         console.log("Selected Opening Balances:", selectedOpn);

@@ -4,9 +4,12 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import helper from '../services/helper.service';
+import { decodeId } from '../utils/idEncoder';
 
 function LCdownload() {
-    const { id } = useParams();
+    const { id:encodedId } = useParams();
+    const id= decodeId(encodedId)
+    
     const printContentRef = useRef(null);
 
     const [leavingInfo, setLeavingInfo] = useState(null);
@@ -197,7 +200,7 @@ function LCdownload() {
                                     <p className="small">{leavingInfo?.schoolUdise?.schoolSlogan || ''}</p>
                                     <p className="">{leavingInfo?.schoolUdise?.sansthaName || ''}</p>
                                     <h1 className="fs-4 fw-bold bg-secondary-subtle p-2">{leavingInfo?.schoolUdise?.schoolName || ''}</h1>
-                                    <p className="small  p-0 m-0"><span className='fw-bold'>तालुका :-</span> {leavingInfo?.schoolUdise?.tehsil?.tehsilName || ''}, <span className='fw-bold'>जिल्हा :-</span> {leavingInfo?.schoolUdise?.district?.districtName}, <span className='fw-bold'>राज्य :-</span> {leavingInfo?.schoolUdise?.state.stateName}, <span className='fw-bold'>पिनकोड :-</span> {leavingInfo?.schoolUdise?.pinCode}, </p>
+                                    <p className="small  p-0 m-0"><span className='fw-bold'>तालुका :-</span> {leavingInfo?.schoolUdise?.tehsil?.tehsilName || ''}, <span className='fw-bold'>जिल्हा :-</span> {leavingInfo?.schoolUdise?.district?.districtName}, <span className='fw-bold'>राज्य :-</span> {leavingInfo?.schoolUdise?.state?.stateName || "___"}, <span className='fw-bold'>पिनकोड :-</span> {leavingInfo?.schoolUdise?.pinCode}, </p>
                                     <p className="small  border-top p-0 m-0 border-dark"><span className='fw-bold'>माध्यम :-</span> {leavingInfo?.schoolUdise?.medium}, <span className='fw-bold'>बोर्ड :-</span> {leavingInfo?.schoolUdise?.board}, <span className='fw-bold'>बोर्ड विभाग :-</span> {leavingInfo?.schoolUdise?.boardDivision}, <span className='fw-bold'>शिक्षण बोर्ड क्रमांक :- </span> {leavingInfo?.schoolUdise?.boardIndexNo}</p>
                                 </div>
                             </div>

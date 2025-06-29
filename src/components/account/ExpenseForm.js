@@ -96,8 +96,13 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
               }
             }
           } else {
-            console.warn("No data found in opening balance.");
-            navigate("/openingbalance", { replace: true });
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा किंवा Cash In Hand हा ग्राहक आपल्या सिस्टम मध्ये असल्याची खात्री करा!",
+            });
+            navigate("/clerk/dashboard");
+            return;
           }
         } catch (error) {
           console.error(
@@ -311,7 +316,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         subheadId: parseInt(formData.custId),
         narr: formData.narr,
         billNo: formData.billNo || "",
-        schoolUdise: formData.schoolUdise
+        schoolUdise: formData.schoolUdise,
       };
 
       // Find head ID
@@ -635,8 +640,8 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
                     ? "अपडेट करत आहे..."
                     : "नोंदवत आहे..."
                   : isEditMode
-                    ? "खर्च अपडेट करा"
-                    : "खर्च नोंदवा"}
+                  ? "खर्च अपडेट करा"
+                  : "खर्च नोंदवा"}
               </button>
               <button
                 type="button"

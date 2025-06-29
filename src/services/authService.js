@@ -49,5 +49,17 @@ export const authService = {
           console.error('Error parsing token:', error);
           return false;
         }
+    },
+  checkDeveloperSubscription : async () => {
+    try {
+      const response = await apiService.getdata(`developer/active`);
+      const activeDevelopers = response.data;
+
+      // Check if current user's username is in the list of active developers
+      return activeDevelopers;
+    } catch (error) {
+      console.error("Error checking subscription:", error);
+      return false;
     }
+  }
 };

@@ -59,7 +59,7 @@ const AccountingDashboard = () => {
       bgColor: "bg-danger-subtle"
     },
     {
-      to: "Journal",
+      to: "journal",
       icon: <FileText size={20} />,
       text: "Create Journal Payment",
       color: "text-info",
@@ -101,7 +101,7 @@ const AccountingDashboard = () => {
         {/* Balance Status Alert */}
         <div className="row mb-4">
           <div className="col-12">
-            {creditAmount === debitAmount ? (
+            {(creditAmount === debitAmount) && (creditAmount > 0 && debitAmount > 0) ? (
               <div className="alert alert-success d-flex align-items-center shadow-sm border-0" role="alert">
                 <div className="alert-icon me-3">
                   <i className="bi bi-check-circle-fill fs-4"></i>
@@ -136,13 +136,13 @@ const AccountingDashboard = () => {
                     Quick Actions
                   </h5>
                   <span className="badge bg-light text-dark">
-                    {creditAmount === debitAmount ? 'Ready' : 'Locked'}
+                    {creditAmount === debitAmount && (creditAmount > 0 && debitAmount > 0) ? 'Ready' : 'Locked'}
                   </span>
                 </div>
               </div>
 
               <div className="card-body p-4">
-                {creditAmount === debitAmount ? (
+                {creditAmount === debitAmount && (creditAmount > 0 && debitAmount > 0) ? (
                   <div className="row g-3">
                     {quickActions.map((action, index) => (
                       <div key={index} className="col-12 col-sm-6 col-lg-4">

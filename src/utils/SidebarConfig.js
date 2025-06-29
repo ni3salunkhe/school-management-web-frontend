@@ -15,7 +15,7 @@ export function getSidebarItems(componentMap) {
     sidebarItemsClerk.push({
       mainMenu: [
         'Student', 'Classes', 'Add Academic New Students', 'List Of Students',
-        'Change Class Teacher', 'Mark Holiday', 'State', 'District', 'Tehsil', 'Village'
+        'Change Class Teacher', 'Mark Holiday'
       ],
     });
 

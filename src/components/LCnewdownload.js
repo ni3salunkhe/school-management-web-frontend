@@ -3,11 +3,12 @@ import apiService from '../services/api.service';
 import { useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import helper from '../services/helper.service';
+import { decodeId } from '../utils/idEncoder';
 
 function LCnewdownload() {
 
-    const { id } = useParams();
-
+    const { id:encodedId } = useParams();
+    const id=decodeId(encodedId)
     const printContentRef = useRef(null);
 
     const [leavingInfo, setLeavingInfo] = useState(null);
@@ -20,8 +21,10 @@ function LCnewdownload() {
     const A4_HEIGHT_PX = 900;
 
     useEffect(() => {
-        apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise)
-            .then((response) => {
+        
+        const callData= async()=>{
+        const response = await apiService.getbyid(`leavinginfo/getbystudentId/${id}/udise/`, udise)
+            try{
                 if (response.data) {
                     setLeavingInfo(response.data);
                     console.log(response);
@@ -35,11 +38,13 @@ function LCnewdownload() {
                 } else {
                     setError("No data received from server");
                 }
-            })
-            .catch(err => {
+            }
+            catch(err) {
                 setError("Error fetching data: " + (err.message || "Unknown error"));
                 console.error("API error:", err);
-            });
+            };
+        }
+        callData()
     }, [id]);
 
     const handlePrint = () => {
@@ -208,7 +213,7 @@ function LCnewdownload() {
                                         <p className="small m-0 p-0">{leavingInfo?.schoolUdise?.schoolSlogan || ''}</p>
                                         <p className=" m-0 p-0">{leavingInfo?.schoolUdise?.sansthaName || ''}</p>
                                         <h1 className="fs-4 fw-bold bg-secondary-subtle p-2">{leavingInfo?.schoolUdise?.schoolName || ''}</h1>
-                                        <p className="small  p-0 m-0"><span className='fw-bold'>तालुका :-</span> {leavingInfo?.schoolUdise?.tehsil?.tehsilName || ''}, <span className='fw-bold'>जिल्हा :-</span> {leavingInfo?.schoolUdise?.district?.districtName}, <span className='fw-bold'>राज्य :-</span> {leavingInfo?.schoolUdise?.state.stateName}, <span className='fw-bold'>पिनकोड :-</span> {leavingInfo?.schoolUdise?.pinCode}, </p>
+                                        <p className="small  p-0 m-0"><span className='fw-bold'>तालुका :-</span> {leavingInfo?.schoolUdise?.tehsil?.tehsilName || ''}, <span className='fw-bold'>जिल्हा :-</span> {leavingInfo?.schoolUdise?.district?.districtName}, <span className='fw-bold'>राज्य :-</span> {leavingInfo?.schoolUdise?.state?.stateName || "___"}, <span className='fw-bold'>पिनकोड :-</span> {leavingInfo?.schoolUdise?.pinCode}, </p>
                                         <p className="small  border-top p-0 m-0 border-dark"><span className='fw-bold'>माध्यम :-</span> {leavingInfo?.schoolUdise?.medium}, <span className='fw-bold'>बोर्ड :-</span> {leavingInfo?.schoolUdise?.board}, <span className='fw-bold'>बोर्ड विभाग :-</span> {leavingInfo?.schoolUdise?.boardDivision}, <span className='fw-bold'>शिक्षण बोर्ड क्रमांक :- </span> {leavingInfo?.schoolUdise?.boardIndexNo}</p>
                                     </div>
                                 </div>
@@ -442,7 +447,7 @@ function LCnewdownload() {
                                     <div className="col-6 border-bottom p-0">
                                         <div className="d-flex">
                                             <div className="fw-bold Cpadding border-end" style={{ width: '50%' }}>जन्म राज्य :</div>
-                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.stateOfBirth?.stateName}</div>
+                                            <div className="Cpadding flex-grow-1">{leavingInfo?.studentId?.stateOfBirth?.stateName || "___"}</div>
                                         </div>
                                     </div>
                                 </div>

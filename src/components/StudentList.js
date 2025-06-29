@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import apiService from '../services/api.service';
 import Next from './Next';
+import { encodeId } from '../utils/idEncoder';
 
 
 function StudentList() {
@@ -101,11 +102,11 @@ function StudentList() {
     }, [studentName, surName, fatherName, motherName, results]);
 
     const handleClick = (id) => {
-        navigate(`/clerk/reports/${id}`);
+        navigate(`/clerk/reports/${encodeId(id)}`);
     };
 
     const viewInfo = (id) => {
-        navigate(`/clerk/singlestudentinfo/${id}`);
+        navigate(`/clerk/singlestudentinfo/${encodeId(id)}`);
     };
 
     const toggleSearchForm = () => {
