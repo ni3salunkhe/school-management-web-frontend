@@ -3,12 +3,31 @@ import renderBalanceSheet from "./accountRenderFunctions/renderBalanceSheet";
 import ReportDashboard from "./accountRenderFunctions/ReportDashboard";
 import apiService from "../../services/api.service";
 import { jwtDecode } from "jwt-decode";
+import Swal from "sweetalert2";
+import { setDate } from "date-fns";
 
 const AccountReports = () => {
+
+  const date = new Date();
+  console.log(date);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+
+  const formattedDate = `${year}-${month}-${day}`;
+
+  const calculateDate = () => {
+    if (date.getMonth() >= 3) {
+      return `${year}-04-01`;
+    }
+    return `${year - 1}-04-01`;
+  }
+
   const [activeReport, setActiveReport] = useState("balance-sheet");
   const [dateRange, setDateRange] = useState({
     from: "2024-01-01",
-    to: "2025-12-31",
+    to: formattedDate,
   });
   const [profitnlossDiff, setProfitnLossDiff] = useState(0);
   const udise = jwtDecode(sessionStorage.getItem("token"))?.udiseNo;
@@ -25,17 +44,41 @@ const AccountReports = () => {
   const [ledgSubhead, setLedgSubhead] = useState("");
   const [companyName1, setCompanyName] = useState("");
   const [plDiff, setPlDiff] = useState(0);
+  const [selectedSubhead, setSelectedSubhead] = useState("");
+
   useEffect(() => {
     fetchInitiealData();
     fetchSubheadsData();
   }, [dateRange.to]);
   useEffect(() => {
     if (activeReport === "ledger") {
+      setDateRange(prev => ({ ...prev, from: calculateDate() }))
       setIsDropdownActive(true);
     } else {
+      setDateRange(prev => ({ ...prev, from: "2024-01-01" }))
       setIsDropdownActive(false);
     }
   }, [activeReport]);
+
+  useEffect(() => {
+    const fetchLedgerData = async () => {
+      if (activeReport === "ledger" && selectedSubhead) {
+        try {
+          const ledger = await apiService.getdata(
+            `generalledger/balances/shop/${udise}/bydate/${dateRange.from}/${dateRange.to}/${selectedSubhead}`
+          );
+          setSampleLedgerData(ledger.data);
+          if (ledger.data.length > 0) {
+            setLedgSubhead(ledger.data[0].subhead?.subheadName || "No data found");
+          }
+        } catch (error) {
+          console.error("Error fetching ledger data:", error);
+        }
+      }
+    };
+
+    fetchLedgerData();
+  }, [dateRange.from, dateRange.to, selectedSubhead, activeReport]);
 
   function convertToHeadBasedFormat(data) {
     if (!Array.isArray(data)) return [];
@@ -159,7 +202,7 @@ const AccountReports = () => {
       income.push(...formattedData); // show profit in income
     }
 
-   
+
     setAssetData(formattedAsset);
     setLiabilityData(formattedLiability);
     setProfitnLossData({
@@ -181,11 +224,15 @@ const AccountReports = () => {
   console.log(profitnlossDiff);
 
   const handleSubheadChange = async (e) => {
-    const ledger = await apiService.getdata(`generalledger/balances/${e}`);
-    setSampleLedgerData(ledger.data);
-    ledger.data.map((item) => {
-      setLedgSubhead(item.subhead?.subheadName || "No data found");
-    });
+    setSelectedSubhead(e);
+    if (e) {
+      const ledger = await apiService.getdata(`generalledger/balances/shop/${udise}/bydate/${dateRange.from}/${dateRange.to}/${e}`);
+      setSampleLedgerData(ledger.data);
+      ledger.data.map((item) => {
+        setLedgSubhead(item.subhead?.subheadName || "No data found");
+      });
+    }
+
   };
 
   const convertToDisplayFormat = (rawData, mainHead, diff, formattedData) => {
@@ -385,13 +432,10 @@ const AccountReports = () => {
         <div className="row mb-4">
           <div className="col-12">
             <div className="card border-0 shadow-lg">
-              <div className="card-body bg-dark text-white text-center py-4">
+              <div className="card-body bg-dark text-white text-center">
                 <h1 className="display-4 fw-bold mb-2">
                   Financial Reports Dashboard
                 </h1>
-                <p className="lead mb-0">
-                  Comprehensive Financial Analysis & Reporting
-                </p>
               </div>
             </div>
           </div>
@@ -400,21 +444,24 @@ const AccountReports = () => {
         {/* Controls */}
         <div className="row mb-4">
           <div className="col-12">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body">
-                <div className="row align-items-center gy-3">
-                  {/* Report Type Toggle */}
+            <div className="card border-0 shadow-lg rounded-4 overflow-hidden">
+              <div className="card-body " style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+                <div className="row align-items-center gy-4">
+
+                  {/* Report Type Toggle Section */}
                   <div className="col-lg-6 col-12">
-                    <div
-                      className="btn-group w-100 d-block d-sm-flex"
-                      role="group"
-                    >
+                    <div className="mb-2">
+                      <h6 className="text-muted fw-semibold mb-0 small fw-bold text-uppercase tracking-wide" style={{ fontSize: '0.75rem' }}>
+                        📊 Report Type
+                      </h6>
+                    </div>
+                    <div className="btn-group w-100 d-block d-sm-flex shadow-sm rounded-3 overflow-hidden" role="group" style={{ height: 'fit-content' }}>
                       {[
-                        { id: "balance-sheet", label: "Balance Sheet" },
-                        { id: "trial-balance", label: "Trial Balance" },
-                        { id: "profit-loss", label: "P&L Statement" },
-                        { id: "ledger", label: "Ledger" },
-                      ].map((item) => (
+                        { id: "balance-sheet", label: "Balance Sheet", icon: "📊" },
+                        { id: "trial-balance", label: "Trial Balance", icon: "⚖️" },
+                        { id: "profit-loss", label: "P&L Statement", icon: "📈" },
+                        { id: "ledger", label: "Ledger", icon: "📚" },
+                      ].map((item, index) => (
                         <React.Fragment key={item.id}>
                           <input
                             type="radio"
@@ -425,56 +472,206 @@ const AccountReports = () => {
                             onChange={() => setActiveReport(item.id)}
                           />
                           <label
-                            className="btn btn-outline-primary mb-1 mb-sm-0"
+                            className={`btn ${activeReport === item.id
+                              ? 'btn-primary text-white fw-semibold shadow-sm'
+                              : 'btn-outline-primary hover-lift'
+                              } mb-1 mb-sm-0 border-0 py-2 px-2 transition-all`}
                             htmlFor={item.id}
+                            style={{
+                              transition: 'all 0.3s ease',
+                              fontSize: '0.8rem',
+                              fontWeight: activeReport === item.id ? '600' : '500',
+                              height: '38px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
                           >
+                            <span className="me-1">{item.icon}</span>
                             {item.label}
                           </label>
                         </React.Fragment>
                       ))}
                     </div>
+
+                    {/* Account Selector - Conditional */}
+                    {isDropdownActive && (
+                      <div className="mt-3">
+                        <div className="bg-white rounded-3 p-3 shadow-sm border border-light" style={{ height: 'fit-content' }}>
+                          <div className="mb-2">
+                            <h6 className="text-muted fw-semibold mb-0 small text-uppercase tracking-wide" style={{ fontSize: '0.75rem' }}>
+                              🏦 Account Selection
+                            </h6>
+                          </div>
+                          <div className="row">
+                            <div className="col-12">
+                              <label htmlFor="paidToId" className="form-label fw-medium text-dark mb-1" style={{ fontSize: '0.8rem' }}>
+                                <span className="me-1">📋</span>
+                                खाते
+                              </label>
+                              <select
+                                id="paidToId"
+                                name="paidToId"
+                                className="form-select border-0 shadow-sm rounded-3 py-2 px-2"
+                                style={{
+                                  backgroundColor: '#f8f9fa',
+                                  fontSize: '0.8rem',
+                                  transition: 'all 0.2s ease',
+                                  cursor: 'pointer',
+                                  height: '38px'
+                                }}
+                                onChange={(e) => {
+                                  handleSubheadChange(e.target.value);
+                                }}
+                                onFocus={(e) => {
+                                  e.target.style.backgroundColor = '#ffffff';
+                                  e.target.style.boxShadow = '0 0 0 0.2rem rgba(13, 110, 253, 0.15)';
+                                }}
+                                onBlur={(e) => {
+                                  e.target.style.backgroundColor = '#f8f9fa';
+                                  e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                }}
+                              >
+                                <option value="" style={{ color: '#6c757d' }}>
+                                  खाते निवडा
+                                </option>
+                                {subhead.map((p) => (
+                                  <option key={p.subheadId} value={p.subheadId || ""}>
+                                    {p.subheadName}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Filters */}
+                  {/* Filters Section */}
                   <div className="col-lg-6 col-12">
-                    <div className="row align-items-end g-2">
-                      <div className="col-sm-4 col-12">
-                        <label className="form-label small mb-1">To Date</label>
-                        <input
-                          type="date"
-                          className="form-control"
-                          value={dateRange.to}
-                          onChange={(e) =>
-                            setDateRange({ ...dateRange, to: e.target.value })
-                          }
-                        />
+                    <div className="bg-white rounded-3 p-4 shadow-sm border border-light">
+                      <div className="mb-2">
+                        <h6 className="text-muted fw-bold mb-0 small text-uppercase tracking-wide" style={{ fontSize: '0.75rem' }}>
+                          🗓️ Filters & Actions
+                        </h6>
                       </div>
 
-                      <div className="col-sm-4 col-12 d-flex align-items-center justify-content-between gap-5">
-                        <div className="form-check m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="consolidatedToggle"
-                            checked={isConsolidated}
-                            // onChange={handleToggle}
-                            onChange={() => setIsConsolidated(!isConsolidated)}
-                          />
-                          <label
-                            className="form-check-label large"
-                            htmlFor="consolidatedToggle"
-                          >
-                            Consolidated
-                          </label>
+                      <div className="row align-items-end g-3">
+                        {/* Date Range */}
+                        <div className="col-12">
+                          <div className="row g-3">
+                            {isDropdownActive && (
+                              <div className="col-6">
+                                <label className="form-label small mb-2 text-muted fw-medium">
+                                  <span className="me-1">📅</span>
+                                  From Date
+                                </label>
+                                <input
+                                  type="date"
+                                  className="form-control border-0 shadow-sm rounded-3 py-2 px-3"
+                                  style={{
+                                    backgroundColor: '#f8f9fa',
+                                    fontSize: '0.875rem',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                  value={dateRange.from}
+                                  onChange={(e) => {
+                                    setDateRange({ ...dateRange, from: e.target.value })
+                                  }}
+                                  onFocus={(e) => {
+                                    e.target.style.backgroundColor = '#ffffff';
+                                    e.target.style.boxShadow = '0 0 0 0.2rem rgba(13, 110, 253, 0.15)';
+                                  }}
+                                  onBlur={(e) => {
+                                    e.target.style.backgroundColor = '#f8f9fa';
+                                    e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <div className={isDropdownActive ? "col-6" : "col-12"}>
+                              <label className="form-label small mb-2 text-muted fw-medium">
+                                <span className="me-1">📅</span>
+                                To Date
+                              </label>
+                              <input
+                                type="date"
+                                className="form-control border-0 shadow-sm rounded-3 py-2 px-3"
+                                style={{
+                                  backgroundColor: '#f8f9fa',
+                                  fontSize: '0.875rem',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                value={dateRange.to}
+                                onChange={(e) => {
+                                  if (e.target.value > dateRange.to) {
+                                    Swal.fire({
+                                      icon: 'warning',
+                                      title: 'तपशील तपासा',
+                                      text: 'उद्याची  तारीख स्वीकारली जाणार नाही. कृपया आज किंवा याआधीची तारीख निवडा.',
+                                    });
+                                    return;
+                                  }
+                                  setDateRange({ ...dateRange, to: e.target.value })
+                                }}
+                                onFocus={(e) => {
+                                  e.target.style.backgroundColor = '#ffffff';
+                                  e.target.style.boxShadow = '0 0 0 0.2rem rgba(13, 110, 253, 0.15)';
+                                }}
+                                onBlur={(e) => {
+                                  e.target.style.backgroundColor = '#f8f9fa';
+                                  e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                }}
+                              />
+                            </div>
+                          </div>
                         </div>
 
-                        <button
-                          onClick={() => window.print()}
-                          className="btn btn-success shadow"
-                          title="Print"
-                        >
-                          🖨️ Print
-                        </button>
+                        {/* Controls Row */}
+                        <div className="col-12 mt-4">
+                          <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+
+                            {/* Consolidated Toggle */}
+                            <div className="form-check form-switch m-0">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id="consolidatedToggle"
+                                checked={isConsolidated}
+                                onChange={() => setIsConsolidated(!isConsolidated)}
+                              />
+                              <label className="form-check-label" htmlFor="consolidatedToggle">
+                                Consolidated
+                              </label>
+                            </div>
+
+                            {/* Print Button */}
+                            <button
+                              onClick={() => window.print()}
+                              className="btn btn-success shadow-sm rounded-3 px-4 py-3 fw-semibold hover-lift flex-shrink-0"
+                              title="Print Report"
+                              style={{
+                                background: 'linear-gradient(45deg, #198754, #20c997)',
+                                border: 'none',
+                                fontSize: '0.9rem',
+                                transition: 'all 0.3s ease',
+                                minWidth: '120px'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 8px 25px rgba(25, 135, 84, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                              }}
+                            >
+                              <span className="me-2">🖨️</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -484,58 +681,59 @@ const AccountReports = () => {
           </div>
         </div>
 
-        {isDropdownActive && (
-          <div className="row mb-4">
-            <div className="col-12">
-              <div className="card border-0 shadow-sm">
-                <div className="card-body">
-                  <div className="row align-items-center gy-3">
-                    <div className="col-md-4">
-                      <label htmlFor="paidToId" className="form-label">
-                        खाते
-                      </label>
-                      <select
-                        id="paidToId"
-                        name="paidToId"
-                        className={`form-select `}
-                        // value={formData.paidToId || ""}
-                        onChange={(e) => {
-                          handleSubheadChange(e.target.value);
-                        }}
-                      >
-                        <option value="">खाते निवडा</option>
-                        {subhead.map((p) => (
-                          <option key={p.subheadId} value={p.subheadId || ""}>
-                            {p.subheadName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <style jsx>{`
+  .tracking-wide {
+    letter-spacing: 0.05em;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  }
+  
+  .transition-all {
+    transition: all 0.3s ease !important;
+  }
+  
+  .user-select-none {
+    user-select: none;
+  }
+  
+  .btn-outline-primary:hover {
+    background: linear-gradient(45deg, #0d6efd, #6610f2) !important;
+    border-color: transparent !important;
+    color: white !important;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15) !important;
+    border-color: #86b7fe !important;
+  }
+  
+  .form-select option {
+    padding: 8px 12px;
+  }
+  
+  @media (max-width: 576px) {
+    .d-flex.justify-content-between {
+      flex-direction: column !important;
+      gap: 1rem !important;
+    }
+    
+    .form-check {
+      align-self: stretch !important;
+      text-align: center !important;
+    }
+  }
+`}</style>
+
+
 
         {/* Report Content */}
         <div className="row">
           <div className="col-12">{renderActiveReport()}</div>
         </div>
 
-        {/* Footer */}
-        <div className="row mt-4">
-          <div className="col-12">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body text-center py-2">
-                <small className="text-muted">
-                  Generated on {new Date().toLocaleDateString("en-IN")} |
-                  Financial Year: {dateRange.from} to {dateRange.to}
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Bootstrap CSS */}

@@ -63,7 +63,7 @@ function Account({ role }) {
 
 
             {/* Transactions - List Views */}
-            <Route path="transactionslist" element={<TransactionList transactionType="cash-receipt" title="Cash Receipts List" />} />
+            {/* <Route path="transactionslist" element={<TransactionList transactionType="cash-receipt" title="Cash Receipts List" />} /> */}
             {/* <Route path="transactions/cash-payments" element={<TransactionList transactionType="cash-payment" title="Cash Payments List" />} /> */}
             {/* <Route path="transactions/bank-receipts" element={<TransactionList transactionType="bank-receipt" title="Bank Receipts List" />} />
             <Route path="transactions/bank-payments" element={<TransactionList transactionType="bank-payment" title="Bank Payments List" />} /> */}

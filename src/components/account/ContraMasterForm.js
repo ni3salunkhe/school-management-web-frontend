@@ -20,6 +20,7 @@ const initialFormData = {
   billNo: "",
   payerAccountId: "", // From Account
   receiverAccountId: "", // To Account
+  year: ''
 };
 
 const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
@@ -158,6 +159,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         });
 
         setContraAccounts(unifiedAccounts);
+        setYear();
 
         if (isEditMode && transactionId) {
           console.log("Edit mode for contra is not fully implemented yet.");
@@ -172,6 +174,23 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
 
     fetchInitialData();
   }, [isEditMode, transactionId]);
+
+  const setYear = () => {
+    const calculatefinancialYear = () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+      // If current month is June (5) or later, academic year is currentYear-nextYear
+      if (currentMonth >= 3) {
+        return `${currentYear}-${currentYear + 1}`;
+      }
+      return `${currentYear - 1}-${currentYear}`;
+    };
+    if (calculatefinancialYear) {
+      setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
+    }
+  }
 
   const handleAccountChange = async (e) => {
     const { name, value } = e.target;
@@ -347,6 +366,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       );
     } finally {
       setLoading(false);
+      setYear();
     }
   };
 
@@ -356,6 +376,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     setPayerBalance(0);
     setReceiverBalance(0);
     setError(null);
+    setYear();
   };
 
   // Get filtered receiver accounts (exclude payer account and cash if payer is cash)

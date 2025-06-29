@@ -47,7 +47,7 @@ function NavBarS({ role }) {
                     </Dropdown.Toggle>
                     <Dropdown.Menu style={{ color: "white", backgroundColor: "black", padding: '0.5rem' }}>
                       <Dropdown.Item as={Link} to={"/developer/view"}>शाळेची माहिती पहा</Dropdown.Item>
-                      <Dropdown.Item as={Link} to={"/developer/view-users"}>वपरकर्त्यांची माहिती पहा</Dropdown.Item>
+                      <Dropdown.Item as={Link} to={"/developer/view-users"}>वापरकर्त्यांची माहिती पहा</Dropdown.Item>
 
                     </Dropdown.Menu>
 

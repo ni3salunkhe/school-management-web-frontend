@@ -12,6 +12,7 @@ function JournalForm() {
         entryDate: new Date().toISOString().split('T')[0],
         dramount: '',
         narr: '',
+        year: '',
         entries: [
             { creditAccount: '', amount: '' }
         ]
@@ -44,6 +45,19 @@ function JournalForm() {
         const transactionKey = await apiService.getdata("journal/transactionkey");
         // console.log(transactionKey.data);
 
+        const calculatefinancialYear = () => {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+            // If current month is June (5) or later, academic year is currentYear-nextYear
+            if (currentMonth >= 3) {
+                return `${currentYear}-${currentYear + 1}`;
+            }
+            return `${currentYear - 1}-${currentYear}`;
+        };
+
+        setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
     };
 
     const filteredParties = parties.filter(p => String(p.subheadId) !== String(selectedDebitAccount));

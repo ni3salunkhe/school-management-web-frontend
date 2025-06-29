@@ -198,7 +198,7 @@ const Sidebar = ({ sidebarItems = [], role }) => {
       case 'openingbalance': IconComponent = FiBarChart2; name = "ताळेबंद"; break;
       case 'head': IconComponent = FiFileText; name = "लेखा शीर्ष (Head)"; break;
       case 'customer': IconComponent = FiUsers; name = "ग्राहक खाते"; break;
-      case 'transactionslist': IconComponent = FiCreditCard; name = "व्यवहार सूची"; break;
+      // case 'transactionslist': IconComponent = FiCreditCard; name = "व्यवहार सूची"; break;
       case 'subhead': IconComponent = FiUserX; name = "उप-शीर्ष (Sub Head)"; break;
       case 'accounttype': IconComponent = FiBookOpen; name="खाते प्रकार मास्टर"; break;
       case 'accountreports':IconComponent=FiFilePlus;name="हिशोब अहवाल";break;

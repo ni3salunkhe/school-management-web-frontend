@@ -117,6 +117,20 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         );
         setExpenseHeads(expenseSubheads || []);
 
+        const calculatefinancialYear = () => {
+          const currentDate = new Date();
+          const currentYear = currentDate.getFullYear();
+          const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+          // If current month is June (5) or later, academic year is currentYear-nextYear
+          if (currentMonth >= 3) {
+            return `${currentYear}-${currentYear + 1}`;
+          }
+          return `${currentYear - 1}-${currentYear}`;
+        };
+
+        setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
+
         if (isEditMode && transactionId) {
           // विद्यमान व्यवहार डेटा आणा
           const existingData = await apiService.getbyid(
@@ -311,7 +325,8 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         subheadId: parseInt(formData.custId),
         narr: formData.narr,
         billNo: formData.billNo || "",
-        schoolUdise: formData.schoolUdise
+        schoolUdise: formData.schoolUdise,
+        year: formData.year
       };
 
       // Find head ID
@@ -339,6 +354,9 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         }
       }
 
+      console.log(jsonData);
+
+
       let response;
       if (isEditMode && transactionId) {
         response = await apiService.put(`expense/${transactionId}`, jsonData);
@@ -348,7 +366,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         Swal.fire("यशस्वी", "खर्च यशस्वीरीत्या नोंदवला!", "success");
       }
 
-      setSuccess(`खर्च ${isEditMode ? "अपडेट" : "नोंदवला"} यशस्वीरीत्या झाला!`);
+      // setSuccess(`खर्च ${isEditMode ? "अपडेट" : "नोंदवला"} यशस्वीरीत्या झाला!`);
 
       if (!isEditMode) {
         setFormData((prev) => ({
@@ -573,7 +591,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
                     required
                   />
                 </div>
-                <div className="col-md-4">
+                {/* <div className="col-md-4">
                   <label htmlFor="billNo" className="form-label">
                     बिल/व्हाउचर नंबर
                   </label>
@@ -586,7 +604,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
                     onChange={handleInputChange}
                     placeholder="उदा., INV-001"
                   />
-                </div>
+                </div> */}
                 <div className="col-md-8">
                   <label htmlFor="narr" className="form-label">
                     वर्णन/हेतू *

@@ -350,10 +350,10 @@ const Login = () => {
             <Card className={`login-card shadow border-0 rounded-4 overflow-hidden ${formAppear ? 'fade-in' : ''}`}>
               <div className="card-header-gradient text-white text-center p-4 position-relative">
                 <div className="header-shape"></div>
-                <h2 className="mb-1 fw-bold text-shadow">शाळा व्यवस्थापन प्रणाली</h2>
+                <h2 className="mb-1 fw-bold text-shadow "  style={{ position: 'relative', zIndex: 1 }}>शाळा व्यवस्थापन प्रणाली</h2>
                 <p className="mb-0 text-light">School Management System</p>
                 <div className="floating-icon">
-                  <i className="bi bi-mortarboard-fill"></i>
+                  <i className="bi bi-mortarboard-fill "></i>
                 </div>
               </div>
 

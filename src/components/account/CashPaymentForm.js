@@ -19,6 +19,7 @@ const initialFormData = {
   creditAccountId: 'CASH_IN_HAND',
   debitAccountId: '',
   remarks: '',
+  year: ''
 };
 
 const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
@@ -87,16 +88,16 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
       console.log(datas.data);
-      
+
       const transBalance = (datas.data || []).filter(
         b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Reciept" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+          b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       );
 
 
       const transBalance2 = (datas.data || []).filter(
         b => (b.entryType === "Cash Payment" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+          b.entryType === "Expense Payment") && (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
       )
 
       let trans = 0;
@@ -108,6 +109,20 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const amt = (opnNBalance.drAmt + transactionAmt) - trans;
       setMainHeadBalance(amt)
       console.log(amt);
+
+      const calculatefinancialYear = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+        // If current month is June (5) or later, academic year is currentYear-nextYear
+        if (currentMonth >= 3) {
+          return `${currentYear}-${currentYear + 1}`;
+        }
+        return `${currentYear - 1}-${currentYear}`;
+      };
+
+      setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
 
     }
 
@@ -235,7 +250,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       }
 
       await apiService.postdata("cashpayment/", payload);
-       Swal.fire('यशस्वी', 'यशस्वीरीत्या जतन केले!', 'success');
+      Swal.fire('यशस्वी', 'यशस्वीरीत्या जतन केले!', 'success');
       // setSuccess(`रोख पेमेंट यशस्वीरित्या जतन झाले! व्हाउचर नं.: ${formData.voucherNo}`);
       setCurrentBalance(null)
       // const nextVoucher = `CP-${new Date().getFullYear().toString().slice(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-00${Math.floor(Math.random() * 100) + 1}`;
