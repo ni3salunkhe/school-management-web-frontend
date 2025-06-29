@@ -29,7 +29,7 @@ export function getSidebarItems(componentMap) {
 
   if (hasAccount) {
    sidebarItemsClerk.push({
-      account: ['Dashboard','Transactions list','Bank','Opening Balance','Customer','Head','Sub Head','Account Type','Account Reports'],
+      account: ['Dashboard','Bank','Opening Balance','Customer','Head','Sub Head','Account Type','Account Reports'],
     });
   }
 

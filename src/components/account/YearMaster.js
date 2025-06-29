@@ -148,7 +148,7 @@ function YearMaster() {
                     <div className="card shadow-sm border-0">
                         <div className="card-header text-white text-center" style={{ backgroundColor: '#007bff' }}>
                             <h4 className="mb-0">
-                                <FaCalendar className='me-2' size={14}/>
+                                <FaCalendar className='me-2' size={14} />
                                 वर्ष मास्टर फॉर्म
                             </h4>
                         </div>
@@ -189,16 +189,7 @@ function YearMaster() {
                                 </div>
 
                                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-secondary me-md-2"
-                                        onClick={handleReset}
-                                        disabled={isSubmitting}
-                                    >
-                                        <i className="fas fa-undo me-1"></i>
-                                        <FaUndo size={14} className='me-2'/>
-                                        रीसेट
-                                    </button>
+
                                     <button
                                         type="submit"
                                         className="btn text-white"
@@ -213,10 +204,20 @@ function YearMaster() {
                                         ) : (
                                             <>
                                                 <i className="fas fa-save me-1"></i>
-                                                <FaSave className='me-2' size={14}/>
+                                                <FaSave className='me-2' size={14} />
                                                 वर्ष जतन करा
                                             </>
                                         )}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary me-md-2"
+                                        onClick={handleReset}
+                                        disabled={isSubmitting}
+                                    >
+                                        <i className="fas fa-undo me-1"></i>
+                                        <FaUndo size={14} className='me-2' />
+                                        रीसेट
                                     </button>
                                 </div>
                             </form>
@@ -234,7 +235,7 @@ function YearMaster() {
                             <div className="card-header text-white" style={{ backgroundColor: 'blue' }}>
                                 <h5 className="mb-0">
                                     <i className="fas fa-table me-2"></i>
-                                    <FaTable size={14} className='me-2'/>
+                                    <FaTable size={14} className='me-2' />
                                     जतन केलेली वर्षे
                                 </h5>
                             </div>
@@ -244,14 +245,14 @@ function YearMaster() {
                                         <thead style={{ backgroundColor: '#f8f9fa' }}>
                                             <tr>
                                                 <th scope="col" className="px-4 py-3">
-                                                    <FaHashtag size={14} className='me-2'/>
+                                                    <FaHashtag size={14} className='me-2' />
                                                     अनुक्रमांक
                                                 </th>
                                                 <th scope="col" className="px-4 py-3">
                                                     शैक्षणिक वर्ष
                                                 </th>
                                                 <th scope="col" className="px-4 py-3 text-center">
-                                                    <FaCogs size={14} className='me-2'/>
+                                                    <FaCogs size={14} className='me-2' />
                                                     कृती
                                                 </th>
                                             </tr>
@@ -287,7 +288,7 @@ function YearMaster() {
                                                             title='Update'
                                                             disabled={isSubmitting}
                                                         >
-                                                            <Edit size={14} className='me-2'/>
+                                                            <Edit size={14} className='me-2' />
                                                             Update
                                                         </button>
                                                     </td>
@@ -300,12 +301,12 @@ function YearMaster() {
                                     <div className="d-flex justify-content-between align-items-center">
                                         <small className="text-muted">
                                             <i className="fas fa-info-circle me-1"></i>
-                                            <FaInfoCircle size={14} className='me-2'/>
+                                            <FaInfoCircle size={14} className='me-2' />
                                             एकूण {yearList.length} वर्षे जतन केली आहेत
                                         </small>
                                         <small className="text-muted">
                                             <i className="fas fa-clock me-1"></i>
-                                            <FaClock size={14} className='me-2'/>
+                                            <FaClock size={14} className='me-2' />
                                             अद्यतनित: {new Date().toLocaleDateString('mr-IN')}
                                         </small>
                                     </div>

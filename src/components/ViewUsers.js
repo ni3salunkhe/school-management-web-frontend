@@ -45,7 +45,6 @@ function ViewUsers() {
     }
   }, [selectedUdise, headmasters, staff]);
 
-  // Get unique UDISE numbers for dropdown
   const getUniqueUdiseNumbers = () => {
     const udiseFromHeadmasters = headmasters
       .filter(hm => hm.udiseNo)
@@ -60,12 +59,11 @@ function ViewUsers() {
 
   return (
     <div className="container py-4">
-      {/* Header */}
       <div className="row mb-4">
         <div className="col">
           <div className="bg-primary text-white p-4 rounded">
-            <h2 className="display-6">School User Directory</h2>
-            <p className="lead">View information about headmasters, teachers, and clerks</p>
+            <h2 className="display-6">शाळा वापरकर्ता निर्देशिका</h2>
+            <p className="lead">मुख्याध्यापक, शिक्षक व लिपिकांची माहिती पहा</p>
           </div>
         </div>
       </div>
@@ -74,32 +72,31 @@ function ViewUsers() {
         <div className="row justify-content-center my-5">
           <div className="col-auto text-center">
             <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">लोड होत आहे...</span>
             </div>
-            <p className="mt-3 text-muted">Loading user data...</p>
+            <p className="mt-3 text-muted">वापरकर्ता डेटा लोड होत आहे...</p>
           </div>
         </div>
       ) : (
         <>
-          {/* Filter Section */}
           <div className="row mb-4">
             <div className="col">
               <div className="card">
                 <div className="card-body">
                   <div className="row align-items-center">
                     <div className="col-md-6 mb-3 mb-md-0">
-                      <h4 className="card-title">Filter Users</h4>
-                      <p className="card-text text-muted">Select a UDISE number to view specific school data</p>
+                      <h4 className="card-title">वापरकर्ते फिल्टर करा</h4>
+                      <p className="card-text text-muted">विशिष्ट शाळेची माहिती पाहण्यासाठी UDISE क्रमांक निवडा</p>
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="udiseFilter" className="form-label">UDISE Number:</label>
+                      <label htmlFor="udiseFilter" className="form-label">UDISE क्रमांक:</label>
                       <select
                         id="udiseFilter"
                         value={selectedUdise}
                         onChange={(e) => setSelectedUdise(e.target.value)}
                         className="form-select"
                       >
-                        <option value="">All UDISE Numbers</option>
+                        <option value="">सर्व UDISE क्रमांक</option>
                         {getUniqueUdiseNumbers().map((udise) => (
                           <option key={udise} value={udise}>
                             {udise}
@@ -124,7 +121,7 @@ function ViewUsers() {
                     type="button" 
                     role="tab"
                   >
-                    Headmasters
+                    मुख्याध्यापक
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
@@ -134,7 +131,7 @@ function ViewUsers() {
                     type="button" 
                     role="tab"
                   >
-                    Staff (Teachers & Clerks)
+                    कर्मचारी (शिक्षक व लिपिक)
                   </button>
                 </li>
               </ul>
@@ -153,11 +150,11 @@ function ViewUsers() {
                         <table className="table table-striped table-hover">
                           <thead className="table-light">
                             <tr>
-                              <th>UDISE No.</th>
-                              <th>Username</th>
-                              <th>Email</th>
-                              <th>Phone</th>
-                              <th>School Name</th>
+                              <th>UDISE क्रमांक</th>
+                              <th>वापरकर्तानाव</th>
+                              <th>ईमेल</th>
+                              <th>फोन</th>
+                              <th>शाळेचे नाव</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -176,8 +173,8 @@ function ViewUsers() {
                                 <td colSpan="5" className="text-center py-5">
                                   <div className="text-muted">
                                     <i className="bi bi-emoji-frown fs-3 d-block mb-3"></i>
-                                    <h5>No headmasters found</h5>
-                                    <p>No headmasters found with this UDISE number.</p>
+                                    <h5>कोणतेही मुख्याध्यापक सापडले नाहीत</h5>
+                                    <p>या UDISE क्रमांकासाठी मुख्याध्यापक आढळले नाहीत.</p>
                                   </div>
                                 </td>
                               </tr>
@@ -197,12 +194,12 @@ function ViewUsers() {
                         <table className="table table-striped table-hover">
                           <thead className="table-light">
                             <tr>
-                              <th>UDISE No.</th>
-                              <th>Username</th>
-                              <th>Email</th>
-                              <th>Phone</th>
-                              <th>School Name</th>
-                              <th>Role</th>
+                              <th>UDISE क्रमांक</th>
+                              <th>वापरकर्तानाव</th>
+                              <th>ईमेल</th>
+                              <th>फोन</th>
+                              <th>शाळेचे नाव</th>
+                              <th>भूमिका</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -220,7 +217,8 @@ function ViewUsers() {
                                       s.role === 'CLERK' ? 'bg-info' : 
                                       'bg-secondary'
                                     }`}>
-                                      {s.role || "-"}
+                                      {s.role === 'TEACHER' ? 'शिक्षक' :
+                                       s.role === 'CLERK' ? 'लिपिक' : s.role || "-"}
                                     </span>
                                   </td>
                                 </tr>
@@ -230,8 +228,8 @@ function ViewUsers() {
                                 <td colSpan="6" className="text-center py-5">
                                   <div className="text-muted">
                                     <i className="bi bi-emoji-frown fs-3 d-block mb-3"></i>
-                                    <h5>No staff found</h5>
-                                    <p>No staff found with this UDISE number.</p>
+                                    <h5>कोणतेही कर्मचारी सापडले नाहीत</h5>
+                                    <p>या UDISE क्रमांकासाठी कर्मचारी सापडले नाहीत.</p>
                                   </div>
                                 </td>
                               </tr>
@@ -242,6 +240,7 @@ function ViewUsers() {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

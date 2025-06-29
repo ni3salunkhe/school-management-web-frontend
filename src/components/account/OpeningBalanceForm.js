@@ -12,7 +12,7 @@ import apiService from "../../services/api.service";
 import { jwtDecode } from "jwt-decode";
 
 const OpeningBalanceForm = () => {
-  const [financialYear, setFinancialYear] = useState("2024-2025");
+  const [financialYear, setFinancialYear] = useState();
   const [selectedHeadId, setSelectedHeadId] = useState("");
   const [subheadEntries, setSubheadEntries] = useState([]);
   const [allHeads, setAllHeads] = useState([]);
@@ -51,6 +51,19 @@ const OpeningBalanceForm = () => {
       setLoading(true);
       const response = await apiService.getdata("openingbal/");
       setBalances(response.data || []);
+      const calculatefinancialYear = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+        // If current month is June (5) or later, academic year is currentYear-nextYear
+        if (currentMonth >= 3) {
+          return `${currentYear}-${currentYear + 1}`;
+        }
+        return `${currentYear - 1}-${currentYear}`;
+      };
+
+      setFinancialYear(calculatefinancialYear());
     } catch (err) {
       setError(`Failed to fetch opening balances: ${err.message}`);
     } finally {
@@ -64,6 +77,7 @@ const OpeningBalanceForm = () => {
       await apiService.deleteById(`openingbal/${id}`);
       fetchOpeningBalances();
       fetchSumofCrDr();
+
     } catch (err) {
       alert("Delete failed: " + err.message);
     }
@@ -154,6 +168,7 @@ const OpeningBalanceForm = () => {
         Dr_Amt: entry.drAmt,
         Cr_Amt: entry.crAmt,
         narr: "Opening balance",
+        year: financialYear,
         udiseNo,
         entrydate,
       }));
@@ -186,12 +201,12 @@ const OpeningBalanceForm = () => {
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
-    const mockYears = [
-      `${currentYear - 1}-${currentYear}`,
-      `${currentYear}-${currentYear + 1}`,
-      `${currentYear + 1}-${currentYear + 2}`,
-    ];
-    setFinancialYearsList(mockYears);
+    // const mockYears = [
+    //   `${currentYear - 1}-${currentYear}`,
+    //   `${currentYear}-${currentYear + 1}`,
+    //   `${currentYear + 1}-${currentYear + 2}`,
+    // ];
+    // setFinancialYearsList(mockYears);
     fetchAccounts();
     fetchSumofCrDr();
   }, []);
@@ -289,11 +304,11 @@ const OpeningBalanceForm = () => {
       prev.map((entry) =>
         entry.subHeadId === subHeadId
           ? {
-              ...entry,
-              [field]: value,
-              ...(field === "debit" ? { credit: "" } : {}),
-              ...(field === "credit" ? { debit: "" } : {}),
-            }
+            ...entry,
+            [field]: value,
+            ...(field === "debit" ? { credit: "" } : {}),
+            ...(field === "credit" ? { debit: "" } : {}),
+          }
           : entry
       )
     );
@@ -301,7 +316,7 @@ const OpeningBalanceForm = () => {
     setSuccess(null);
   };
 
-  
+
   const calculateTotal = (type) =>
     filteredEntries.reduce(
       (sum, entry) => sum + (parseFloat(entry[type]) || 0),
@@ -355,8 +370,8 @@ const OpeningBalanceForm = () => {
 
   const filteredEntries = selectedHeadId
     ? subheadEntries.filter(
-        (entry) => entry.headId === parseInt(selectedHeadId)
-      )
+      (entry) => entry.headId === parseInt(selectedHeadId)
+    )
     : [];
 
   const totalDebit = calculateTotal("debit");
@@ -365,20 +380,21 @@ const OpeningBalanceForm = () => {
 
   return (
     <div className="container-fluid py-3">
-      <h3>Opening Balance Entry</h3>
+      <h3>प्रारंभिक शिल्लक नोंद</h3>
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
+
       <div className="row justify-content-center py-2">
         <div className="col-md-8 col-lg-12">
           <div className="card shadow-sm">
             <div className="card-header bg-primary text-white">
-              <h5 className="mb-0">Account Balance Summary</h5>
+              <h5 className="mb-0">खाते शिल्लक सारांश</h5>
             </div>
             <div className="card-body">
               <div className="row mb-3">
                 <div className="col-6">
                   <div className="text-center p-3 bg-success bg-opacity-10 rounded">
-                    <h6 className="text-success mb-2">Credit Amount</h6>
+                    <h6 className="text-success mb-2">क्रेडिट रक्कम</h6>
                     <h4 className="text-success fw-bold">
                       ₹{creditAmount.toFixed(2)}
                     </h4>
@@ -386,7 +402,7 @@ const OpeningBalanceForm = () => {
                 </div>
                 <div className="col-6">
                   <div className="text-center p-3 bg-danger bg-opacity-10 rounded">
-                    <h6 className="text-danger mb-2">Debit Amount</h6>
+                    <h6 className="text-danger mb-2">डेबिट रक्कम</h6>
                     <h4 className="text-danger fw-bold">
                       ₹{debitAmount.toFixed(2)}
                     </h4>
@@ -398,19 +414,18 @@ const OpeningBalanceForm = () => {
                 {isBalanced ? (
                   <div className="alert alert-success" role="alert">
                     <i className="bi bi-check-circle-fill me-2"></i>
-                    <strong>Balanced!</strong> Credit and Debit amounts are
-                    equal.
+                    <strong>समतोल!</strong> क्रेडिट आणि डेबिट रक्कम समान आहेत.
                   </div>
                 ) : (
                   <div className="alert alert-warning" role="alert">
                     <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    <strong>Imbalance Detected!</strong>
+                    <strong>असमतोल आढळला!</strong>
                     <br />
-                    Difference: ₹{difference.toFixed(2)}
+                    फरक: ₹{difference.toFixed(2)}
                     <br />
                     {creditAmount > debitAmount
-                      ? "Credit exceeds Debit"
-                      : "Debit exceeds Credit"}
+                      ? "क्रेडिट डेबिटपेक्षा जास्त"
+                      : "डेबिट क्रेडिटपेक्षा जास्त"}
                   </div>
                 )}
               </div>
@@ -418,33 +433,21 @@ const OpeningBalanceForm = () => {
           </div>
         </div>
       </div>
-      <div className="card ">
+
+      <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center bg-primary text-white">
           <div className="d-flex align-items-center gap-2">
             <DollarSign size={20} />
-            <strong> Set Opening Balances</strong>
+            <strong>प्रारंभिक शिल्लक सेट करा</strong>
           </div>
           <div className="d-flex gap-2">
-            <select
-              className="form-select form-select-sm"
-              value={financialYear}
-              onChange={(e) => setFinancialYear(e.target.value)}
-              disabled={loading || saving}
-            >
-              {financialYearsList.map((fy) => (
-                <option key={fy} value={fy}>
-                  {fy}
-                </option>
-              ))}
-            </select>
-
             <select
               className="form-select form-select-sm"
               value={selectedHeadId}
               onChange={(e) => setSelectedHeadId(e.target.value)}
               disabled={loading}
             >
-              <option value="">Select Head</option>
+              <option value="">मुख्य शीर्ष निवडा</option>
               {allHeads.map((h) => (
                 <option key={h.headId} value={h.headId}>
                   {h.headName}
@@ -461,16 +464,14 @@ const OpeningBalanceForm = () => {
                 <table className="table table-bordered table-sm">
                   <thead className="table-light">
                     <tr>
-                      <th>Subhead Name</th>
-                      <th>Debit (₹)</th>
-                      <th>Credit (₹)</th>
+                      <th>उपशीर्ष नाव</th>
+                      <th>डेबिट (₹)</th>
+                      <th>क्रेडिट (₹)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredEntries.map((entry) => {
                       const bookType = entry.bookType?.toLowerCase();
-                      console.log(entry.bookType);
-
                       const isDebitEditable =
                         bookType === "asset" || bookType === "profit and loss";
                       const isCreditEditable = bookType === "liabilities";
@@ -478,7 +479,6 @@ const OpeningBalanceForm = () => {
                       return (
                         <tr key={entry.subHeadId}>
                           <td>{entry.subHeadName}</td>
-
                           <td>
                             <input
                               type="number"
@@ -494,7 +494,6 @@ const OpeningBalanceForm = () => {
                               step="0.01"
                             />
                           </td>
-
                           <td>
                             <input
                               type="number"
@@ -516,16 +515,16 @@ const OpeningBalanceForm = () => {
                   </tbody>
                   <tfoot className="table-light fw-bold">
                     <tr>
-                      <td className="text-end">Total</td>
+                      <td className="text-end">एकूण</td>
                       <td className="text-end">₹{totalDebit.toFixed(2)}</td>
                       <td className="text-end">₹{totalCredit.toFixed(2)}</td>
                     </tr>
                     {difference !== 0 && (
                       <tr className="table-warning">
-                        <td className="text-end">Difference</td>
+                        <td className="text-end">फरक</td>
                         <td colSpan="2" className="text-end text-danger">
                           ₹{Math.abs(difference).toFixed(2)} (
-                          {difference > 0 ? "Debit Excess" : "Credit Excess"})
+                          {difference > 0 ? "डेबिट जास्त" : "क्रेडिट जास्त"})
                         </td>
                       </tr>
                     )}
@@ -536,35 +535,35 @@ const OpeningBalanceForm = () => {
               <div className="d-flex justify-content-end">
                 <button type="submit" className="btn btn-success">
                   <Save size={16} className="me-1" />
-                  {saving ? "Saving..." : "Save Opening Balances"}
+                  {saving ? "सेव होत आहे..." : "प्रारंभिक शिल्लक जतन करा"}
                 </button>
               </div>
             </form>
           )}
           {!selectedHeadId && (
             <div className="text-muted">
-              Please select a head to view subheads.
+              कृपया उपशीर्ष पाहण्यासाठी मुख्य शीर्ष निवडा.
             </div>
           )}
         </div>
 
         <div className="card-footer bg-success bg-opacity-10">
           <small className="text-muted">
-            Only balance sheet accounts can have opening balances. Ensure totals
-            are equal.
+            फक्त बॅलन्स शीट खात्यांमध्ये प्रारंभिक शिल्लक असू शकते. एकूण रक्कम समान असल्याची खात्री करा.
           </small>
         </div>
       </div>
+
       <div className="card mt-4">
         <div className="card-header d-flex justify-content-between bg-primary text-white">
-          <h5 className="mb-0">Opening Balance Records</h5>
+          <h5 className="mb-0">प्रारंभिक शिल्लक नोंदी</h5>
           <div className="d-flex gap-2">
             {selectedRows.length > 0 && (
               <button
                 className="btn btn-success btn-sm"
                 onClick={selectedLedger}
               >
-                Add to general ledger ({selectedRows.length})
+                जनरल लेजरमध्ये जोडा ({selectedRows.length})
               </button>
             )}
             {selectedRows.length > 0 && (
@@ -572,7 +571,7 @@ const OpeningBalanceForm = () => {
                 className="btn btn-danger btn-sm"
                 onClick={deleteSelected}
               >
-                Delete Selected ({selectedRows.length})
+                निवडलेले हटवा ({selectedRows.length})
               </button>
             )}
           </div>
@@ -595,12 +594,12 @@ const OpeningBalanceForm = () => {
                     }}
                   />
                 </th>
-                <th>Subhead</th>
-                <th>Head</th>
-                <th>Debit Amount</th>
-                <th>Credit Amount</th>
-                <th>Year</th>
-                <th>Actions</th>
+                <th>उपशीर्ष</th>
+                <th>मुख्य शीर्ष</th>
+                <th>डेबिट रक्कम</th>
+                <th>क्रेडिट रक्कम</th>
+                <th>वर्ष</th>
+                <th>क्रिया</th>
               </tr>
             </thead>
             <tbody>
@@ -672,14 +671,14 @@ const OpeningBalanceForm = () => {
                           <button
                             className="btn btn-success btn-sm"
                             onClick={handleEditSave}
-                            title="Save changes"
+                            title="बदल जतन करा"
                           >
                             <Check size={14} />
                           </button>
                           <button
                             className="btn btn-secondary btn-sm"
                             onClick={handleEditCancel}
-                            title="Cancel edit"
+                            title="रद्द करा"
                           >
                             <X size={14} />
                           </button>
@@ -689,14 +688,14 @@ const OpeningBalanceForm = () => {
                           <button
                             className="btn btn-outline-primary btn-sm"
                             onClick={() => handleEdit(b)}
-                            title="Edit record"
+                            title="नोंद संपादित करा"
                           >
                             <Pencil size={14} />
                           </button>
                           <button
                             className="btn btn-outline-danger btn-sm"
                             onClick={() => handleDelete(b.id)}
-                            title="Delete record"
+                            title="नोंद हटवा"
                           >
                             <Trash2 size={14} />
                           </button>

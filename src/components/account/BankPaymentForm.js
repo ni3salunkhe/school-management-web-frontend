@@ -112,6 +112,21 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       setParties(filtered || []);
 
       console.log(partiesResponse.data);
+      const calculatefinancialYear = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+        // If current month is June (5) or later, academic year is currentYear-nextYear
+        if (currentMonth >= 3) {
+          return `${currentYear}-${currentYear + 1}`;
+        }
+        return `${currentYear - 1}-${currentYear}`;
+      };
+
+      if (calculatefinancialYear()) {
+        setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
+      }
 
       if (isEditMode && transactionId) {
         // विद्यमान व्यवहार डेटा आणा

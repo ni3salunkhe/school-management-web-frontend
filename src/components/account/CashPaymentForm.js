@@ -8,16 +8,17 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const initialFormData = {
-  voucherNo: "",
-  date: new Date().toISOString().split("T")[0],
-  paidToId: "",
-  paidToHead: "",
-  paidToSubHead: "",
-  amount: "",
-  narration: "",
-  creditAccountId: "CASH_IN_HAND",
-  debitAccountId: "",
-  remarks: "",
+  voucherNo: '',
+  date: new Date().toISOString().split('T')[0],
+  paidToId: '',
+  paidToHead: '',
+  paidToSubHead: '',
+  amount: '',
+  narration: '',
+  creditAccountId: 'CASH_IN_HAND',
+  debitAccountId: '',
+  remarks: '',
+  year: ''
 };
 
 const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
@@ -135,7 +136,22 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const amt = opnNBalance.drAmt + transactionAmt - trans;
       setMainHeadBalance(amt);
       console.log(amt);
-    };
+
+      const calculatefinancialYear = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+        // If current month is June (5) or later, academic year is currentYear-nextYear
+        if (currentMonth >= 3) {
+          return `${currentYear}-${currentYear + 1}`;
+        }
+        return `${currentYear - 1}-${currentYear}`;
+      };
+
+      setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
+
+    }
 
     init();
   };

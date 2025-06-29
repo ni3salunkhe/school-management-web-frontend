@@ -15,7 +15,8 @@ const initialFormData = {
   amount: '',
   narr: '',
   debitAccountId: 'CASH_IN_HAND',
-  tranType: 'Cash Receipt'
+  tranType: 'Cash Receipt',
+  year: ''
 };
 
 const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
@@ -109,6 +110,8 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
         });
 
         setMainHeadBalance((openBalance.drAmt + drTransaction) - crTransaction);
+
+        setYear();
       }
 
       init();
@@ -126,6 +129,25 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       setLoading(false);
     }
   };
+
+  const setYear = () => {
+    const calculatefinancialYear = () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+
+      // If current month is June (5) or later, academic year is currentYear-nextYear
+      if (currentMonth >= 3) {
+        return `${currentYear}-${currentYear + 1}`;
+      }
+      return `${currentYear - 1}-${currentYear}`;
+    };
+
+    if (calculatefinancialYear) {
+      setFormData((prev) => ({ ...prev, year: calculatefinancialYear() }))
+    }
+  }
+
   useEffect(() => {
 
     fetchInitialData();
@@ -261,6 +283,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       setError(`ऑपरेशन अयशस्वी: ${err.message}`);
     } finally {
       setLoading(false);
+      setYear();
     }
   };
 
@@ -270,6 +293,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
     setCurrentBalance(null)
     setError(null);
     setSuccess(null);
+    setYear();
   };
 
   if (loading && !formData.voucherNo && !isEditMode) {

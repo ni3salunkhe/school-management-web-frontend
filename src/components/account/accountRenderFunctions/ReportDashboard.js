@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import helper from "../../../services/helper.service";
 
 const ReportDashboard = ({
   companyName = "",
@@ -54,21 +55,21 @@ const ReportDashboard = ({
   const getDateLabel = () => {
     switch (reportType) {
       case "balance-sheet":
-        return `as at ${asAtDate}`;
+        return `as at ${helper.formatISODateToDMY(asAtDate,"-")}`;
       case "trial-balance":
         return dateRange
-          ? `From ${dateRange.from} to ${dateRange.to}`
-          : `as at ${asAtDate}`;
+          ? `From ${helper.formatISODateToDMY(dateRange.from ,"-")} to ${helper.formatISODateToDMY(dateRange.to,"-")}`
+          : `as at ${helper.formatISODateToDMY(asAtDate,"-")}`;
       case "profit-loss":
         return dateRange
-          ? `For the period ${dateRange.from} to ${dateRange.to}`
-          : `as at ${asAtDate}`;
+          ? `For the period ${helper.formatISODateToDMY(dateRange.from,"-")} to ${helper.formatISODateToDMY(dateRange.to,"-")}`
+          : `as at ${helper.formatISODateToDMY(asAtDate,"-")}`;
       case "ledger":
         return dateRange
-          ? `From ${dateRange.from} to ${dateRange.to}`
-          : `as at ${asAtDate}`;
+          ? `From ${helper.formatISODateToDMY(dateRange.from,"-")} to ${helper.formatISODateToDMY(dateRange.to,"-")}`
+          : `as at ${helper.formatISODateToDMY(asAtDate,"-")}`;
       default:
-        return `as at ${asAtDate}`;
+        return `as at ${helper.formatISODateToDMY(asAtDate,"-")}`;
     }
   };
 

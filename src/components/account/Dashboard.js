@@ -3,72 +3,67 @@ import { Plus, DollarSign, CreditCard, Building, FileText, TrendingUp, Settings 
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
 
-const AccountingDashboard = () => {
+const Dashboard = () => {
   const [creditAmount, setCreditAmount] = useState(5000);
   const [debitAmount, setDebitAmount] = useState(5000);
-  // const [isBalanced, setIsBalanced] = useState(true);
 
-  // Simulate balance check
   useEffect(() => {
     const fetchSumofCrDr = async () => {
       const response = await apiService.getdata(`openingbal/sum`);
-      setCreditAmount(response.data.totalCr)
-      setDebitAmount(response.data.totalDr)
-    }
+      setCreditAmount(response.data.totalCr);
+      setDebitAmount(response.data.totalDr);
+    };
 
     fetchSumofCrDr();
   }, [creditAmount, debitAmount]);
-
-  // Mock Link component for demonstration
-
 
   const quickActions = [
     {
       to: "cash-receipt",
       icon: <DollarSign size={20} />,
-      text: "Create Cash Receipt",
+      text: "कॅश पावती तयार करा",
       color: "text-primary",
       bgColor: "bg-primary-subtle"
     },
     {
       to: "cash-payment",
       icon: <DollarSign size={20} />,
-      text: "Create Cash Payment",
+      text: "कॅश पेमेंट तयार करा",
       color: "text-success",
       bgColor: "bg-success-subtle"
     },
     {
       to: "bank-receipt",
       icon: <Building size={20} />,
-      text: "Create Bank Receipt",
+      text: "बँक पावती तयार करा",
       color: "text-info",
       bgColor: "bg-info-subtle"
     },
     {
       to: "bank-payment",
       icon: <Building size={20} />,
-      text: "Create Bank Payment",
+      text: "बँक पेमेंट तयार करा",
       color: "text-warning",
       bgColor: "bg-warning-subtle"
     },
     {
       to: "contra-payment",
       icon: <CreditCard size={20} />,
-      text: "Create Contra Payment",
+      text: "कॉण्ट्रा पेमेंट तयार करा",
       color: "text-danger",
       bgColor: "bg-danger-subtle"
     },
     {
       to: "journal",
       icon: <FileText size={20} />,
-      text: "Create Journal Payment",
+      text: "जर्नल व्हाउचर तयार करा",
       color: "text-info",
       bgColor: "bg-info-subtle"
     },
     {
       to: "expense",
       icon: <TrendingUp size={20} />,
-      text: "Create Expenses Payment",
+      text: "खर्चाची नोंद करा",
       color: "text-purple",
       bgColor: "bg-light"
     }
@@ -77,28 +72,22 @@ const AccountingDashboard = () => {
   return (
     <div className="container-fluid bg-light min-vh-100 py-4">
       <div className="container">
-        {/* Dashboard Header */}
+        {/* Header */}
         <div className="row mb-4">
           <div className="col-12">
             <div className="d-flex align-items-center justify-content-between flex-wrap">
               <div>
                 <h1 className="display-6 fw-bold text-primary mb-2">
                   <i className="bi bi-speedometer2 me-2"></i>
-                  Accounting Dashboard
+                  लेखा डॅशबोर्ड
                 </h1>
-                <p className="lead text-muted mb-0">School Management System</p>
+                <p className="lead text-muted mb-0">शाळा व्यवस्थापन प्रणाली</p>
               </div>
-              {/* <div className="d-none d-md-block">
-                <div className="badge bg-primary fs-6 px-3 py-2">
-                  <i className="bi bi-calendar-check me-1"></i>
-                  {new Date().toLocaleDateString()}
-                </div>
-              </div> */}
             </div>
           </div>
         </div>
 
-        {/* Balance Status Alert */}
+        {/* Balance Status */}
         <div className="row mb-4">
           <div className="col-12">
             {(creditAmount === debitAmount) && (creditAmount > 0 && debitAmount > 0) ? (
@@ -107,8 +96,8 @@ const AccountingDashboard = () => {
                   <i className="bi bi-check-circle-fill fs-4"></i>
                 </div>
                 <div className="flex-grow-1">
-                  <h6 className="alert-heading mb-1">Accounts Balanced</h6>
-                  <small className="mb-0">Credit: ₹{creditAmount.toLocaleString('en-IN')} | Debit: ₹{debitAmount.toLocaleString('en-IN')}</small>
+                  <h6 className="alert-heading mb-1">खाते संतुलित आहे</h6>
+                  <small className="mb-0">क्रेडिट: ₹{creditAmount.toLocaleString('en-IN')} | डेबिट: ₹{debitAmount.toLocaleString('en-IN')}</small>
                 </div>
               </div>
             ) : (
@@ -117,15 +106,15 @@ const AccountingDashboard = () => {
                   <i className="bi bi-exclamation-triangle-fill fs-4"></i>
                 </div>
                 <div className="flex-grow-1">
-                  <h6 className="alert-heading mb-1">Balance Required</h6>
-                  <small className="mb-0">Please balance credit and debit amounts before proceeding</small>
+                  <h6 className="alert-heading mb-1">संतुलन आवश्यक आहे</h6>
+                  <small className="mb-0">कृपया क्रेडिट आणि डेबिट रक्कम संतुलित करा</small>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Quick Actions Section */}
+        {/* Quick Actions */}
         <div className="row">
           <div className="col-12">
             <div className="card shadow-sm border-0 h-100">
@@ -133,7 +122,7 @@ const AccountingDashboard = () => {
                 <div className="d-flex align-items-center justify-content-between">
                   <h5 className="card-title mb-0 d-flex align-items-center">
                     <i className="bi bi-lightning-charge-fill text-warning me-2"></i>
-                    Quick Actions
+                    जलद क्रिया
                   </h5>
                   <span className="badge bg-light text-dark">
                     {creditAmount === debitAmount && (creditAmount > 0 && debitAmount > 0) ? 'Ready' : 'Locked'}
@@ -146,10 +135,7 @@ const AccountingDashboard = () => {
                   <div className="row g-3">
                     {quickActions.map((action, index) => (
                       <div key={index} className="col-12 col-sm-6 col-lg-4">
-                        <Link
-                          to={action.to}
-                          className="text-decoration-none"
-                        >
+                        <Link to={action.to} className="text-decoration-none">
                           <div className="card h-100 border-0 shadow-sm action-card position-relative overflow-hidden">
                             <div className="card-body d-flex align-items-center p-3">
                               <div className={`rounded-circle p-2 me-3 ${action.bgColor}`}>
@@ -171,47 +157,14 @@ const AccountingDashboard = () => {
                         </Link>
                       </div>
                     ))}
-
-
                   </div>
                 ) : (
-                  <div>First Balance the credit amount and debit amount</div>
+                  <div>कृपया आधी क्रेडिट व डेबिट रक्कम संतुलित करा</div>
                 )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Demo Controls */}
-        {/* <div className="row mt-4">
-          <div className="col-12">
-            <div className="card bg-dark text-white">
-              <div className="card-body">
-                <h6 className="card-title">Demo Controls</h6>
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Credit Amount</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={creditAmount}
-                      onChange={(e) => setCreditAmount(Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Debit Amount</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={debitAmount}
-                      onChange={(e) => setDebitAmount(Number(e.target.value))}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
       </div>
 
       <style jsx>{`
@@ -219,49 +172,49 @@ const AccountingDashboard = () => {
           transition: all 0.3s ease;
           cursor: pointer;
         }
-        
+
         .action-card:hover {
           transform: translateY(-2px);
           box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
         }
-        
+
         .action-card:hover .position-absolute {
           opacity: 0.05;
         }
-        
+
         .transition-opacity {
           transition: opacity 0.3s ease;
         }
-        
+
         .text-purple {
           color: #6f42c1 !important;
         }
-        
+
         .bg-primary-subtle {
           background-color: rgba(13, 110, 253, 0.1) !important;
         }
-        
+
         .bg-success-subtle {
           background-color: rgba(25, 135, 84, 0.1) !important;
         }
-        
+
         .bg-info-subtle {
           background-color: rgba(13, 202, 240, 0.1) !important;
         }
-        
+
         .bg-warning-subtle {
           background-color: rgba(255, 193, 7, 0.1) !important;
         }
-        
+
         .bg-danger-subtle {
           background-color: rgba(220, 53, 69, 0.1) !important;
         }
-        
+
         @media (max-width: 576px) {
           .display-6 {
             font-size: 1.75rem;
           }
-          
+
           .lead {
             font-size: 1rem;
           }
@@ -271,4 +224,4 @@ const AccountingDashboard = () => {
   );
 };
 
-export default AccountingDashboard;
+export default Dashboard;
