@@ -9,7 +9,6 @@ import { setDate } from "date-fns";
 const AccountReports = () => {
 
   const date = new Date();
-  console.log(date);
 
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
@@ -129,28 +128,46 @@ const AccountReports = () => {
       setCompanyName(response.data[0]?.schoolUdise?.schoolName);
     }
   };
-  console.log(companyName1);
 
   const fetchInitiealData = async () => {
     const asset = await apiService.getdata(
       `generalledger/getvalue/Asset/shop/${udise}/date/${dateRange.to}`
-    );
+    ).catch(err => {
+      console.log(err);
+    })
+
 
     const liabilities = await apiService.getdata(
       `generalledger/getvalue/Liabilities/shop/${udise}/date/${dateRange.to}`
-    );
-    console.log(liabilities.data);
+    ).catch(err => {
+      console.log(err);
+    })
+
+
     const profitnloss = await apiService.getdata(
       `generalledger/getvalue/Profit%20And%20Loss/shop/${udise}/date/${dateRange.to}`
-    );
+    ).catch(err => {
+      console.log(err);
+    })
+
+    console.log(profitnloss.data);
+
+    if (liabilities.data && profitnloss.data) {
+
+    }
+
     const expense = convertToDisplayFormat(
       extractPLHeads(profitnloss.data, "expense"),
       "ProfitnLoss"
     );
+    console.log(expense);
+
     const income = convertToDisplayFormat(
       extractPLHeads(profitnloss.data, "income"),
       "ProfitnLoss"
     );
+    console.log(income);
+
     const diff = calculateTotal(income) + calculateTotal(expense);
     setPlDiff(diff);
     const udpdatePl = async (diff) => {
@@ -170,18 +187,26 @@ const AccountReports = () => {
           Dr_Amt: 0,
         };
       }
+
       await apiService.put(
         `generalledger/profit-loss/Current%20Period/${udise}`,
         payload
-      );
+      ).catch(err => {
+        console.log(err);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Please fill the opening balances for Current Period",
+        });
+      })
       const response = await apiService.getdata(
         `generalledger/get-profit-loss/Profit%20&%20Loss/${udise}`
-      );
-      console.log(convertToHeadBasedFormat(response.data));
+      ).catch(err => {
+        console.log(err);
+      })
       return convertToHeadBasedFormat(response.data);
     };
     const formattedData = await udpdatePl(diff);
-    console.log(formattedData);
 
     const formattedAsset = convertToDisplayFormat(
       asset.data,
@@ -210,7 +235,6 @@ const AccountReports = () => {
       income: income,
     });
 
-    console.log(formattedAsset);
   };
 
   const calculateTotal = (items) => {
@@ -221,7 +245,6 @@ const AccountReports = () => {
     });
     return base;
   };
-  console.log(profitnlossDiff);
 
   const handleSubheadChange = async (e) => {
     setSelectedSubhead(e);
@@ -312,14 +335,10 @@ const AccountReports = () => {
         });
       }
     }
-    console.log(diff);
 
     if (diff > 0 && mainHead === "Assets") {
-      console.log(formattedData);
-
       result.push(...formattedData);
     } else if (diff < 0 && mainHead === "Liabilities") {
-      console.log(formattedData);
       result.push(...formattedData);
     }
 
