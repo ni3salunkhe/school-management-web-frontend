@@ -22,7 +22,7 @@ function NavigationBlocker() {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    const isLoginPage = location.pathname === "/";
+    const isLoginPage = location.pathname === "/" || location.pathname === "/developer-subscription";
 
     // If we're on login page and there's no token, prevent back navigation
     if (
@@ -49,7 +49,7 @@ function NavigationBlocker() {
       const link = e.target.closest("a");
       if (link && link.href && isLoginPage) {
         const targetPath = new URL(link.href).pathname;
-        if (targetPath !== "/") {
+        if (targetPath !== "/" || location.pathname === "/developer-subscription") {
           e.preventDefault();
           alert("Navigation from root is blocked.");
         }
@@ -74,11 +74,16 @@ function App() {
     const checkAndRedirect = async () => {
       const authenticated = authService.isAuthenticated();
       const hasToken = sessionStorage.getItem("token");
-      const isLoginPage = location.pathname === "/";
+      const isDevsubPage = location.pathname === "/developer-subscription"
+      const isLoginPage = location.pathname === "/" || isDevsubPage;
+      if(isDevsubPage){
+        return
+      }
       const isValidSubscription =
         await authService.checkDeveloperSubscription();
       console.log(isValidSubscription);
-
+      console.log(isDevsubPage);
+      
       // If user is NOT authenticated and NOT on login page, redirect to login
       if ((!authenticated || !hasToken) && !isLoginPage) {
         navigate("/", { replace: true });
