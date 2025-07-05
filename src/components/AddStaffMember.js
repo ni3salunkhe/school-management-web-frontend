@@ -156,7 +156,6 @@ function AddStaffMember() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form submitted:", formData);
         // TODO: Send formData to backend
         if (validateForm()) {
 
@@ -174,7 +173,6 @@ function AddStaffMember() {
                 try {
 
                     const payload = { ...formData, school ,status:'working'};
-                    console.log("Form submitted:", payload);
                     await apiService.postdata("staff/", payload)
 
                     await Swal.fire({

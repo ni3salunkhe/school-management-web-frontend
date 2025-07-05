@@ -5,9 +5,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaUser, FaUsers, FaMapMarkerAlt, FaSchool, FaIdCard, FaSpinner } from 'react-icons/fa';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { decodeId } from '../utils/idEncoder';
 
 function SingleStudentInfo() {
-    const { id } = useParams();
+    const { id:encodedId } = useParams();
+    const id=decodeId(encodedId);
     const [student, setStudent] = useState(null);
     const [academicData, setAcademicData] = useState();
     const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ function SingleStudentInfo() {
                 "Authorization": `Bearer ${sessionStorage.getItem('token')}`
             }
         }).then((response) => {
-            console.log('Academic Data:', response.data);
+           
             setAcademicData(response.data);
         });
     }, [id]);

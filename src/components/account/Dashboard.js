@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Plus, DollarSign, CreditCard, Building, FileText, TrendingUp, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api.service';
+import { jwtDecode } from 'jwt-decode';
 
 const Dashboard = () => {
   const [creditAmount, setCreditAmount] = useState(5000);
   const [debitAmount, setDebitAmount] = useState(5000);
+  const udiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+
 
   useEffect(() => {
     const fetchSumofCrDr = async () => {
-      const response = await apiService.getdata(`openingbal/sum`);
+      const response = await apiService.getdata(`openingbal/sum/${udiseNo}`);
       setCreditAmount(response.data.totalCr);
       setDebitAmount(response.data.totalDr);
     };
@@ -167,7 +170,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style >{`
         .action-card {
           transition: all 0.3s ease;
           cursor: pointer;

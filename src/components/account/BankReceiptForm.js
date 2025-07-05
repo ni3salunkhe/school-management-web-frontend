@@ -136,10 +136,14 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
     if (name === "bankId") {
       const bankAccount = bankAccounts.find(b => Number(b.id) === Number(value));
+      console.log(bankAccount);
+      
       const bankHead = bankAccount.headId?.bookSideMaster?.booksideName;
-      const openBalence = generalledgerData.find(b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId));
-
-      const transactionBalance = generalledgerData.filter(b => (b.entryType === "Bank Receipt" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment") && (b.custId && Number(b.custId.custId) === bankAccount.custId.custId))
+      console.log(generalledgerData);
+      
+      const openBalence = generalledgerData.find(b => b.entryType === "Opening Balance" && (b.subhead && Number(b.subhead.subheadId) === bankAccount.subHeadId.subheadId));
+      
+      const transactionBalance = generalledgerData.filter(b => (b.entryType === "Bank Receipt" || b.entryType === "Bank Payment" || b.entryType === "Contra Payment") && (b.subhead && Number(b.subhead.subheadId) === bankAccount.subHeadId.subheadId))
       let drTransAmt = 0;
       let crTransAmt = 0;
       transactionBalance.forEach(a => {
@@ -172,6 +176,7 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
     if (selectedParty) {
       setSelectedCustomer(selectedParty);
+      
       setFormData(prev => ({
         ...prev,
         custId: partyId,
@@ -191,7 +196,13 @@ const BankReceiptForm = ({ isEditMode = false, transactionId = null }) => {
     // const datas = await apiService.getbyid("generalledger/", udiseNo);
     // console.log(datas.data);
 
-    const openBalence = (generalledgerData || []).find(b => b.entryType === "Opening Balance" && b.custId && Number(b.custId.custId) === Number(selectedParty.custId));
+    console.log(generalledgerData);
+    
+
+    const openBalence = (generalledgerData || []).find(b => b.entryType === "Opening Balance" && b.subhead && Number(b.subhead.subheadId) === Number(selectedParty.subheadId.subheadId));
+
+    console.log(openBalence);
+    
 
     const openingAmt = openBalence?.drAmt || 0;
 

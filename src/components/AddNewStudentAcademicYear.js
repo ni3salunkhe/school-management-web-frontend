@@ -34,7 +34,7 @@ function AddNewStudentAcademicYear() {
         api.get('student/search', { params })
             .then(response => {
                 setResults(response.data);
-                console.log(response.data);
+                
                 setLoading(false);
             })
             .catch(error => {
@@ -101,7 +101,6 @@ function AddNewStudentAcademicYear() {
         }
 
     }
-    console.log(listOfStudents);
 
     function alldataset() {
         if (listOfStudents.length > 0) {

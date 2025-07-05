@@ -43,6 +43,10 @@ const SubHeadMasterForm = () => {
   const fetchParentHeads = async () => {
     try {
       const response = await apiService.getdata(`headmaster/`);
+      // const filteredHeads = response.data.filter(
+      //   (head) =>
+      //     head.headName !== "Sundry Creditors" && head.headName !== "Sundry Debtors"
+      // );
       setParentHeads(response.data || []);
     } catch (err) {
       setError('मुख्य हेड मिळवताना त्रुटी: ' + err.message);
@@ -59,15 +63,13 @@ const SubHeadMasterForm = () => {
     idIncrement()
   }, []);
 
-  console.log(nextId);
-
 
   const fetchSubHeads = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.getdata(`subheadmaster/`);
-      console.log(response.data)
+      const response = await apiService.getdata(`subheadmaster/getbyudise/${udiseNo}`);
+      
       const subHeads = (response.data || []).map(sh => ({
         ...sh,
         id: sh.subheadId,
@@ -75,7 +77,6 @@ const SubHeadMasterForm = () => {
         parentHeadId: sh.headId.headId,
         parentHeadName: parentHeads.find(ph => ph.headId === sh.headId.headId)?.headName || 'N/A'
       }));
-      console.log(subHeads)
       setSubHeadList(subHeads);
     } catch (err) {
       setError('उप-हेड मिळवताना त्रुटी: ' + err.message);
@@ -222,8 +223,6 @@ const SubHeadMasterForm = () => {
     setError(null);
     setSuccess(null);
   };
-
-  console.log(subHeadList);
 
   const filteredSubHeadList = subHeadList.filter(sh => {
     const matchesSearch =

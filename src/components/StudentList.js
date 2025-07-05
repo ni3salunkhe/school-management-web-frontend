@@ -40,7 +40,6 @@ function StudentList() {
             .then(response => {
                 setResults(response.data);
                 setLoading(false);
-                console.log(response.data);
 
             })
             .catch((error) => {
@@ -60,7 +59,7 @@ function StudentList() {
             const allStaff = response.data;
             const onlyTeachers = allStaff.filter((staff) => staff.role.toLowerCase() === "teacher");
             setTeachers(onlyTeachers);
-            console.log(onlyTeachers);
+            
         });
     }, [udise]);
 

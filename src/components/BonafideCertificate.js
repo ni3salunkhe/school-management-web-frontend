@@ -109,12 +109,8 @@ function BonafideCertificate() {
   }, [studentId, udise, token]);
 
   const handleReasonInputChange = (id, value) => {
-    console.log(value);
 
     if (!isOnlyMarathi(value)) {
-      // console.log(value);
-
-      console.log(!/^[\u0900-\u097F\s]+$/.test(value));
 
       setError(true);
     } else {
@@ -197,7 +193,7 @@ function BonafideCertificate() {
           "bonafide/",
           bonafidePayload
         );
-        console.log("Bonafide record created:", bonafideResponse.data);
+
       }
       triggerPrint();
       setCertificateReason("");
@@ -208,11 +204,10 @@ function BonafideCertificate() {
         if (error.response.status === 403) {
           errorMessage = "तुमची विनंती अधिकृत नाही. कृपया पुन्हा लॉग इन करा.";
         } else if (error.response.status === 400) {
-          errorMessage = `विनंतीमध्ये त्रुटी: ${
-            error.response.data?.message ||
+          errorMessage = `विनंतीमध्ये त्रुटी: ${error.response.data?.message ||
             error.response.data ||
             "कृपया माहिती तपासा."
-          }`;
+            }`;
         } else {
           errorMessage = `सर्व्हर त्रुटी: ${error.response.status}`;
         }
@@ -261,8 +256,8 @@ function BonafideCertificate() {
           प्रमाणपत्रासाठी माहिती लोड होत आहे...
         </div>
       );
-      console.log(studentData);
-      
+
+
 
     return (
       <div
@@ -526,6 +521,9 @@ function BonafideCertificate() {
                   </div>
                 </div>
               )}
+              <div className="alert alert-info small text-center">
+                <strong>सूचना:</strong> कृपया प्रथम प्रमाणपत्रासाठीचे कारण निवडा किंवा लिहा. कारण दिल्यानंतरच प्रमाणपत्र तयार केले जाईल.
+              </div>
 
               <div className="mb-4">
                 <CombinedDropdownInput

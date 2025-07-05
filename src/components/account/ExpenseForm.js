@@ -80,7 +80,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
         // Cash In Hand खाते शोधा
         const cashInHand = (partiesResponse.data || []).find(
           (party) => party.custName === "Cash In Hand"
-        );
+        );        
         setCashAccount(cashInHand);
 
         // Opening balance तपासा
@@ -178,19 +178,19 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
     if (name === "bankId" && formData.paymentSource === "bank") {
       const bank = bankAccounts.find((f) => f.id === Number(value));
       if (bank) {
-        calculateSourceBalance(bank.custId?.custId, "bank");
+        calculateSourceBalance(bank.subHeadId?.subheadId, "bank");
       }
     }
   };
 
-  const calculateSourceBalance = async (custId, sourceType) => {
+  const calculateSourceBalance = async (subheadId, sourceType) => {
     try {
       const datas = await apiService.getdata("generalledger/");
 
       const opnBalance = (datas.data || []).find(
         (b) =>
           b.entryType === "Opening Balance" &&
-          (b.custId && Number(b.custId.custId)) === Number(custId)
+          (b.subhead && Number(b.subhead.subheadId)) === Number(subheadId)
       );
 
       if (!opnBalance) {
@@ -205,7 +205,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
             b.entryType === "Cash Receipt" ||
             b.entryType === "Contra Payment" ||
             b.entryType === "Expense Payment") &&
-          (b.custId && Number(b.custId.custId)) === Number(custId)
+          (b.subhead && Number(b.subhead.subheadId)) === Number(subheadId)
       );
 
       // Debit transactions (money going out)
@@ -215,7 +215,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
             b.entryType === "Cash Payment" ||
             b.entryType === "Expense Payment" ||
             b.entryType === "Contra Payment") &&
-          (b.custId && Number(b.custId.custId)) === Number(custId)
+          (b.subhead && Number(b.subhead.subheadId)) === Number(subheadId)
       );
 
       let creditAmount = 0;
@@ -266,7 +266,7 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
     }));
 
     if (source === "cash" && cashAccount) {
-      calculateSourceBalance(cashAccount.custId, "cash");
+      calculateSourceBalance(cashAccount.subheadId.subheadId, "cash");
     } else {
       setSourceAccountBalance(0);
     }
@@ -358,8 +358,6 @@ const ExpenseForm = ({ isEditMode = false, transactionId = null }) => {
           jsonData.tranType = "Expense Payment";
         }
       }
-
-      console.log(jsonData);
 
 
       let response;

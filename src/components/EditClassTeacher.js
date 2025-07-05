@@ -3,6 +3,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import apiService from '../services/api.service';
 import Next from './Next';
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 function EditClassTeacher() {
     const { id } = useParams();
@@ -18,6 +19,7 @@ function EditClassTeacher() {
     const [apierror, setApiError] = useState('');
     const [teachers, setTeachers] = useState([]);
     const school = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;
+    const navigate = useNavigate();
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -118,7 +120,7 @@ function EditClassTeacher() {
                 setSubmitted(true);
                 setWarning(false);
                 setTimeout(() => {
-                    Navigate("/clerk/classteacher");
+                    navigate("/clerk/changeclassteacher");
                 }, 1500);
             })
             .catch(() => {
@@ -336,7 +338,7 @@ function EditClassTeacher() {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style >{`
         .bg-gradient-primary-to-secondary {
           background: linear-gradient(135deg,rgb(84, 171, 247) 0%,rgb(154, 110, 235) 100%);
         }

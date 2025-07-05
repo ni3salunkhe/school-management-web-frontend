@@ -81,8 +81,6 @@ function App() {
       }
       const isValidSubscription =
         await authService.checkDeveloperSubscription();
-      console.log(isValidSubscription);
-      console.log(isDevsubPage);
       
       // If user is NOT authenticated and NOT on login page, redirect to login
       if ((!authenticated || !hasToken) && !isLoginPage) {
@@ -147,7 +145,7 @@ function App() {
       const response = await apiService.getdata(
         `api/subscription/modules/${udiseNo}`
       );
-      console.log("Modules:", response.data);
+     
       return response.data;
     } catch (err) {
       console.error("Failed to fetch modules:", err);
@@ -160,10 +158,10 @@ function App() {
     location.pathname === "/developer-subscription" ||
     location.pathname === "/expiry";
 
-  console.log(components);
+  
 
   const componentMap = components; // dynamically from backend
-  console.log(componentMap);
+  
   
   const { sidebarItemsHm, sidebarItemsClerk, sidebarItemsTeacher } =
     getSidebarItems(componentMap);

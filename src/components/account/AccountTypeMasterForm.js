@@ -30,7 +30,6 @@ function AccountTypeMasterForm() {
         try {
             const response = await apiService.getdata(`accounttype/byudiseno/${udiseNo}`);
             setAllAccountType(response.data);
-            console.log(response.data);
             
         } catch (error) {
             console.error("Error fetching accounttypes:", error);

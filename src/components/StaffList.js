@@ -61,20 +61,20 @@ function StaffList() {
         getData();
     }, []);
 
-    const getData =async()=>{
-        try{
-        const response =await apiService.getbyid('staff/getbyudise/', udise)
-        
+    const getData = async () => {
+        try {
+            const response = await apiService.getbyid('staff/getbyudise/', udise)
+
             const staffData = Array.isArray(response?.data) ? response.data : [];
             setAllStaff(staffData);
             setFilteredStaff(staffData); // Initially show all staff
-        }catch(err)  {
+        } catch (err) {
             console.error("Error fetching staff data:", err);
             setError("Failed to load staff data.");
             setAllStaff([]);
             setFilteredStaff([]);
         }
-        finally{
+        finally {
             setLoading(false);
         };
     }
@@ -87,7 +87,7 @@ function StaffList() {
         setError(null);
 
         getData();
-       
+
     }, [udise]);
 
     // --- Search Logic ---
@@ -141,7 +141,7 @@ function StaffList() {
         setSearchSurName('');
     };
 
-    function changeStatus (id) {
+    function changeStatus(id) {
 
         const isleft = allStaff.find(staff => staff.id === id && staff.status === "left")
 
@@ -159,7 +159,7 @@ function StaffList() {
                 /* Read more about isConfirmed, isDenied below */
                 if (result.isConfirmed) {
                     setFormData(prev => ({ ...prev, status: "left" }))
-                    apiService.getbyid("staff/status/",id).then((response)=>{
+                    apiService.getbyid("staff/status/", id).then((response) => {
                         Swal.fire("Saved!", "", "success");
                         getData();
                     })
@@ -169,7 +169,7 @@ function StaffList() {
             });
 
         }
-        
+
     }
     return (
         <div className="container py-4">
@@ -242,7 +242,7 @@ function StaffList() {
                                         style={{ height: '32px' }}
                                         type="button"
                                     >
-                                        <BiReset className='me-1' size="1.8em"/>
+                                        <BiReset className='me-1' size="1.8em" />
                                     </button>
                                 </div>
                             </div>
@@ -274,14 +274,13 @@ function StaffList() {
                             <div className="card-body p-0">
                                 {filteredStaff.length > 0 ? (
                                     <div className="table-responsive">
-                                        <table className="table table-bordered table-striped mb-0"> {/* Added table-striped */}
+                                        <table className="table table-bordered table-striped mb-0">
                                             <thead className="bg-light">
                                                 <tr>
-                                                    {/* Adjusted widths slightly */}
                                                     <th scope="col" width="5%" className="text-center">क्र.</th>
                                                     <th scope="col" width="25%">कर्मचाऱ्याचे नाव</th>
-                                                    <th scope="col" width="20%">आडनाव</th>
-                                                    <th scope="col" width="15%">वडिलांचे नाव</th>
+                                                    <th scope="col" width="20%">वडिलांचे नाव</th>
+                                                    <th scope="col" width="15%">आडनाव</th>
                                                     <th scope="col" width="15%">पदनाम</th>
                                                     <th scope="col" width="10%">Status</th>
                                                     <th scope="col" width="20%" className="text-center">क्रिया</th>
@@ -289,16 +288,17 @@ function StaffList() {
                                             </thead>
                                             <tbody>
                                                 {filteredStaff.map((staff, index) => (
-                                                    <tr key={staff.id || index}> {/* Use staff.id if available, otherwise index */}
+                                                    <tr key={staff.id || index}>
                                                         <td className="text-center">{index + 1}</td>
-                                                        {/* Corrected order of data cells to match headers */}
-                                                        <td>{staff.fname || '-'}</td>
-                                                        <td>{staff.lname || '-'}</td>       {/* Surname */}
-                                                        <td>{staff.fathername || '-'}</td> {/* Father's Name */}
-                                                        <td>{staff.role || '-'}</td>       {/* Designation */}
-                                                        <td><span className={`badge ${staff.status === 'left' ? 'bg-danger' : 'bg-success'}`}>
-                                                            {staff.status}
-                                                        </span></td>      {/* Status */}
+                                                        <td>{staff.fname || " "}</td>
+                                                        <td>{staff.fathername || " "}</td>
+                                                        <td>{staff.lname || " "}</td>
+                                                        <td>{staff.role || " "}</td>
+                                                        <td>
+                                                            <span className={`badge ${staff.status === 'left' ? 'bg-danger' : 'bg-success'}`}>
+                                                                {staff.status}
+                                                            </span>
+                                                        </td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-sm btn-outline-warning"
@@ -331,8 +331,8 @@ function StaffList() {
                         </div>
 
                     )}
-                    <button class="btn btn-primary position-fixed bottom-0 start-50  mb-4" onClick={()=>{navigate(`/headmaster/staffAdd`)}}>
-                        कर्मचारी नोंदणी फॉर्म 
+                    <button className="btn btn-primary position-fixed bottom-0 start-50  mb-4" onClick={() => { navigate(`/headmaster/staffAdd`) }}>
+                        कर्मचारी नोंदणी फॉर्म
                     </button>
                 </div>
 

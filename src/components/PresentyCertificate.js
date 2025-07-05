@@ -32,7 +32,6 @@ function PresentyCertificate() {
 
   useEffect(() => {
     apiService.getbyid("student/", id).then((response) => {
-      console.log("Student Data:", response.data);
       setStudentData(response.data);
     });
 
@@ -48,14 +47,14 @@ function PresentyCertificate() {
         },
       })
       .then((response) => {
-        console.log("Academic Data:", response.data);
+        
         setAcademicData("academic data" + response.data);
 
         // Now that we have academicData, call the last year data API
         apiService
           .getbyid("academicold/lastyear/", response.data.id)
           .then((lastYearResponse) => {
-            console.log("Last Year Academic:", lastYearResponse.data);
+            
             setLastAcademicData(lastYearResponse.data);
           })
           .catch((error) => {
@@ -74,7 +73,7 @@ function PresentyCertificate() {
           `api/attendance/by-udise-monthnyear/${id}/${udise}/${monthnyearend}/${monthnyear}`
         );
 
-        console.log(monthnyearend, monthnyear);
+        
 
         setAttendanceData(response.data);
       } catch (err) {
@@ -84,12 +83,12 @@ function PresentyCertificate() {
     function calculateYearlyAttendancePercentage(attendanceData) {
       let totalPresent = 0;
       let totalWorking = 0;
-      console.log(attendanceData);
+      
       attendanceData.forEach((month) => {
         totalPresent += month.totalp || 0;
         totalWorking += month.workDays || 0;
       });
-      console.log(totalPresent, totalWorking);
+ 
       if (totalWorking === 0) return 0;
 
       return ((totalPresent / totalWorking) * 100).toFixed(2); // returns string like "95.37"
@@ -98,7 +97,6 @@ function PresentyCertificate() {
     fetchAcademia();
     const yearlyPercentage =
       calculateYearlyAttendancePercentage(attendanceData);
-    console.log("Yearly Attendance %:", yearlyPercentage + "%");
   }, [id, udise]);
 
   const handlePrint = () => {

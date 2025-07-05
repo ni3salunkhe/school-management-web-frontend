@@ -383,7 +383,7 @@ const HeadMasterForm = () => {
                     </thead>
                     <tbody>
                       {headList.map(head => (
-                        <tr key={head.id}>
+                        <tr key={head.headId}>
                           <td>{head.headName}</td>
                           <td>{head.headId || '-'}</td>
                           <td>

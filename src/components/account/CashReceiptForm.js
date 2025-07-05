@@ -47,6 +47,8 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       const customersData = await apiService.getdata(`customermaster/getcustomerbyheadname/${headname}/${schoolUdise}`);
       const leadgerData = await apiService.getdata(`generalledger/${schoolUdise}`)
 
+      
+
       let selectedOpn = []
 
       for (let i = 0; i < leadgerData.data.length; i++) {
@@ -58,7 +60,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       );
       const customersData1 = await apiService.getdata(`customermaster/getcustomerbyheadname/Cash%20In%20Hand/${schoolUdise}`);
       const recordMain = (customersData1.data || []).find(c => c.custName === "Cash In Hand" && selectedOpn.includes(c.subheadId.subheadId));
-
+      
       if (!recordMain) {
         Swal.fire({
           icon: "error",
@@ -72,37 +74,33 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       setCustomers(filtered || []);
       setMainHead({
         headName: recordMain.custName,
-        headId: recordMain.headId.headId,
+        custId: recordMain.custId,
         subheadId: recordMain.subheadId.subheadId
       })
 
       const init = async () => {
         const datas = await apiService.getdata('generalledger/');
         const openBalance = (datas.data || []).find(
-          b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+          b => b.entryType === "Opening Balance" && (b.subhead && Number(b.subhead.subheadId)) === Number(recordMain.subheadId.subheadId)
         );
+        
         // console.log(opnNBalance.drAmt)
         const transBalance = (datas.data || []).filter(
           b => b.entryType === "Cash Receipt" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+            b.entryType === "Expense Payment" && (b.subhead && Number(b.subhead.subheadId)) === Number(recordMain.subheadId.subheadId)
         );
         const transBalance2 = (datas.data || []).filter(
           b => b.entryType === "Cash Payment" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId)
+            b.entryType === "Expense Payment" && (b.subhead && Number(b.subhead.subheadId)) === Number(recordMain.subheadId.subheadId)
         )
         let trans = 0;
         transBalance2.map(a => trans += a.crAmt);
 
-        console.log(recordMain.custId);
-
-        console.log(datas.data);
-
-        const transAmt = (datas.data || []).filter(b => (b.entryType === "Cash Payment" || b.entryType === "Cash Receipt" || b.entryType === "Contra Payment") && (b.custId && Number(b.custId.custId)) === Number(recordMain.custId));
+        const transAmt = (datas.data || []).filter(b => (b.entryType === "Cash Payment" || b.entryType === "Cash Receipt" || b.entryType === "Contra Payment") && (b.subhead && Number(b.subhead.subheadId)) === Number(recordMain.subheadId.subheadId));
 
         let drTransaction = 0;
         let crTransaction = 0;
 
-        console.log(transAmt);
 
         transAmt.forEach(a => {
           drTransaction += a.drAmt || 0;
@@ -167,9 +165,6 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
       try {
         const customerData = await apiService.getbyid("customermaster/", customerId);
         const selectedCustomer = customerData.data;
-        console.log(customerData.data);
-        console.log(selectedCustomer);
-
 
         if (!selectedCustomer || !selectedCustomer.subheadId || !selectedCustomer.subheadId.subheadId) {
           console.error("Invalid customer data or missing subheadId");
@@ -188,11 +183,11 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
         // Now fetch ledger balance
         const datas = await apiService.getdata(`generalledger/${schoolUdise}`);
-
+        
         const opnNBalance = (datas.data || []).find(
           b => b.entryType === "Opening Balance" &&
-            b.custId && Number(b.custId && b.custId.custId) === Number(selectedCustomer.subheadId.subheadId)
-        );
+            b.subhead && Number(b.subhead && b.subhead.subheadId) === Number(selectedCustomer.subheadId.subheadId)
+        );        
 
         const transBalance = (datas.data || []).filter(
           b => (b.entryType === "Cash Receipt" || b.entryType === "Bank Receipt" || b.entryType === "Journal Payment") &&
@@ -209,7 +204,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
         const balance = (openingAmt - transactionAmt) + drtransaction;
         setCurrentBalance(balance);
-
+        
 
       } catch (err) {
         console.error("Error fetching customer or ledger data", err);
@@ -375,7 +370,7 @@ const CashReceiptForm = ({ isEditMode = false, transactionId = null }) => {
 
                 <div className="col-md-2">
                   <label className="form-label">खाते क्र.</label>
-                  <input type="text" className="form-control" value={mainHead.headId} name='headId' readOnly disabled />
+                  <input type="text" className="form-control" value={mainHead.custId} name='headId' readOnly disabled />
                 </div>
 
                 <div className="col-md-4">

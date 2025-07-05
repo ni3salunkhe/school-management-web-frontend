@@ -43,17 +43,25 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     const opnNBalance = (datas.data || []).find(
       (b) =>
         b.entryType === "Opening Balance" &&
-        (b.custId && Number(b.custId.custId)) === Number(subheadId)
+        (b.subhead && Number(b.subhead.subheadId)) === Number(subheadId)
     );
+
+    console.log(opnNBalance);
+    
     const transBalance = (datas.data || []).filter(
       (b) =>
         (b.entryType === "Cash Receipt" ||
-          b.entryType === "Bank Reciept" ||
+          b.entryType === "Bank Receipt" ||
           b.entryType === "Contra Payment" ||
           b.entryType === "Expense Payment") &&
-        (b.custId && Number(b.custId.custId)) === Number(subheadId)
+        (b.subhead && Number(b.subhead.subheadId)) === Number(subheadId)
     );
     console.log("transaction balance 2", transBalance);
+
+    console.log(datas.data);
+    console.log(subheadId);
+    
+
 
     const transBalance2 = (datas.data || []).filter(
       (b) =>
@@ -61,7 +69,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
           b.entryType === "Bank Payment" ||
           b.entryType === "Contra Payment" ||
           b.entryType === "Expense Payment") &&
-        (b.custId && Number(b.custId.custId)) === Number(subheadId)
+        (b.custId && Number(b.subhead.subheadId)) === Number(subheadId)
     );
     console.log("transaction balance 2", transBalance2);
 
@@ -72,7 +80,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             b.entryType === "Expense Payment" ||
             b.entryType === "Bank Payment" ||
             b.entryType === "Bank Reciept") &&
-          (b.custId && Number(b.custId.custId)) === Number(subheadId)
+          (b.custId && Number(b.subhead.subheadId)) === Number(subheadId)
       );
       console.log("transaction balance 2", transBalance);
 
@@ -82,7 +90,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             b.entryType === "Expense Payment" ||
             b.entryType === "Bank Payment" ||
             b.entryType === "Bank Reciept") &&
-          (b.custId && Number(b.custId.custId)) === Number(subheadId)
+          (b.custId && Number(b.subhead.subheadId)) === Number(subheadId)
       );
 
       let trans = 0;
@@ -146,7 +154,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             text: "जनरल लेजर मध्ये ताळेबंद मधील एंट्री भरा किंवा Cash In Hand हा ग्राहक आपल्या सिस्टम मध्ये असल्याची खात्री करा!",
           });
           navigate("/clerk/dashboard");
-          return; 
+          return;
         }
         console.log(cashAccount);
 
@@ -156,7 +164,7 @@ const ContraPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             unifiedAccounts.push({
               id: bank.custId.custId,
               name: `${bank.bankname} - ${bank.accountno}`,
-              subheadId: bank.custId.custId,
+              subheadId: bank.subHeadId.subheadId,
               type: "bank",
               headId: bank.headId.headId,
               headName: bank.headId.bookSideMaster.booksideName,

@@ -41,7 +41,7 @@ function ListOfClass() {
             })
         }
         catch (error) {
-            console.log("Error fetching classTeacher");
+            
             setError("Failed to load data");
         }
         finally {
@@ -49,7 +49,7 @@ function ListOfClass() {
         }
     }
 
-    console.log(classTeacheData);
+    
     useEffect(() => {
         if (!school) return;
         setLoading(true);
@@ -104,7 +104,7 @@ function ListOfClass() {
         setSearchSurName('');
     };
 
-    console.log(filteredClass);
+   
 
     return (
         <div className="container py-4">

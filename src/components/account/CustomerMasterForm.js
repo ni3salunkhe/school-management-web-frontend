@@ -57,14 +57,13 @@ const CustomerMasterForm = () => {
     }
   }, [schoolUdise]); // fetchCustomers will be called if schoolUdise changes, which is rare after init.
 
-  console.log(customers);
 
   useEffect(() => {
     const fetchCustomerType = async () => {
       setLoading(true);
       try {
         const response = await apiService.getdata("customertype/");
-        // console.log(response.data);
+
 
         if (response && response.data) {
           setPartyType(response.data || [])
@@ -94,8 +93,12 @@ const CustomerMasterForm = () => {
     setError(null);
     try {
       const heads = await apiService.getdata("headmaster/");
-      console.log(heads.data);
-      setHeads(heads.data);
+
+      const filteredHeads = heads.data.filter(
+        (head) =>
+          head.headName === "Sundry Creditors" || head.headName === "Sundry Debtors"
+      );
+      setHeads(filteredHeads);
 
     }
     catch (err) {
@@ -116,7 +119,7 @@ const CustomerMasterForm = () => {
     setError(null);
     try {
       const subHeads = await apiService.getbyid("subheadmaster/getbyudise/", schoolUdise);
-      console.log(subHeads.data);
+
       setSubHeads(subHeads.data);
 
     }
@@ -140,8 +143,8 @@ const CustomerMasterForm = () => {
     setError(null);
     try {
       const customerData = await apiService.getbyid("customermaster/getcustomersbyudise/", schoolUdise);
-      
-      setCustomers((customerData.data).filter(b=>b.custName!=="Cash In Hand") || []); // Ensure customers is an array
+
+      setCustomers((customerData.data).filter(b => b.custName !== "Cash In Hand") || []); // Ensure customers is an array
     } catch (err) {
       setError(`Failed to fetch customers: ${err.message}`);
       setCustomers([]); // Ensure customers is an array on error
@@ -304,7 +307,6 @@ const CustomerMasterForm = () => {
       } else {
         const payload = { customerTypeName: trimmedCustomerType };
         const customerTypeResponse = await apiService.post("customertype/", payload);
-        // console.log("New customer type added:", customerTypeResponse);
         selectedPartyTypeId = customerTypeResponse.data.id;
         // Fetch updated party types to include the new one in dropdown
         const updatedPartyTypes = await apiService.getdata("customertype/");
@@ -333,9 +335,6 @@ const CustomerMasterForm = () => {
         subheadId: formData.subheadId
       };
 
-      // console.log("Customer Payload:", customerPayload);
-      console.log(customerPayload);
-
 
       let response;
       if (isEditing && formData.custId) {
@@ -351,7 +350,6 @@ const CustomerMasterForm = () => {
 
       }
 
-      console.log("Customer saved/updated:", response);
       handleClear(); // Clears form and resets editing state
       fetchCustomers(); // Refresh customer list
 

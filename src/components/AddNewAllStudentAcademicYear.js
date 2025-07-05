@@ -28,7 +28,7 @@ const AddNewAllStudentAcademicYear = () => {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const { selectedStudents } = location.state || { selectedStudents: [] };
-    console.log(selectedStudents);
+
     const studentId = selectedStudents[0];
 
     const schoolUdiseNo = jwtDecode(sessionStorage.getItem('token'))?.udiseNo;

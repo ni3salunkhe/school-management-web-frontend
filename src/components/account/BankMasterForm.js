@@ -11,7 +11,7 @@ const initialFormData = {
   id: null,
   bankName: '',
   accountNumber: '',
-  headId:null,
+  headId:'',
   accounttype: '',
   branchName: '',
   ifscCode: '',
@@ -66,7 +66,6 @@ const BankMasterForm = () => {
     setError(null);
     try {
       const heads = await apiService.getdata("headmaster/");
-      console.log(heads.data);
       const filter = (heads.data || []).filter(
         e => e.headName === "Bank OCC A/c" || e.headName === 'Bank OD A/c.' || e.headName === "Bank Accounts"
       )

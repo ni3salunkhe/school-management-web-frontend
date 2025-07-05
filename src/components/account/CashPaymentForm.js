@@ -85,6 +85,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         c.custName === "Cash In Hand" &&
         selectedOpn.includes(c.subheadId.subheadId)
     );
+    
     if (recordedMain?.length == 0) {
       Swal.fire({
         icon: "error",
@@ -97,7 +98,8 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
     setMainHead({
       headName: recordedMain.custName,
       headId: recordedMain.headId.headId,
-      subHeadId: recordedMain.custId,
+      subHeadId: recordedMain.subheadId.subheadId,
+      custId:recordedMain.custId
     });
     const init = async () => {
       const datas = await apiService.getdata("generalledger/");
@@ -105,9 +107,10 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const opnNBalance = (datas.data || []).find(
         (b) =>
           b.entryType === "Opening Balance" &&
-          (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+          (b.subhead && Number(b.subhead.subheadId)) === Number(recordedMain.subheadId.subheadId)
       );
-      console.log(datas.data);
+     
+      
 
       const transBalance = (datas.data || []).filter(
         (b) =>
@@ -115,7 +118,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             b.entryType === "Bank Reciept" ||
             b.entryType === "Contra Payment" ||
             b.entryType === "Expense Payment") &&
-          (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+          (b.subhead && Number(b.subhead.subheadId)) === Number(recordedMain.subheadId.subheadId)
       );
 
       const transBalance2 = (datas.data || []).filter(
@@ -124,18 +127,16 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
             b.entryType === "Bank Payment" ||
             b.entryType === "Contra Payment" ||
             b.entryType === "Expense Payment") &&
-          (b.custId && Number(b.custId.custId)) === Number(recordedMain.custId)
+          (b.subhead && Number(b.subhead.subheadId)) === Number(recordedMain.subheadId.subheadId)
       );
 
       let trans = 0;
       transBalance2.map((a) => (trans += a.crAmt));
-      console.log(transBalance2);
 
       let transactionAmt = 0;
       transBalance.map((a) => (transactionAmt += a.drAmt));
       const amt = opnNBalance.drAmt + transactionAmt - trans;
       setMainHeadBalance(amt);
-      console.log(amt);
 
       const calculatefinancialYear = () => {
         const currentDate = new Date();
@@ -213,7 +214,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const opnNBalance = (datas.data || []).find(
         (b) =>
           b.entryType === "Opening Balance" &&
-          (b.custId && Number(b.custId.custId)) ===
+          (b.subhead && Number(b.subhead.subheadId)) ===
             Number(selectedParty.subheadId.subheadId)
       );
       const transBalance = (datas.data || []).filter(
@@ -376,7 +377,7 @@ const CashPaymentForm = ({ isEditMode = false, transactionId = null }) => {
                   <input
                     type="text"
                     className="form-control"
-                    value={mainHead.headId || ""}
+                    value={mainHead.custId || ""}
                     name="headId"
                     readOnly
                     disabled

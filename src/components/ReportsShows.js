@@ -55,7 +55,6 @@ function ReportsShows() {
                 });
                 if (response?.data) {
                     setAcademicData(response.data);
-                    console.log(response.data);
                 }
             } catch (error) {
                 console.error("Error fetching academic data:", error);

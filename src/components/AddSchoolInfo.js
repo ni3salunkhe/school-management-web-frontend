@@ -349,7 +349,6 @@ function AddSchoolInfo() {
         submissionData.append('logo', formData.logo);
       }
 
-      console.log(formData);
 
       apiService
         .put(`school/${udiseNo}`, submissionData)
@@ -374,7 +373,7 @@ function AddSchoolInfo() {
           setIsLoading(false); // Hide loading indicator
         });
     } else {
-      console.log("Validation Errors:", errors);
+     
       alert("कृपया फॉर्ममधील त्रुटी तपासा."); // Please check errors in the form.
     }
   };

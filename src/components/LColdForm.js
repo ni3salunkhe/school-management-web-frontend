@@ -46,7 +46,6 @@ function LColdForm() {
             setStudentData(response.data);
 
             const lcdata = await apiService.getbyid("leavinginfo/getbyudise/", udise);
-            console.log(lcdata.data);
             setAllLeavingInfos(lcdata.data);
 
         } catch (err) {

@@ -27,12 +27,11 @@ function LCnewdownload() {
             try{
                 if (response.data) {
                     setLeavingInfo(response.data);
-                    console.log(response);
-                    console.log(response.data);
+                  
 
                     // Assuming printed: true means it's NOT a duplicate (original)
                     setIsDuplicate(response.data.newlcprinted);
-                    console.log(isduplicate);
+                    
                     const date=new Date();
                     setDate(date);
                 } else {
@@ -126,7 +125,7 @@ function LCnewdownload() {
 
                 }
             } else {
-                console.log("User cancelled or said print failed");
+                
             }
         }, 1000); // Slightly delayed to ensure print is done
     };

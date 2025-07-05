@@ -162,22 +162,27 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       const init = async () => {
         const datas = await apiService.getdata('generalledger/')
         console.log(datas.data.filter(
-          b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+          b =>(b.entryType === "Bank Payment" || b.entryType === "Cash Payment") && (b.subhead && Number(b.subhead.subheadId)) === Number(bank.subHeadId && bank.subHeadId.subheadId)
         ));
         const opnNBalance = (datas.data || []).find(
-          b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+          b => b.entryType === "Opening Balance" && (b.subhead && Number(b.subhead.subheadId)) === Number(bank.subHeadId && bank.subHeadId.subheadId)
         );
         // console.log(opnNBalance.drAmt)
+        console.log(datas.data);
+        console.log(bank);
+        
+        
         const transBalance = (datas.data || []).filter(
-          b => b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+          b => (b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment")&& (b.subhead && Number(b.subhead.subheadId)) === Number(bank.subHeadId && bank.subHeadId.subheadId)
         );
-        // console.log(+transBalance)
+        console.log(transBalance)
 
         const transBalance2 = (datas.data || []).filter(
-          b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" || b.entryType === "Contra Payment" ||
-            b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+          b =>( b.entryType === "Bank Payment" || b.entryType === "Cash Payment" || b.entryType === "Contra Payment" ||
+            b.entryType === "Expense Payment") && (b.subhead && Number(b.subhead.subheadId)) === Number(bank.subHeadId && bank.subHeadId.subheadId)
         )
+        
         // console.log( "transaction balance 2"+transBalance2);
         let trans = 0;
         transBalance2.map(a => trans += a.crAmt)
@@ -195,14 +200,14 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         if (head === "Liabilities") {
           const transBalance = (datas.data || []).filter(
             b => b.entryType === "Bank Receipt" || b.entryType === "Cash reciept" || b.entryType === "Contra Payment" ||
-              b.entryType === "Expense Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+              b.entryType === "Expense Payment" && (b.subhead && Number(b.subhead.subheadId)) === Number(bank.subHeadId && bank.subHeadId.subheadId)
           );
 
           console.log("transaction balance 2", transBalance)
 
           const transBalance2 = (datas.data || []).filter(
             b => b.entryType === "Bank Payment" || b.entryType === "Cash Payment" ||
-              b.entryType === "Expense Payment" || b.entryType === "Contra Payment" && (b.custId && Number(b.custId.custId)) === Number(bank.custId && bank.custId.custId)
+              b.entryType === "Expense Payment" || b.entryType === "Contra Payment" && (b.subhead && Number(b.subhead.subheadId)) === Number(bank.subHeadId && bank.subHeadId.subheadId)
           )
 
           let trans = 0;
@@ -210,6 +215,9 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
           console.log(trans);
           let transactionAmt = 0;
           transBalance.map(a => transactionAmt += a.drAmt)
+
+          console.log(opnNBalance.crAmt);
+          
 
           const amt = (opnNBalance.crAmt + trans) - transactionAmt;
           return setMainHeadBalance(amt)
@@ -220,7 +228,7 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
       }
 
       init();
-      setMainSubheadId(bank.custId && bank.custId.custId)
+      setMainSubheadId(bank.subHeadId && bank.subHeadId.subheadId)
     }
   };
 
@@ -240,7 +248,7 @@ const BankPaymentForm = ({ isEditMode = false, transactionId = null }) => {
         const datas = await apiService.getdata('generalledger/')
         console.log(datas.data);
         const opnNBalance = (datas.data || []).find(
-          b => b.entryType === "Opening Balance" && (b.custId && Number(b.custId.custId)) === Number(selectedParty.subheadId.subheadId)
+          b => b.entryType === "Opening Balance" && (b.subhead && Number(b.subhead.subheadId)) === Number(selectedParty.subheadId.subheadId)
         );
         // console.log(opnNBalance.drAmt)
         const transBalance = (datas.data || []).filter(b =>

@@ -315,17 +315,10 @@ function AddStudent() {
   }, [formData.tehasilOfBirth, villages, formData.villageOfBirth]);
 
   useEffect(() => {
-    console.log(
-      "ATTEMPTING TO SAVE TO SESSION STORAGE. Current formData:",
-      formData
-    ); // DEBUG LINE 1
+    // DEBUG LINE 1
     try {
       const stringifiedData = JSON.stringify(formData);
-      console.log("Stringified data to save:", stringifiedData); // DEBUG LINE 2
       sessionStorage.setItem(STORAGE_KEY, stringifiedData);
-      console.log(
-        "Successfully called sessionStorage.setItem. Check dev tools now."
-      ); // DEBUG LINE 3
     } catch (error) {
       console.error("Error saving form data to session storage:", error);
     }
@@ -633,7 +626,6 @@ function AddStudent() {
       const currentRegisterNumber = formData.registerNumber
         ? formData.registerNumber.toString().trim()
         : "";
-      console.log(students);
       if (!currentRegisterNumber) {
         Swal.fire(
           "त्रुटी!",
@@ -656,10 +648,6 @@ function AddStudent() {
       );
 
       if (selectedStudent) {
-        console.log(
-          "Found student raw data:",
-          JSON.parse(JSON.stringify(selectedStudent))
-        ); // Deep copy for logging
 
         // Create a mutable copy to transform for the form
         const studentDataForForm = { ...selectedStudent };
@@ -715,11 +703,6 @@ function AddStudent() {
         // delete studentDataForForm.tehasilOfBirth;
         // delete studentDataForForm.villageOfBirth;
         // No, keep the transformed ones: studentDataForForm.districtOfBirth will now hold the ID string.
-
-        console.log(
-          "Populating form with (transformed data):",
-          studentDataForForm
-        );
 
         setFormData((prev) => ({
           ...initialFormData, // Reset all fields first
@@ -806,7 +789,7 @@ function AddStudent() {
         const element = document.getElementById(firstErrorField);
         element?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      console.log("Validation Failed:", errors);
+      
       alert("कृपया फॉर्ममधील सर्व आवश्यक (*) माहिती भरा आणि त्रुटी तपासा.");
       setButtonRole("");
       return;

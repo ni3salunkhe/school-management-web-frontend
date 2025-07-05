@@ -49,8 +49,10 @@ const OpeningBalanceForm = () => {
   const fetchOpeningBalances = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getdata("openingbal/");
+      const response = await apiService.getdata(`openingbal/byudise/${udiseNo}`);
       setBalances(response.data || []);
+      console.log(response.data);
+      
       const calculatefinancialYear = () => {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
@@ -220,7 +222,7 @@ const OpeningBalanceForm = () => {
   const fetchAccounts = async () => {
     setLoading(true);
     try {
-      const subHeadsRes = await apiService.getdata("subheadmaster/");
+      const subHeadsRes = await apiService.getdata(`subheadmaster/getbyudise/${udiseNo}`);
       const headsRes = await apiService.getdata("headmaster/");
 
       const heads = headsRes.data;
@@ -253,7 +255,7 @@ const OpeningBalanceForm = () => {
 
   const fetchSumofCrDr = async () => {
     const response = await apiService
-      .getdata(`openingbal/sum`)
+      .getdata(`openingbal/sum/${udiseNo}`)
       .catch((e) => console.log(e));
     setCreditAmount(response.data.totalCr);
     setDebitAmount(response.data.totalDr);
@@ -263,7 +265,7 @@ const OpeningBalanceForm = () => {
     setLoading(true);
     try {
       let obData = [];
-      const response = await apiService.getdata(`openingbal/`);
+      const response = await apiService.getdata(`openingbal/byudise/${udiseNo}`);
       const existingSubHeadIds = (response.data || []).map(
         (item) => item.subHeadId.subheadId
       );
